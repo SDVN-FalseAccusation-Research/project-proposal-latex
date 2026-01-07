@@ -3,6 +3,7 @@
 \usepackage{titlesec} % For customizing section titles
 \usepackage{tocloft} % For customizing table of contents
 \usepackage{acro} % For acronyms
+%\usepackage{hyperref} % For clickable links in the document
 %% ____Bibliography____%%
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage{chapterbib}
@@ -40,7 +41,9 @@
 \renewcommand{\thepage}{\roman{page}} % Start page numbering in roman
 
 \chapter*{Abstract}
-Abstract goes here.
+False accusation attacks pose a significant security challenge in Software-Defined Vehicular Networks (SDVN), where malicious entities deliberately accuse honest nodes of misbehavior to manipulate trust and reputation systems. Such attacks can severely disrupt routing decisions, degrade network performance, and undermine overall system stability. This study identifies four prominent variants of false accusation attacks: single-accuser opportunistic fabrication, Sybil-amplified consensus flooding, timing-based accusations during high-noise periods, and evidence spoofing through tampered or fabricated logs. \\ \\
+To address these threats, this research proposes a novel multi-layered defense framework that integrates blockchain technology, Zero-Knowledge Proofs (ZKPs), and Graph Neural Networks combined with Large Language Models (GNN-LLMs). Blockchain is employed to ensure immutable and decentralized logging of reputation and accusation records, while ZKPs enable privacy-preserving verification of accusation authenticity without revealing sensitive vehicular information. GNN-LLMs are leveraged to model SDVN topology and behavioral relationships, enabling the detection of anomalous accusation patterns and the intelligent interpretation of complex attack behaviors. \\\\
+The proposed framework is evaluated through comprehensive simulation across all identified attack variants, demonstrating its effectiveness in mitigating false accusation attacks while preserving network performance and privacy. To the best of our knowledge, this work represents the first integrated use of blockchain, ZKPs, and GNN-LLMs specifically designed to counter false accusation attacks in Software-Defined Vehicular Networks.
 \newpage
 
 % Table of Contents
@@ -63,11 +66,20 @@ Abstract goes here.
 
 \renewcommand{\thepage}{\arabic{page}} % Start page numbering in arabic 
 \setcounter{page}{1} % start page numbering from 1
+\setcounter{secnumdepth}{3}
 
 % Main Content
 \chapter{Introduction}
 \section{Background}
-This is the Introduction Section of your project proposal report. Provide background information and context for your project. For example, \ac{AI} and \ac{ML} are transforming industries \cite{smith2020ai}.
+\subsection{Evolution of Networking Paradigms: From SDN to SDVN}
+To understand the security challenges in Software-Defined Vehicular Networks, it is essential to examine the evolution from traditional Software-Defined Networking through Vehicular Ad-hoc Networks to the integrated SDVN architecture. \cite{smith2020ai}.
+\subsubsection{Software-Defined Networking (SDN)}
+Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding. \\ 
+
+The SDN architecture consists of three distinct layers:\\
+• Application Plane: Network applications defining desired behaviors and policies, communicating through the northbound API.\\
+• Control Plane: SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules.\\
+• Data Plane: Physical and virtual network devices forwarding packets according to flow tables populated by the controller.
 
 \section{Problem Statement}
 Clearly define the problem the project aims to solve.
