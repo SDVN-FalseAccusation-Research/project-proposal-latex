@@ -1,0 +1,48 @@
+\documentclass[a4paper,12pt]{report}
+
+\usepackage{pgfgantt}
+\usepackage{xcolor}
+\usepackage{graphicx}
+
+\begin{document}
+	
+	\begin{figure}[htbp]
+		\centering
+		\resizebox{\textwidth}{!}{%
+			
+			\begin{ganttchart}[
+				hgrid,
+				vgrid,
+				time slot format=isodate,
+				bar/.append style={fill=blue!60},
+				bar height=2,
+				y unit chart=0.9cm,
+				x unit=0.4cm
+				]{2026-01-01}{2026-12-31}
+				
+				\gantttitlecalendar{year, month} \\
+				
+				\ganttbar{Project Selection}{2026-02-03}{2026-02-10} \\
+				
+				\ganttbar{Project Proposal}{2026-02-11}{2026-03-21} \\
+				
+				\ganttbar{Analysis of Vehicle Mobility Impact on SDVN Routing Attacks}
+				{2026-03-14}{2026-05-31} \\
+				
+				\ganttbar{Development of Blockchain-Based Security Framework}
+				{2026-05-15}{2026-09-15} \\
+				
+				\ganttbar{Validation \& Performance Evaluation}
+				{2026-09-15}{2026-11-15} \\
+				
+				\ganttbar{Final Research Paper}
+				{2026-11-01}{2026-11-30}
+				
+			\end{ganttchart}
+		}
+		
+		\caption{Project Timeline Gantt Chart}
+		\label{fig:gantt}
+	\end{figure}
+	
+\end{document}
