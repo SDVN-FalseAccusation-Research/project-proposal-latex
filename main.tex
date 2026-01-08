@@ -76,22 +76,138 @@ The proposed framework is evaluated through comprehensive simulation across all 
 
 % Main Content
 \chapter{Introduction}
-\section{Background}
-\subsection{Evolution of Networking Paradigms: From SDN to SDVN}
-To understand the security challenges in Software-Defined Vehicular Networks, it is essential to examine the evolution from traditional Software-Defined Networking through Vehicular Ad-hoc Networks to the integrated SDVN architecture. \cite{smith2020ai}.
-\subsubsection{Software-Defined Networking (SDN)}
-Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding. \\ 
+\section{Evolution of Networking Paradigms: From SDN to SDVN}
+To understand the security challenges in Software-Defined Vehicular Networks, it is essential to examine the evolution from traditional Software-Defined Networking through Vehicular Ad-hoc Networks to the integrated SDVN architecture.
 
-The SDN architecture consists of three distinct layers:\\
-• Application Plane: Network applications defining desired behaviors and policies, communicating through the northbound API.\\
-• Control Plane: SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules.\\
-• Data Plane: Physical and virtual network devices forwarding packets according to flow tables populated by the controller.
+\subsection{Software-Defined Networking (SDN)}
+Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding.
 
-\section{Problem Statement}
-Clearly define the problem the project aims to solve.
+The SDN architecture consists of three distinct layers:
+\begin{itemize}
+    \item \textbf{Application Plane:} Network applications defining desired behaviors and policies, communicating through the northbound API.
+    \item \textbf{Control Plane:} SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules.
+    \item \textbf{Data Plane:} Physical and virtual network devices forwarding packets according to flow tables populated by the controller.
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.85\textwidth]{diagrams/1_SDN.png}
+    \caption{SDN Data Plane Architecture}
+    \label{fig:sdn}
+\end{figure}
+
+\subsection{Vehicular Ad-hoc Networks (VANET)}
+Vehicular Ad-hoc Networks (VANET) represent a specialized class of Mobile Ad-hoc Networks specifically designed for vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication. VANETs enable vehicles equipped with On-Board Units to communicate directly with each other and with Roadside Units deployed along roadways.
+
+Distinctive characteristics of VANET:
+\begin{itemize}
+    \item \textbf{High Mobility:} Vehicles move at varying speeds creating highly dynamic topology with frequent link disruptions.
+    \item \textbf{Dynamic Topology:} Network topology changes rapidly and unpredictably as vehicles enter, leave, or change lanes.
+    \item \textbf{Variable Network Density:} Node density varies dramatically based on location, time, and events.
+    \item \textbf{Distributed Decision Making:} Each vehicle makes local routing decisions without global network visibility.
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.85\textwidth]{diagrams/2_VANET.png}
+    \caption{Architecture of Vehicular Ad-Hoc Networks (VANETs)}
+    \label{fig:vanet}
+\end{figure}
+
+\subsection{Software-Defined Vehicular Networks (SDVN)}
+Software-Defined Vehicular Networks (SDVN) emerge as a convergence architecture integrating the programmability and centralized control of SDN with the mobility and distributed communication of VANET. SDVN addresses fundamental VANET limitations—particularly distributed routing in highly dynamic topologies—by introducing centralized intelligence while maintaining vehicle-to-vehicle communication.
+
+SDVN architectural components:
+\begin{itemize}
+    \item \textbf{SDN-Enabled Vehicles:} Vehicles as mobile SDN switches querying controllers for forwarding instructions.
+    \item \textbf{SDN-Enabled RSUs:} Hybrid devices for packet forwarding and controller-to-vehicle communication aggregation.
+    \item \textbf{Hierarchical Controllers:} Local controllers for region-specific routing with global controller coordination.
+    \item \textbf{Hybrid Control:} Time-critical safety messages via direct V2V; non-urgent traffic via centralized SDN.
+\end{itemize}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.85\textwidth]{diagrams/3_SDVN.png}
+    \caption{Architecture of Software-Defined Vehicular Networks (SDVN)}
+    \label{fig:sdvn}
+\end{figure}
+
+\subsection{Security Challenges in SDVN}
+Software-Defined Vehicular Networks inherit security vulnerabilities from both Software-Defined Networking and Vehicular Ad-hoc Networks, while simultaneously introducing new attack surfaces due to their centralized control architecture and highly dynamic vehicular environment. Although SDVN improves network flexibility and routing efficiency, the tight coupling between mobile data-plane entities and centralized control logic increases the overall attack impact when security assumptions are violated.
+
+One of the core security challenges in SDVN is maintaining reliable decision-making under highly dynamic conditions. Frequent topology changes, intermittent connectivity, and variable node density make it difficult to obtain accurate and consistent network state information. As a result, control-plane decisions may be based on incomplete, delayed, or noisy inputs, reducing the effectiveness of conventional security validation mechanisms.
+
+The reliance on centralized or hierarchical controllers further complicates the security landscape. Controllers aggregate large volumes of network information and enforce global policies, making them attractive targets for compromise. Any disruption, manipulation, or failure at the control plane can propagate rapidly across the network, affecting routing stability, quality of service, and overall system reliability.
+
+Additionally, SDVN must balance security enforcement with privacy preservation. Vehicles continuously exchange sensitive operational and contextual information, yet excessive disclosure of such data violates privacy requirements and regulatory constraints. Existing security solutions often struggle to simultaneously ensure data integrity, system robustness, and privacy protection in large-scale vehicular environments. These unresolved challenges highlight the need for advanced security mechanisms capable of supporting trustworthy operation in SDVN, thereby motivating the problem addressed in the following section.
+
+\section{Problem Statement: False Accusation Attacks in SDVN}
+Trust and reputation systems are essential for secure routing and decision-making in Software-Defined Vehicular Networks. These systems rely on reports and behavioral evidence submitted by vehicles and RSUs to identify malicious participants. However, this reliance creates a critical vulnerability: malicious entities can fabricate or manipulate accusations to falsely label honest nodes as attackers.
+
+False accusation attacks undermine the fundamental assumption that reports submitted to the controller are truthful. When exploited, these attacks cause legitimate vehicles to be blacklisted, trusted routes to be eliminated, and network traffic to be redirected through adversarial paths. Over time, this results in degraded network performance, biased routing decisions, and erosion of trust in the SDVN control framework.
+
+This research addresses false accusation attacks under two distinct attacker models:
+\begin{itemize}
+    \item \textbf{Data-plane attacker model:} Malicious vehicles or RSUs generate false accusations while the SDN controller remains honest but vulnerable to deception.
+    \item \textbf{Control-plane attacker model:} The SDN controller itself is malicious or compromised, enabling it to fabricate, amplify, or manipulate accusation records internally without relying on genuine vehicle reports.
+\end{itemize}
+
+Under these assumptions, four major variants of false accusation attacks are identified and addressed:
+
+\subsection{Single-Accuser Opportunistic Fabrication}
+In this attack, a single malicious vehicle falsely accuses a nearby honest node of misbehavior during transient network conditions such as packet loss or congestion.
+\begin{itemize}
+    \item \textbf{Data-plane version:} A malicious vehicle exploits momentary failures to submit fabricated reports against an honest vehicle.
+    \item \textbf{Control-plane version:} A malicious controller directly injects fabricated accusation records into the reputation system, attributing them to legitimate vehicles.
+\end{itemize}
+
+\subsection{Sybil-Amplified Consensus Flooding}
+This attack amplifies false accusations by using multiple forged identities to create artificial consensus.
+\begin{itemize}
+    \item \textbf{Data-plane version:} A malicious vehicle creates or controls multiple Sybil identities, each submitting coordinated accusations against a target node.
+    \item \textbf{Control-plane version:} The controller internally generates phantom vehicle identities and uses them to simulate widespread agreement, forcing the blacklisting of honest nodes.
+\end{itemize}
+
+\subsection{Timing-Based Accusations During High-Noise Periods}
+Here, attackers exploit periods of high mobility, interference, or network congestion when verification is difficult.
+\begin{itemize}
+    \item \textbf{Data-plane version:} Malicious vehicles submit accusations during peak traffic or handover events, masking falsified claims within legitimate noise.
+    \item \textbf{Control-plane version:} A malicious controller selectively issues accusations during known unstable periods to minimize detection.
+\end{itemize}
+
+\subsection{Evidence-Spoofing with Tampered Logs and Collusion}
+This attack targets the integrity of behavioral evidence.
+\begin{itemize}
+    \item \textbf{Data-plane version:} Colluding vehicles submit manipulated logs or selectively omit information to support false accusations.
+    \item \textbf{Control-plane version:} The controller alters or fabricates historical logs and metrics, presenting them as authentic evidence of misbehavior.
+\end{itemize}
+
+These attack variants demonstrate that false accusation attacks are not limited to distributed adversaries but remain effective even when centralized control components are compromised. Therefore, a defense mechanism must be tamper-resistant, privacy-preserving, and capable of detecting structural and behavioral anomalies across both planes.
 
 \section{Objectives and Scope}
-State the objectives of your project clearly.
+\subsection{Objectives}
+The primary objective of this research is to design, implement, and evaluate a comprehensive defense framework for mitigating false accusation attacks in Software-Defined Vehicular Networks. To achieve this overarching goal, the specific objectives of the study are as follows:
+\begin{enumerate}
+    \item To analyze and model false accusation attacks in SDVN, focusing on their impact on trust and reputation management systems under dynamic vehicular conditions.
+    \item To design a blockchain-based reputation management mechanism that ensures tamper-proof logging, distributed validation, and resilience against manipulation of accusation records.
+    \item To develop Zero-Knowledge Proof–based verification methods that enable the validation of accusation authenticity and node behavior without revealing sensitive vehicular or contextual information.
+    \item To construct Graph Neural Network models for representing SDVN topology and relational interactions, enabling detection of anomalous accusation patterns and coordinated attacks.
+    \item To integrate Large Language Models with graph-based insights to interpret complex attack behaviors, analyze contextual evidence, and support intelligent mitigation decisions.
+    \item To evaluate the effectiveness of the proposed multi-layered defense framework in terms of attack detection accuracy, false positive reduction, network performance, and Quality of Service preservation.
+    \item To validate the proposed solution through simulation in a Software-Defined Vehicular Network environment using NS-3 and a blockchain platform such as Hyperledger Fabric.
+\end{enumerate}
+
+\subsection{Scope}
+The scope of this research is defined to ensure focused investigation and practical feasibility. The study concentrates on the following aspects:
+\begin{itemize}
+    \item The research is limited to false accusation attacks targeting trust and reputation systems in Software-Defined Vehicular Networks.
+    \item Both data-plane adversaries (malicious vehicles and RSUs) and control-plane adversaries (compromised or malicious SDN controllers) are considered within the threat model.
+    \item The proposed framework focuses on the integration of blockchain, Zero-Knowledge Proofs, Graph Neural Networks, and Large Language Models as core defensive components.
+    \item Evaluation is conducted using simulation-based experiments rather than real-world vehicular deployments, with performance metrics including detection accuracy, reputation stability, routing efficiency, and QoS impact.
+    \item The scope excludes physical-layer attacks (e.g., jamming), traditional cryptographic key management protocols, and non-reputation-based network attacks that do not involve accusation manipulation.
+\end{itemize}
+
+This defined scope ensures that the research remains targeted toward developing a robust, privacy-preserving, and intelligent defense mechanism for false accusation attacks while maintaining relevance to real-world SDVN deployments.
 
 \chapter{Literature Review}
 \section{Previous Work}
