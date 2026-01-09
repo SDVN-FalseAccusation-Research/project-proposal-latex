@@ -162,18 +162,3 @@ https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=+Arif%2C+M.%3B+Wang%2C+G
   year={2020},
   publisher={MDPI}
 }
-
-https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=Hama%2C+D.K.%3B+Mubarek%2C+F.S.%3B+Abdullatif%2C+F.A.+Security+Challenges+and+Architectures+in+SDN-Enabled+VANETs%3A+A+Comprehensive+Survey+and+Taxonomy.+Passer+Journal+of+Basic+and+Applied+Sciences+2025%2C+7%282%29%2C+953-982.&btnG=
-
-[12]
-@article{hama2025security,
-  title={Security Challenges and Architectures in SDN-Enabled VANETs: A Comprehensive Survey and Taxonomy},
-  author={Hama, Dana Kareem and Mubarek, Foad Salem and Abdullatif, Firas Abdulhameed},
-  journal={Passer Journal of Basic and Applied Sciences},
-  volume={7},
-  number={2},
-  pages={953--982},
-  year={2025},
-  publisher={University of Garmian}
-}
-

@@ -80,66 +80,66 @@ The proposed framework is evaluated through comprehensive simulation across all 
 To understand the security challenges in Software-Defined Vehicular Networks, it is essential to examine the evolution from traditional Software-Defined Networking through Vehicular Ad-hoc Networks to the integrated SDVN architecture.
 
 \subsection{Software-Defined Networking (SDN)}
-Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding.
+Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane \cite{godanj2016simple}. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding \cite{godanj2016simple}.
 
 The SDN architecture consists of three distinct layers:
 \begin{itemize}
-    \item \textbf{Application Plane:} Network applications defining desired behaviors and policies, communicating through the northbound API.
-    \item \textbf{Control Plane:} SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules.
-    \item \textbf{Data Plane:} Physical and virtual network devices forwarding packets according to flow tables populated by the controller.
+    \item \textbf{Application Plane:} Network applications defining desired behaviors and policies, communicating through the northbound API \cite{kreutz2014software}.
+    \item \textbf{Control Plane:} SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules \cite{kreutz2014software}.
+    \item \textbf{Data Plane:} Physical and virtual network devices forwarding packets according to flow tables populated by the controller \cite{kreutz2014software}.
 \end{itemize}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.85\textwidth]{diagrams/1_SDN.png}
-    \caption{SDN Data Plane Architecture}
+    \caption{SDN Data Plane Architecture \cite{nunez2023brief}}
     \label{fig:sdn}
 \end{figure}
 
 \subsection{Vehicular Ad-hoc Networks (VANET)}
-Vehicular Ad-hoc Networks (VANET) represent a specialized class of Mobile Ad-hoc Networks specifically designed for vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication. VANETs enable vehicles equipped with On-Board Units to communicate directly with each other and with Roadside Units deployed along roadways.
+Vehicular Ad-hoc Networks (VANET) represent a specialized class of Mobile Ad-hoc Networks specifically designed for vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication \cite{raja2010issues}. VANETs enable vehicles equipped with On-Board Units to communicate directly with each other and with Roadside Units deployed along roadways \cite{raja2010issues}.
 
 Distinctive characteristics of VANET:
 \begin{itemize}
-    \item \textbf{High Mobility:} Vehicles move at varying speeds creating highly dynamic topology with frequent link disruptions.
-    \item \textbf{Dynamic Topology:} Network topology changes rapidly and unpredictably as vehicles enter, leave, or change lanes.
-    \item \textbf{Variable Network Density:} Node density varies dramatically based on location, time, and events.
-    \item \textbf{Distributed Decision Making:} Each vehicle makes local routing decisions without global network visibility.
+    \item \textbf{High Mobility:} Vehicles move at varying speeds creating highly dynamic topology with frequent link disruptions \cite{raja2010issues}.
+    \item \textbf{Dynamic Topology:} Network topology changes rapidly and unpredictably as vehicles enter, leave, or change lanes \cite{rehman2013vehicular}.
+    \item \textbf{Variable Network Density:} Node density varies dramatically based on location, time, and events \cite{lee2021vanet}.
+    \item \textbf{Distributed Decision Making:} Each vehicle makes local routing decisions without global network visibility \cite{raja2010issues}.
 \end{itemize}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.85\textwidth]{diagrams/2_VANET.png}
-    \caption{Architecture of Vehicular Ad-Hoc Networks (VANETs)}
+    \caption{Architecture of Vehicular Ad-Hoc Networks (VANETs) \cite{rehman2013vehicular}}
     \label{fig:vanet}
 \end{figure}
 
 \subsection{Software-Defined Vehicular Networks (SDVN)}
-Software-Defined Vehicular Networks (SDVN) emerge as a convergence architecture integrating the programmability and centralized control of SDN with the mobility and distributed communication of VANET. SDVN addresses fundamental VANET limitations—particularly distributed routing in highly dynamic topologies—by introducing centralized intelligence while maintaining vehicle-to-vehicle communication.
+Software-Defined Vehicular Networks (SDVN) emerge as a convergence architecture integrating the programmability and centralized control of SDN with the mobility and distributed communication of VANET \cite{correia2017architecture}. SDVN addresses fundamental VANET limitations—particularly distributed routing in highly dynamic topologies—by introducing centralized intelligence while maintaining vehicle-to-vehicle communication \cite{li2016control}.
 
 SDVN architectural components:
 \begin{itemize}
-    \item \textbf{SDN-Enabled Vehicles:} Vehicles as mobile SDN switches querying controllers for forwarding instructions.
-    \item \textbf{SDN-Enabled RSUs:} Hybrid devices for packet forwarding and controller-to-vehicle communication aggregation.
-    \item \textbf{Hierarchical Controllers:} Local controllers for region-specific routing with global controller coordination.
-    \item \textbf{Hybrid Control:} Time-critical safety messages via direct V2V; non-urgent traffic via centralized SDN.
+    \item \textbf{SDN-Enabled Vehicles:} Vehicles as mobile SDN switches querying controllers for forwarding instructions \cite{li2016control}.
+    \item \textbf{SDN-Enabled RSUs:} Hybrid devices for packet forwarding and controller-to-vehicle communication aggregation \cite{li2016control}.
+    \item \textbf{Hierarchical Controllers:} Local controllers for region-specific routing with global controller coordination \cite{correia2017architecture}.
+    \item \textbf{Hybrid Control:} Time-critical safety messages via direct V2V; non-urgent traffic via centralized SDN \cite{dhawankar2017software}.
 \end{itemize}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.85\textwidth]{diagrams/3_SDVN.png}
-    \caption{Architecture of Software-Defined Vehicular Networks (SDVN)}
+    \caption{Architecture of Software-Defined Vehicular Networks (SDVN) \cite{hama2025security}}
     \label{fig:sdvn}
 \end{figure}
 
 \subsection{Security Challenges in SDVN}
-Software-Defined Vehicular Networks inherit security vulnerabilities from both Software-Defined Networking and Vehicular Ad-hoc Networks, while simultaneously introducing new attack surfaces due to their centralized control architecture and highly dynamic vehicular environment. Although SDVN improves network flexibility and routing efficiency, the tight coupling between mobile data-plane entities and centralized control logic increases the overall attack impact when security assumptions are violated.
+Software-Defined Vehicular Networks inherit security vulnerabilities from both Software-Defined Networking and Vehicular Ad-hoc Networks, while simultaneously introducing new attack surfaces due to their centralized control architecture and highly dynamic vehicular environment. Although SDVN improves network flexibility and routing efficiency, the tight coupling between mobile data-plane entities and centralized control logic increases the overall attack impact when security assumptions are violated \cite{arif2020sdn}.
 
-One of the core security challenges in SDVN is maintaining reliable decision-making under highly dynamic conditions. Frequent topology changes, intermittent connectivity, and variable node density make it difficult to obtain accurate and consistent network state information. As a result, control-plane decisions may be based on incomplete, delayed, or noisy inputs, reducing the effectiveness of conventional security validation mechanisms.
+One of the core security challenges in SDVN is maintaining reliable decision-making under highly dynamic conditions. Frequent topology changes, intermittent connectivity, and variable node density make it difficult to obtain accurate and consistent network state information \cite{arif2020sdn}. As a result, control-plane decisions may be based on incomplete, delayed, or noisy inputs, reducing the effectiveness of conventional security validation mechanisms \cite{arif2020sdn}.
 
-The reliance on centralized or hierarchical controllers further complicates the security landscape. Controllers aggregate large volumes of network information and enforce global policies, making them attractive targets for compromise. Any disruption, manipulation, or failure at the control plane can propagate rapidly across the network, affecting routing stability, quality of service, and overall system reliability.
+The reliance on centralized or hierarchical controllers further complicates the security landscape \cite{hama2025security}. Controllers aggregate large volumes of network information and enforce global policies, making them attractive targets for compromise. Any disruption, manipulation, or failure at the control plane can propagate rapidly across the network, affecting routing stability, quality of service, and overall system reliability \cite{hama2025security}.
 
-Additionally, SDVN must balance security enforcement with privacy preservation. Vehicles continuously exchange sensitive operational and contextual information, yet excessive disclosure of such data violates privacy requirements and regulatory constraints. Existing security solutions often struggle to simultaneously ensure data integrity, system robustness, and privacy protection in large-scale vehicular environments. These unresolved challenges highlight the need for advanced security mechanisms capable of supporting trustworthy operation in SDVN, thereby motivating the problem addressed in the following section.
+Additionally, SDVN must balance security enforcement with privacy preservation. Vehicles continuously exchange sensitive operational and contextual information, yet excessive disclosure of such data violates privacy requirements and regulatory constraints. Existing security solutions often struggle to simultaneously ensure data integrity, system robustness, and privacy protection in large-scale vehicular environments \cite{hama2025security}. These unresolved challenges highlight the need for advanced security mechanisms capable of supporting trustworthy operation in SDVN, thereby motivating the problem addressed in the following section.
 
 \section{Problem Statement: False Accusation Attacks in SDVN}
 Trust and reputation systems are essential for secure routing and decision-making in Software-Defined Vehicular Networks. These systems rely on reports and behavioral evidence submitted by vehicles and RSUs to identify malicious participants. However, this reliance creates a critical vulnerability: malicious entities can fabricate or manipulate accusations to falsely label honest nodes as attackers.
@@ -211,7 +211,7 @@ This defined scope ensures that the research remains targeted toward developing 
 
 \chapter{Literature Review}
 \section{Previous Work}
-Discuss relevant previous work in the field. For instance, \cite{jones2019ml} discusses advancements in \ac{ML}.
+Discuss relevant previous work in the field related to SDVN security, false accusation attacks, blockchain-based reputation systems, Zero-Knowledge Proofs, and GNN-LLM applications in network security.
 
 \section{Gaps in Literature}
 Identify gaps in the existing literature that your project aims to address.
@@ -222,7 +222,6 @@ Describe the research design and methodology. Use diagrams or flow charts to ill
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.95\textwidth]{microgrid-architecture.png} % Replace with your image file
     \caption{This is an example image.}
     \label{fig:example}
 \end{figure}
