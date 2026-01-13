@@ -421,16 +421,33 @@ The complete system operates through continuous cycles. Vehicles authenticate pe
 Simultaneously, the GNN analyzes the network graph updated every few seconds, identifying clusters and patterns. When anomalies are detected, the LLM processes this alongside system logs to generate threat assessments. If both AI systems and weighted endorser consensus agree that an attack is occurring, the reputation management contract updates scores and potentially blacklists malicious nodes. Throughout this process, the controller trusts evaluation contract monitors for insider threats, ready to trigger failover if needed.
 
 This multi-layered approach ensures that attackers must simultaneously defeat multiple independent security mechanisms—cryptographic verification, blockchain consensus, weighted trust scoring, and AI anomaly detection—making successful attacks computationally infeasible \cite{huo2023trustgnn}. The framework maintains vehicular network performance requirements while providing comprehensive security against reputation manipulation attacks.
+%
 
 \section{Attack-Specific Mitigation Strategies}
 The proposed methodology addresses each false accusation attack variant through targeted defense mechanisms:
 
 \subsection{Single-Accuser Opportunistic Fabrication}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/single-accuser.jpeg}
+    \caption{Single-Accuser Opportunistic Fabrication Attack Scenario}
+    \label{fig:single_accuser}
+\end{figure}
+
 This attack occurs when a single privileged malicious node fabricates convincing evidence against legitimate vehicles. The weighted endorser trust mechanism in the Reputation Management Smart Contract prevents this by requiring accusations to be validated by multiple high-trust endorsers \cite{alshaibani2023blockchain}. A single accuser, regardless of how convincing their evidence appears, contributes only their weighted trust score to the reputation change calculation. Since blacklisting requires $\geq$2/3 weighted consensus, a lone attacker cannot unilaterally blacklist a victim unless multiple independent high-trust nodes corroborate the accusation.
 
 Additionally, cryptographic evidence validation ensures that accusations lacking proper digital signatures, valid timestamps, or verifiable location proofs are automatically rejected. The blockchain's immutable audit logs all accusations with timestamps, allowing forensic analysis to identify nodes that frequently make false accusations, gradually reducing their trust weights to near-zero \cite{bessani2014state}.
 
 \subsection{Sybil-Amplified Consensus Flooding}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/Sybil-Amplified Consensus Flooding.png}
+    \caption{Sybil-Amplified Consensus Flooding Attack Scenario}
+    \label{fig:sybil_attack}
+\end{figure}
+
 Sybil attacks create multiple fake identities to flood the network with coordinated accusations, attempting to achieve artificial consensus. The methodology employs three defensive layers. First, the Registration Smart Contract with Zero-Knowledge Proofs ensures that each node possesses unique cryptographic credentials tied to physical vehicle identities \cite{bensasson2018scalable}. Creating Sybil identities requires either stealing legitimate credentials or registering through out-of-band channels, both of which are computationally expensive and detectable.
 
 Second, new nodes start with minimal trust weights. Even if an attacker successfully registers multiple Sybil identities, they initially carry near-zero influence in reputation decisions. Trust accumulates gradually only through consistent honest behavior over extended periods, making instant consensus flooding ineffective \cite{balaram2023highly}.
@@ -438,6 +455,14 @@ Second, new nodes start with minimal trust weights. Even if an attacker successf
 Third, the Graph Neural Network detects coordinated attack patterns by analyzing the network topology \cite{chen2025sybil}. When multiple low-trust nodes simultaneously target a single victim, the GNN identifies this star-topology accusation pattern as anomalous. Features such as identical registration timestamps, similar behavioral patterns, and temporal clustering of accusations trigger high-confidence Sybil detection, prompting immediate investigation and potential preemptive blacklisting of the attacker cluster.
 
 \subsection{Timing-Based Accusations During High-Noise Periods}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{diagrams/Timing Based Accusations.png}
+    \caption{Timing-Based Accusations During High-Noise Periods Attack Scenario}
+    \label{fig:timing_based}
+\end{figure}
+
 Sophisticated attackers exploit periods of legitimate network stress—congestion, controller handovers, or channel degradation—to mask malicious accusations as genuine failures. The temporal attention mechanism in the GNN specifically addresses this by analyzing accusation timing relative to network conditions \cite{zhou2020automating}. The system maintains historical baselines of legitimate packet loss rates during various network states (normal operation, moderate congestion, severe congestion, handover periods).
 
 When accusations occur during high-noise periods, the LLM performs semantic reasoning to distinguish between expected failures and coordinated attacks \cite{zhang2024large}. For instance, if multiple vehicles near a congestion zone report packet loss, this correlates with legitimate network stress. However, if accusations target only specific nodes while other nearby vehicles report normal performance, this discrepancy flags a timing-based attack.
@@ -445,6 +470,28 @@ When accusations occur during high-noise periods, the LLM performs semantic reas
 Furthermore, the weighted endorser mechanism inherently provides resilience: during genuine high-noise periods, multiple independent high-trust endorsers will naturally corroborate packet loss reports. Malicious timing-based accusations lack this broad corroboration pattern, revealing them as outliers despite the noisy environment.
 
 \subsection{Evidence-Spoofing with Tampered Logs and Collusion}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Node Attack - Evidence Spoofing.png}
+    \caption{Malicious Node Attack - Evidence Spoofing Scenario}
+    \label{fig:evidence_node}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious RSU Attack - Evidence Spoofing.png}
+    \caption{Malicious RSU Attack - Evidence Spoofing Scenario}
+    \label{fig:evidence_rsu}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Controller Attack - Evidence Spoofing.png}
+    \caption{Malicious Controller Attack - Evidence Spoofing Scenario}
+    \label{fig:evidence_controller}
+\end{figure}
+
 The most sophisticated attack involves fabricating cryptographically convincing but falsified evidence—tampered packet logs, forged signatures, or collusion among multiple compromised nodes. The methodology employs multi-layer cryptographic validation as the primary defense \cite{pournaghi2020necppa}. Every accusation must include: (1) valid digital signatures from authenticated nodes, (2) unfalsifiable timestamps within acceptable time windows, (3) Zero-Knowledge Proofs demonstrating the accuser's legitimate network presence, and (4) location proofs validated by multiple independent roadside units \cite{quevedo2020intelligent}.
 
 The blockchain's immutable chain-of-custody provides additional protection. Evidence must include traceable hashes of original packets stored on the blockchain at capture time. Retrospective evidence fabrication is impossible because the blockchain timestamp proves when data was recorded. Attackers cannot backdate evidence to match historical events \cite{sharma2017distblocknet}.
@@ -465,10 +512,34 @@ Provide a realistic timeline for completing the project. Use a Gantt chart or ta
 \include{timeline}
 
 \section{Resource Required}
-State the resource required for the project and estimate the budget for the resources required.
+For the implementation of the proposed blockchain, ZKP, and GNN-LLM-based defense framework for mitigating false accusation attacks in SDVN, the following tools and technologies are needed:
+
+\begin{itemize}
+    \item \textbf{Network Simulator 3 (NS-3):} A discrete-event network simulator for modeling SDVN, simulating V2V and V2I communications, and evaluating the framework under various attack scenarios.
+    
+    \item \textbf{Hyperledger Fabric:} A permissioned blockchain platform for implementing the distributed ledger, deploying smart contracts for registration, reputation management, and controller trust evaluation with BFT-SMaRt consensus.
+    
+    \item \textbf{PyTorch or TensorFlow:} Deep learning frameworks for implementing Graph Neural Networks with temporal attention to detect Sybil attacks and coordinated false accusation patterns.
+    
+    \item \textbf{Hugging Face Transformers:} A library for integrating Large Language Models to process controller logs and system alerts, perform semantic reasoning, and generate automated incident reports.
+    
+    \item \textbf{libsodium or PyCryptodome:} Cryptographic libraries for implementing post-quantum algorithms (FALCON-1024, Kyber-1024), digital signatures, key exchange, and encryption for securing communications.
+    
+    \item \textbf{zkSNARK Libraries (libsnark or circom):} Zero-Knowledge Proof frameworks for privacy-preserving authentication, enabling identity verification without revealing sensitive vehicle information.
+    
+    \item \textbf{Python with NetworkX and Pandas:} Programming environment for graph construction, feature extraction, statistical analysis, and visualization of experimental results.
+\end{itemize}
+
+These tools will be employed for the design, implementation, simulation, and evaluation of the proposed defense framework against false accusation attacks in Software-Defined Vehicular Networks.
 
 \chapter{Conclusion}
-Summarize the key points of your proposal and reiterate the importance of the project.
+False accusation attacks represent a critical security threat in Software-Defined Vehicular Networks, where malicious entities exploit reputation-based trust management systems to falsely accuse legitimate nodes, leading to route elimination, network instability, and degraded Quality of Service. This research addresses sophisticated attack variants including single-accuser fabrication, Sybil-amplified flooding, timing-based accusations, and evidence-spoofing through a novel multi-layered defense framework.
+
+The proposed solution uniquely integrates blockchain technology for tamper-proof decentralized reputation logging, Zero-Knowledge Proofs for privacy-preserving verification without revealing sensitive vehicular information, and Graph Neural Networks combined with Large Language Models for intelligent anomaly detection through network topology analysis and contextual threat interpretation. The framework operates under a Zero-Trust Architecture with specialized smart contracts for registration authentication, weighted endorser trust scoring, and continuous controller trust evaluation.
+
+Comprehensive simulation-based validation using NS-3 will evaluate the framework across varying attack intensities, measuring Packet Delivery Ratio, Packet Interception Ratio, and Matthews Correlation Coefficient. Comparative analysis will demonstrate superiority over traditional trust-based systems and basic blockchain implementations.
+
+This research represents the first integrated application of blockchain, ZKP, and GNN-LLM technologies specifically designed to counter false accusation attacks in SDVN, enhancing the reliability and trustworthiness of intelligent transportation systems essential for future autonomous driving and smart city applications.
 
 % References
 \renewcommand{\bibname}{References}
