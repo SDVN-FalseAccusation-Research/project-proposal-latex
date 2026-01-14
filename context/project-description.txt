@@ -1,0 +1,35 @@
+Project Title: A Blockchain, ZKP, and GNN-LLM-based Combined Defense for False Accusation Attack Mitigation in Software Defined Vehicular Networks
+
+Supervisor’s Name: Dr. P.A.D.S.N. Wijesekara
+Please see my profiles at: DEIE, ResearchGate, Google_Scholar, Scopus, WoS, ORCID. I am the person with the highest number of journal publications in the department.
+You can contact me through mobile: 071-0651856 or email: nilmantha@eie.ruh.ac.lk for any initial discussion.
+
+Co Supervisor’s information if any: None
+
+Areas in which students will specialize upon successful completion of the project:
+Blockchain
+Zero-Knowledge Proofs
+Graph Neural Networks
+Large Language Models
+Networking
+Network Security
+
+Project Description:
+Introduction: False accusation attacks in Software-Defined Vehicular Networks (SDVN) represent a critical threat, where malicious actors falsely accuse honest nodes of misbehavior to manipulate reputation systems, leading to blacklisting of legitimate participants and compromising network trust, routing efficiency, and overall stability. These attacks can manifest in variants such as single-accuser opportunistic fabrications–one node with a privileged position fabricates one convincing accusation, Sybil-amplified consensus flooding–many fake nodes create “consensus” and flood the reputation system, timing-based accusations during high-noise periods–accusations are sent during high-noise periods so they blend with normal failures, evidence-spoofing with tampered logs–attacker fabricates traceroute-like evidence or tampered logs to look authentic, or collusion with compromised Roadside Units (RSUs) or controllers. Such manipulations result in false path elimination–Legitimate nodes are blacklisted, removing good routes, route concentration toward attacker-controlled nodes, QoS degradation with increased packet loss and delays, and control-plane instability from frequent trust score fluctuations. While existing research has explored reputation management, there remains a gap in comprehensive defenses that integrate decentralized verification with advanced AI to robustly mitigate these subtle yet damaging threats in dynamic vehicular settings, prioritizing verifiable trust, anomaly detection, and privacy.
+
+Goal: To tackle this issue, this project will design a blockchain, Zero-Knowledge Proof (ZKP), and Graph Neural Network-Large Language Model (GNN-LLM)-based combined defense for mitigating false accusation attacks in SDVN. Focusing on a distributed vehicular network architecture as the core use case, the solution will deliver a multi-layered security framework that employs blockchain for secure, immutable reputation logging and consensus, ZKPs for privacy-preserving verification of accusations without revealing sensitive data, and GNN-LLMs for modeling network graphs to detect anomalous patterns and interpret complex threats intelligently.
+
+Proposed methods (Subject to refinement after discussion): Start by examining common false accusation attack patterns (e.g., reputation manipulation via fabricated evidence, Sybil flooding, or collusive tampering) in SDVN and architect a defensive system that utilizes blockchain for tamper-proof reputation tracking and distributed validation. Integrate ZKPs to enable verifiable proofs of node behavior and accusation authenticity while maintaining privacy. Leverage GNNs to analyze network topology and relational data for identifying anomalous accusation clusters, then apply LLMs to process graph-derived insights and natural language logs for contextual threat assessment and automated response generation. Finally, refine the framework for real-time efficiency, ensuring scalable deployment across network nodes to preempt and neutralize attacks while minimizing impacts on routing and QoS.
+
+Tools/equipment needed: Python libraries like Hugging Face Transformers for LLMs, PyTorch Geometric or DGL for GNNs, zk-SNARK libraries such as zk-SNARKs-py or circom for ZKP implementation, Web3.py or Hyperledger Fabric for blockchain, SciPy for optimization, Network Simulator 3 (NS3) for SDVN simulation, and supporting tools like Scikit-learn for additional machine learning elements.
+
+Significance and implications: This project pioneers the integration of blockchain, ZKPs, and GNN-LLMs into a unified defense against false accusation attacks in vehicular networks, offering groundbreaking advancements in verifiable trust mechanisms, resilient reputation systems, and enhanced security for intelligent transportation infrastructures.
+
+Research outputs: Journal publications and conference presentations.
+
+Communication mode: Weekly supervisor meetings. A WhatsApp group will also be created to clarify any immediate concerns.
+
+Names of at least three academics within DEIE whose expertise aligns with the project’s focus:
+Dr. Kushan Sudheera
+Dr. Geeth Priyankara
+Dr. Rajitha Udawalpola
