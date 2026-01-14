@@ -8,6 +8,8 @@
 \usepackage[table]{xcolor}
 \usepackage{array}
 \usepackage{float}
+\usepackage{setspace}
+
 
 %\usepackage{hyperref} % For clickable links in the document
 %% ____Bibliography____%%
@@ -233,59 +235,19 @@ The reliance on centralized or hierarchical controllers further complicates the 
 Additionally, SDVN must balance security enforcement with privacy preservation. Vehicles continuously exchange sensitive operational and contextual information, yet excessive disclosure of such data violates privacy requirements and regulatory constraints. Existing security solutions often struggle to simultaneously ensure data integrity, system robustness, and privacy protection in large-scale vehicular environments \cite{hama2025security}. These unresolved challenges highlight the need for advanced security mechanisms capable of supporting trustworthy operation in SDVN, thereby motivating the problem addressed in the following section.
 
 \section{Problem Statement: False Accusation Attacks in SDVN}
-Trust and reputation systems are essential for secure routing and decision-making in Software-Defined Vehicular Networks. These systems rely on reports and behavioral evidence submitted by vehicles and RSUs to identify malicious participants. However, this reliance creates a critical vulnerability: malicious entities can fabricate or manipulate accusations to falsely label honest nodes as attackers.
-
-False accusation attacks undermine the fundamental assumption that reports submitted to the controller are truthful. When exploited, these attacks cause legitimate vehicles to be blacklisted, trusted routes to be eliminated, and network traffic to be redirected through adversarial paths. Over time, this results in degraded network performance, biased routing decisions, and erosion of trust in the SDVN control framework.
-
-This research addresses false accusation attacks under two distinct attacker models:
-\begin{itemize}
-    \item \textbf{Data-plane attacker model:} Malicious vehicles or RSUs generate false accusations while the SDN controller remains honest but vulnerable to deception.
-    \item \textbf{Control-plane attacker model:} The SDN controller itself is malicious or compromised, enabling it to fabricate, amplify, or manipulate accusation records internally without relying on genuine vehicle reports.
-\end{itemize}
-
-Under these assumptions, four major variants of false accusation attacks are identified and addressed:
-
-\subsection{Single-Accuser Opportunistic Fabrication}
-In this attack, a single malicious vehicle falsely accuses a nearby honest node of misbehavior during transient network conditions such as packet loss or congestion.
-\begin{itemize}
-    \item \textbf{Data-plane version:} A malicious vehicle exploits momentary failures to submit fabricated reports against an honest vehicle.
-    \item \textbf{Control-plane version:} A malicious controller directly injects fabricated accusation records into the reputation system, attributing them to legitimate vehicles.
-\end{itemize}
-
-\subsection{Sybil-Amplified Consensus Flooding}
-This attack amplifies false accusations by using multiple forged identities to create artificial consensus.
-\begin{itemize}
-    \item \textbf{Data-plane version:} A malicious vehicle creates or controls multiple Sybil identities, each submitting coordinated accusations against a target node.
-    \item \textbf{Control-plane version:} The controller internally generates phantom vehicle identities and uses them to simulate widespread agreement, forcing the blacklisting of honest nodes.
-\end{itemize}
-
-\subsection{Timing-Based Accusations During High-Noise Periods}
-Here, attackers exploit periods of high mobility, interference, or network congestion when verification is difficult.
-\begin{itemize}
-    \item \textbf{Data-plane version:} Malicious vehicles submit accusations during peak traffic or handover events, masking falsified claims within legitimate noise.
-    \item \textbf{Control-plane version:} A malicious controller selectively issues accusations during known unstable periods to minimize detection.
-\end{itemize}
-
-\subsection{Evidence-Spoofing with Tampered Logs and Collusion}
-This attack targets the integrity of behavioral evidence.
-\begin{itemize}
-    \item \textbf{Data-plane version:} Colluding vehicles submit manipulated logs or selectively omit information to support false accusations.
-    \item \textbf{Control-plane version:} The controller alters or fabricates historical logs and metrics, presenting them as authentic evidence of misbehavior.
-\end{itemize}
-
-These attack variants demonstrate that false accusation attacks are not limited to distributed adversaries but remain effective even when centralized control components are compromised. Therefore, a defense mechanism must be tamper-resistant, privacy-preserving, and capable of detecting structural and behavioral anomalies across both planes.
+Trust and reputation systems in Software-Defined Vehicular Networks (SDVNs) are vulnerable to false accusation attacks, where malicious vehicles or RSUs in the data plane, or a compromised SDN controller in the control plane, can fabricate or manipulate reports to falsely blacklist honest nodes, leading to degraded network performance, biased routing, and loss of trust, with no robust mechanism currently able to detect or mitigate such attacks.
 
 \section{Objectives and Scope}
 \subsection{Objectives}
-The primary objective of this research is to design, implement, and evaluate a comprehensive defense framework for mitigating false accusation attacks in Software-Defined Vehicular Networks. To achieve this overarching goal, the specific objectives of the study are as follows:
+The primary objective of this research is to develop a robust defense framework for mitigating false accusation attacks in Software-Defined Vehicular Networks (SDVNs). 
+
+\singlespacing
+
+The specific objectives are:
 \begin{enumerate}
-    \item To analyze and model false accusation attacks in SDVN, focusing on their impact on trust and reputation management systems under dynamic vehicular conditions.
-    \item To design a blockchain-based reputation management mechanism that ensures tamper-proof logging, distributed validation, and resilience against manipulation of accusation records.
-    \item To develop Zero-Knowledge Proof–based verification methods that enable the validation of accusation authenticity and node behavior without revealing sensitive vehicular or contextual information.
-    \item To construct Graph Neural Network models for representing SDVN topology and relational interactions, enabling detection of anomalous accusation patterns and coordinated attacks.
-    \item To integrate Large Language Models with graph-based insights to interpret complex attack behaviors, analyze contextual evidence, and support intelligent mitigation decisions.
-    \item To evaluate the effectiveness of the proposed multi-layered defense framework in terms of attack detection accuracy, false positive reduction, network performance, and Quality of Service preservation.
-    \item To validate the proposed solution through simulation in a Software-Defined Vehicular Network environment using NS-3 and a blockchain platform such as Hyperledger Fabric.
+    \item \textbf{Analyze and model false accusation attacks in SDVNs } to understand their impact on trust and reputation systems under dynamic vehicular conditions, and to identify patterns of data-plane (vehicle/RSU) and control-plane (controller) attacks.
+    \item \textbf{Design and implement a secure, tamper-resistant reputation management framework } combining blockchain-based logging, Zero-Knowledge Proofs for privacy-preserving verification, and Graph Neural Network–based anomaly detection to identify malicious accusations and coordinated attacks.
+    \item \textbf{Evaluate the effectiveness of the proposed defense framework } through simulations in NS-3 integrated with a blockchain platform (e.g., Hyperledger Fabric), assessing attack detection accuracy, false positives, network performance, and overall Quality of Service.
 \end{enumerate}
 
 \subsection{Scope}
