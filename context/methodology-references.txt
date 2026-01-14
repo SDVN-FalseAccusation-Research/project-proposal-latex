@@ -1,0 +1,219 @@
+% [1]
+@techreport{rose2020zero,
+  title={Zero Trust Architecture},
+  author={Rose, Scott and Borchert, Oliver and Mitchell, Stu and Connelly, Sean},
+  year={2020},
+  institution={National Institute of Standards and Technology},
+  type={NIST Special Publication},
+  number={800-207}
+}
+
+% [2]
+@article{khan2017topology,
+  title={Topology Discovery in Software Defined Networks: Threats, Taxonomy, and State-of-the-Art},
+  author={Khan, Samee Ullah and Gani, Abdullah and Wahab, Abdul Wahab Abdul and Guizani, Mohsen and Khan, Muhammad Khurram},
+  journal={ACM Computing Surveys},
+  volume={19},
+  number={1},
+  pages={303--324},
+  year={2017},
+  publisher={ACM}
+}
+
+% [3]
+@article{arif2020sdn,
+  title={SDN-based VANETs, Security Attacks, Applications, and Challenges},
+  author={Arif, Muhammad and Wang, Guojun and Geman, Oana and others},
+  journal={Applied Sciences},
+  volume={10},
+  number={9},
+  pages={3217},
+  year={2020},
+  publisher={MDPI}
+}
+
+% [4]
+@article{sharma2017distblocknet,
+  title={DistBlockNet: A Distributed Blockchains-Based Secure SDN Architecture for IoT Networks},
+  author={Sharma, Pradip Kumar and Singh, Saurabh and Jeong, Young-Sik and Park, Jong Hyuk},
+  journal={IEEE Communications Magazine},
+  volume={55},
+  number={9},
+  pages={78--85},
+  year={2017},
+  publisher={IEEE}
+}
+
+% [5]
+@inproceedings{yahiatene2018blockchain,
+  title={Towards a Blockchain and Software-Defined Vehicular Networks Approaches to Secure Vehicular Social Network},
+  author={Yahiatene, Yacine and Rachedi, Abderrezak},
+  booktitle={2018 IEEE Conference on Standards for Communications and Networking (CSCN)},
+  pages={1--6},
+  year={2018},
+  organization={IEEE}
+}
+
+% [6]
+@misc{bensasson2018scalable,
+  title={Scalable, Transparent, and Post-Quantum Secure Computational Integrity},
+  author={Ben-Sasson, Eli and Bentov, Iddo and Horesh, Yinon and Riabzev, Michael},
+  year={2018},
+  howpublished={Cryptology ePrint Archive, Report 2018/046},
+  note={Available at \url{https://eprint.iacr.org/2018/046}}
+}
+
+% [7]
+@article{alshaibani2023blockchain,
+  title={Blockchain-Assisted Privacy-Preserving Authentication and Key Agreement Scheme},
+  author={Alshaibani, Wafa and Shayea, Ibraheem and Caglar, Raed and others},
+  journal={Sensors},
+  volume={23},
+  pages={5766},
+  year={2023},
+  publisher={MDPI}
+}
+
+% [8]
+@inproceedings{bessani2014state,
+  title={State Machine Replication for the Masses with BFT-SMART},
+  author={Bessani, Alysson and Sousa, Jo{\~a}o and Alchieri, Eduardo Esteves Pagani},
+  booktitle={2014 44th Annual IEEE/IFIP International Conference on Dependable Systems and Networks (DSN)},
+  pages={355--362},
+  year={2014},
+  organization={IEEE}
+}
+
+% [9]
+@article{raja2020energy,
+  title={Energy-Efficient End-to-End Security for Software-Defined Vehicular Networks},
+  author={Raja, Gunasekaran and Anbalagan, Sudha and Vijayaraghavan, Ganapathy and others},
+  journal={IEEE Transactions on Industrial Informatics},
+  volume={17},
+  number={8},
+  pages={5730--5737},
+  year={2020},
+  publisher={IEEE}
+}
+
+% [10]
+@inproceedings{zhou2020automating,
+  title={Automating Botnet Detection with Graph Neural Networks},
+  author={Zhou, Jiawei and Xu, Zhiying and Rush, Alexander M. and Yu, Minlan},
+  booktitle={AutoML Workshop at ICML 2020},
+  year={2020}
+}
+
+% [11]
+@article{balaram2023highly,
+  title={Highly Accurate Sybil Attack Detection in VANET Using Extreme Learning Machine},
+  author={Balaram, Ala and Nabi, S. Altaf and Rao, K. Srujan and Koppula, Nageswara},
+  journal={Wireless Networks},
+  volume={29},
+  number={8},
+  pages={3435--3443},
+  year={2023},
+  publisher={Springer}
+}
+
+% [12]
+@article{chen2025sybil,
+  title={Sybil Attack Detection and Traceability Based on Temporal Heterogeneous GAT},
+  author={Chen, Y. and others},
+  journal={Journal of Network and Computer Applications},
+  year={2025},
+  note={DOI: 10.1016/j.jnca.2025.103584}
+}
+
+% [13]
+@article{zhang2024large,
+  title={Large Language Models for Cybersecurity: A Systematic Literature Review},
+  author={Zhang, Y. and others},
+  journal={ACM Computing Surveys},
+  year={2024},
+  publisher={ACM}
+}
+
+% [14]
+@article{pournaghi2020necppa,
+  title={NECPPA: A Novel and Efficient Conditional Privacy-Preserving Authentication Scheme for VANET},
+  author={Pournaghi, Seyed Mohsen and Zahednejad, Bagher and Bayat, Mahmoud and Farjami, Yashar},
+  journal={Computer Networks},
+  volume={134},
+  pages={78--92},
+  year={2020},
+  publisher={Elsevier}
+}
+
+% [15]
+@article{benjaballah2021security,
+  title={Security and Design Requirements for Software-Defined VANETs},
+  author={Ben Jaballah, Wafa and Conti, Mauro and Lal, Chhagan},
+  journal={Computer Networks},
+  volume={169},
+  pages={107099},
+  year={2021},
+  publisher={Elsevier}
+}
+
+% [16]
+@inproceedings{quevedo2020intelligent,
+  title={An Intelligent Mechanism for Sybil Attacks Detection in VANETs},
+  author={Quevedo, Carlos H. and Quevedo, Ana M. and Campos, Glaucio A. and others},
+  booktitle={IEEE International Conference on Communications (ICC)},
+  pages={1--6},
+  year={2020},
+  organization={IEEE}
+}
+
+% [17]
+@article{huo2023trustgnn,
+  title={TrustGNN: Graph Neural Network based Trust Evaluation},
+  author={Huo, Chao and others},
+  journal={IEEE Transactions on Neural Networks and Learning Systems},
+  year={2023},
+  note={DOI: 10.1109/TNNLS.2023.3277478},
+  publisher={IEEE}
+}
+
+% [18]
+@article{nayak2021tbddosa,
+  title={TBDDoSA-MD: Trust-based DDoS Misbehave Detection Approach in SDVN},
+  author={Nayak, Rakesh Prasad and Sethi, Suvendu and Bhoi, Sourav Kumar and others},
+  journal={Computers and Electrical Engineering},
+  volume={69},
+  number={3},
+  pages={3513--3529},
+  year={2021},
+  publisher={Elsevier}
+}
+
+% [19]
+@article{adnan2021towards,
+  title={Towards the Design of Efficient and Secure Architecture for SDVN},
+  author={Adnan, Muhammad and Iqbal, Javed and Waheed, Abdul and others},
+  journal={Applied Sciences},
+  volume={21},
+  number={11},
+  pages={3902},
+  year={2021},
+  publisher={MDPI}
+}
+
+% [19] - Second reference with same number
+@article{wijesekara2025bqllda,
+  title={BQLLDA: A Blockchain, Q-Learning, and Cryptography-Driven Secure Approach to Mitigate Link Discovery Attacks in SDVNs},
+  author={Wijesekara, P. A. D. S. N. and others},
+  journal={Computer Networks},
+  year={2025},
+  note={Under Review}
+}
+
+% [20]
+@inproceedings{castro1999practical,
+  title={Practical Byzantine Fault Tolerance},
+  author={Castro, Miguel and Liskov, Barbara},
+  booktitle={Proceedings of the Third Symposium on Operating Systems Design and Implementation (OSDI)},
+  pages={173--186},
+  year={1999}
+}
