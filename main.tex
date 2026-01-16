@@ -8,6 +8,7 @@
 \usepackage[table]{xcolor}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{longtable}
 \usepackage{float}
 \usepackage{setspace}
 
@@ -296,17 +297,33 @@ Current vehicular network security frameworks lack comprehensive mechanisms for 
 
 \section{Table of Literature Review Summary}
 
-\begin{table}[H]
-\centering
+\begingroup
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{5pt}
-
-\begin{tabularx}{\textwidth}{|p{3cm}|X|X|}
+\begin{longtable}{|p{3cm}|p{6.5cm}|p{6.5cm}|}
+\caption{Related work on false accusation and trust distortion in networked systems.}
+\label{tab:false_accusation_detection} \\
 \hline
 \textbf{Category} &
 \textbf{Approach (example works)} &
 \textbf{Limitation vs. SDVN false-accusation mitigation} \\
 \hline
+\endfirsthead
+
+\multicolumn{3}{c}%
+{{\bfseries \tablename\ \thetable{} -- continued}} \\
+\hline
+\textbf{Category} &
+\textbf{Approach (example works)} &
+\textbf{Limitation vs. SDVN false-accusation mitigation} \\
+\hline
+\endhead
+
+\hline \multicolumn{3}{|r|}{{Continued on next page}} \\ \hline
+\endfoot
+
+\hline
+\endlastfoot
 
 False accusation / reputation poisoning &
 Shows how fabricated accusations can blacklist honest nodes and degrade throughput/QoS (\cite{lee2012efficient}) &
@@ -352,11 +369,8 @@ Advanced DL for security analytics &
 Uses modern DL enhancements to improve robustness to evolving/stealthy attacks (\cite{belcastro2025enhancing}) &
 Not accusation-specific; lacks blockchain/ZKP-style verifiability for trust decisions under false accusations \\
 \hline
-\end{tabularx}
-
-\caption{Related work on false accusation and trust distortion in networked systems.}
-\label{tab:false_accusation_detection}
-\end{table}
+\end{longtable}
+\endgroup
 
 
 \chapter{Methodology}
