@@ -293,6 +293,8 @@ Current misbehavior detection systems in SDVN rely on statistical anomaly detect
 \subsection{Insufficient Immutable Evidence Logging and Historical Verification}
 Current vehicular network security frameworks lack comprehensive mechanisms for establishing immutable chain-of-custody for accusation evidence, enabling attackers to fabricate or tamper with packet logs, routing traces, and sensor data without detection. Existing systems do not maintain cryptographically verifiable timestamps proving when behavioral evidence was captured and recorded, allowing sophisticated attackers to retrospectively manufacture fake evidence matching historical network events to frame honest nodes. Most approaches lack blockchain-based evidence integrity protection where original packet hashes are stored immutably at capture time, preventing backdating of fabricated accusations or manipulation of evidence post-incident. Furthermore, current solutions do not provide comprehensive forensic audit trails tracking complete accusation lifecycles including who accused whom, what evidence was submitted, how endorsers voted, and final reputation score changes with cryptographic non-repudiation, hindering post-incident investigation and accountability. Reputation management systems typically lack mechanisms to identify and gradually reduce trust weights of nodes that frequently make false accusations through historical pattern analysis, allowing malicious nodes to continue disruption despite repeated invalid accusations. There is critical need to develop blockchain-based evidence management frameworks maintaining immutable chain-of-custody with traceable cryptographic hashes, unfalsifiable timestamps within acceptable time windows, comprehensive audit logs enabling forensic analysis of accusation patterns, and automated trust weight reduction mechanisms for nodes exhibiting consistent false reporting behaviors in Software-Defined Vehicular Networks.
 
+
+
 \chapter{Methodology}
 \section{Research Design}
 This research proposes a blockchain-based security framework integrated with artificial intelligence to mitigate False Accusation Attacks in Software-Defined Vehicular Networks (SDVN). The framework operates on a Zero-Trust Architecture principle, where no network entity—vehicles, roadside units, or controllers—is trusted by default \cite{rose2020zero}. Instead, continuous verification and validation mechanisms ensure that only legitimate nodes participate in routing decisions.
@@ -367,12 +369,20 @@ The proposed methodology addresses each false accusation attack variant through 
 
 \subsection{Single-Accuser Opportunistic Fabrication}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_DV.png}
+    \caption{Single-Accuser Opportunistic Fabrication Attack Data Plane Version}
+    \label{fig:single_accuser_data_plane_version}
+\end{figure}
+
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=1\textwidth]{diagrams/single-accuser.jpeg}
-    \caption{Single-Accuser Opportunistic Fabrication Attack Scenario}
-    \label{fig:single_accuser}
+    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_CV.png}
+    \caption{Single-Accuser Opportunistic Fabrication Attack Control Plane Version}
+    \label{fig:single_accuser_control_plane_version}
 \end{figure}
+
 
 This attack occurs when a single privileged malicious node fabricates convincing evidence against legitimate vehicles. The weighted endorser trust mechanism in the Reputation Management Smart Contract prevents this by requiring accusations to be validated by multiple high-trust endorsers \cite{alshaibani2023blockchain}. A single accuser, regardless of how convincing their evidence appears, contributes only their weighted trust score to the reputation change calculation. Since blacklisting requires $\geq$2/3 weighted consensus, a lone attacker cannot unilaterally blacklist a victim unless multiple independent high-trust nodes corroborate the accusation.
 
@@ -382,9 +392,16 @@ Additionally, cryptographic evidence validation ensures that accusations lacking
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{diagrams/Sybil-Amplified Consensus Flooding.png}
-    \caption{Sybil-Amplified Consensus Flooding Attack Scenario}
-    \label{fig:sybil_attack}
+    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_DV.png}
+    \caption{Sybil-Amplified Consensus Flooding Attack Data Plane Version}
+    \label{fig:sybil_attack_data_plane_version}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_CV.png}
+    \caption{Sybil-Amplified Consensus Flooding Attack Control Plane Version}
+    \label{fig:sybil_attack_control_plane_version}
 \end{figure}
 
 Sybil attacks create multiple fake identities to flood the network with coordinated accusations, attempting to achieve artificial consensus. The methodology employs three defensive layers. First, the Registration Smart Contract with Zero-Knowledge Proofs ensures that each node possesses unique cryptographic credentials tied to physical vehicle identities \cite{bensasson2018scalable}. Creating Sybil identities requires either stealing legitimate credentials or registering through out-of-band channels, both of which are computationally expensive and detectable.
@@ -397,9 +414,16 @@ Third, the Graph Neural Network detects coordinated attack patterns by analyzing
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{diagrams/Timing Based Accusations.png}
-    \caption{Timing-Based Accusations During High-Noise Periods Attack Scenario}
-    \label{fig:timing_based}
+    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_DV.png}
+    \caption{Timing-Based Accusations During High-Noise Periods Attack in Data Plane Version}
+    \label{fig:timing_based_data_plane_version}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_CV.png}
+    \caption{Timing-Based Accusations During High-Noise Periods Attack in Control Plane Version}
+    \label{fig:timing_based_control_plane_version}
 \end{figure}
 
 Sophisticated attackers exploit periods of legitimate network stress—congestion, controller handovers, or channel degradation—to mask malicious accusations as genuine failures. The temporal attention mechanism in the GNN specifically addresses this by analyzing accusation timing relative to network conditions \cite{zhou2020automating}. The system maintains historical baselines of legitimate packet loss rates during various network states (normal operation, moderate congestion, severe congestion, handover periods).
