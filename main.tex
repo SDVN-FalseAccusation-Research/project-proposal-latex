@@ -7,6 +7,7 @@
 \usepackage{multirow}
 \usepackage[table]{xcolor}
 \usepackage{array}
+\usepackage{tabularx}
 \usepackage{float}
 \usepackage{setspace}
 
@@ -291,8 +292,71 @@ Current reputation-based trust management systems in SDVN require nodes to revea
 Current misbehavior detection systems in SDVN rely on statistical anomaly detection, threshold-based filtering, and historical pattern matching that effectively identify simple packet dropping or individual false reporting but fail against sophisticated coordinated attacks. Traditional machine learning approaches using CNNs and RNNs process feature vectors from individual node behaviors but cannot capture complex relational dependencies in vehicular network topologies where trust relationships and accusation flows form intricate interdependencies. Existing solutions lack capability to detect Sybil-amplified consensus flooding where multiple fake identities create artificial consensus, timing-based accusations that exploit network congestion periods to mask malicious reports, or collusion involving compromised RSUs and controllers coordinating false accusations. Graph Neural Networks remain underutilized for modeling vehicular networks as graphs to identify structural anomalies such as star-topology accusation patterns, suspicious clustering, or coordinated communities targeting legitimate vehicles. There is urgent need to develop GNN-based frameworks that leverage message-passing mechanisms to analyze network topology, detect anomalous accusation clusters, and identify coordinated attack signatures, combined with temporal attention mechanisms to distinguish genuine network failures from malicious timing-based accusations during high-noise periods.
 
 \subsection{Insufficient Immutable Evidence Logging and Historical Verification}
-Current vehicular network security frameworks lack comprehensive mechanisms for establishing immutable chain-of-custody for accusation evidence, enabling attackers to fabricate or tamper with packet logs, routing traces, and sensor data without detection. Existing systems do not maintain cryptographically verifiable timestamps proving when behavioral evidence was captured and recorded, allowing sophisticated attackers to retrospectively manufacture fake evidence matching historical network events to frame honest nodes. Most approaches lack blockchain-based evidence integrity protection where original packet hashes are stored immutably at capture time, preventing backdating of fabricated accusations or manipulation of evidence post-incident. Furthermore, current solutions do not provide comprehensive forensic audit trails tracking complete accusation lifecycles including who accused whom, what evidence was submitted, how endorsers voted, and final reputation score changes with cryptographic non-repudiation, hindering post-incident investigation and accountability. Reputation management systems typically lack mechanisms to identify and gradually reduce trust weights of nodes that frequently make false accusations through historical pattern analysis, allowing malicious nodes to continue disruption despite repeated invalid accusations. There is critical need to develop blockchain-based evidence management frameworks maintaining immutable chain-of-custody with traceable cryptographic hashes, unfalsifiable timestamps within acceptable time windows, comprehensive audit logs enabling forensic analysis of accusation patterns, and automated trust weight reduction mechanisms for nodes exhibiting consistent false reporting behaviors in Software-Defined Vehicular Networks.
+Current vehicular network security frameworks lack comprehensive mechanisms for establishing immutable chain-of-custody for accusation evidence, enabling attackers to fabricate or tamper with packet logs, routing traces, and sensor data without detection. Existing systems do not maintain cryptographically verifiable timestamps proving when behavioral evidence was captured and recorded, allowing sophisticated attackers to retrospectively manufacture fake evidence matching historical network events to frame honest nodes. Most approaches lack blockchain-based evidence integrity protection where original packet hashes are stored immutably at capture time, preventing backdating of fabricated accusations or manipulation of evidence post-incident. Furthermore, current solutions do not provide comprehensive forensic audit trails tracking complete accusation lifecycles including who accused whom, what evidence was submitted, how endorsers voted, and final reputation score changes with cryptographic non-repudiation, hindering post-incident investigation and accountability. Reputation management systems typically lack mechanisms to identify and gradually reduce trust weights of nodes that frequently make false accusations through historical pattern analysis, allowing malicious nodes to continue disruption despite repeated invalid accusations. There is critical need to develop blockchain-based evidence management frameworks maintaining immutable chain-of-custody with traceable cryptographic hashes, unfalsifiable timestamps within acceptable time windows, comprehensive audit logs enabling forensic analysis of accusation patterns, and automated trust weight reduction mechanisms for nodes exhibiting consistent false reporting behaviors in Software-Defined Vehicular Networks. \clearpage
 
+\section{Table of Literature Review Summary}
+
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+
+\begin{tabularx}{\textwidth}{|p{3cm}|X|X|}
+\hline
+\textbf{Category} &
+\textbf{Approach (example works)} &
+\textbf{Limitation vs. SDVN false-accusation mitigation} \\
+\hline
+
+False accusation / reputation poisoning &
+Shows how fabricated accusations can blacklist honest nodes and degrade throughput/QoS (\cite{lee2012efficient}) &
+No tamper-proof chain-of-custody; weak against Sybil-amplified flooding, timing-noise exploitation, and forged evidence; no privacy-preserving verification \\
+\hline
+
+ML-assisted misbehavior detection &
+Uses ML/cooperative evidence fusion for detecting misbehavior patterns in vehicular settings (\cite{gyawali2020machine}) &
+Can be evaded by stealthy attackers below thresholds; limited integrity assurance for logs/evidence; not SDVN control-plane aware \\
+\hline
+
+Trust distortion / Sybil-related manipulation &
+Analyzes trust distortion and identity-based amplification issues impacting trust decisions (\cite{che2022trust}) &
+Does not provide cryptographic proof of accusation authenticity; limited detection of coordinated accusation graphs \\
+\hline
+
+Blockchain trust / reputation &
+Stores trust/reputation records immutably using blockchain-based trust management (\cite{li2020blockchain}) &
+Immutability alone cannot stop false accusations; limited Sybil resistance; weak intelligent detection for coordinated accusation campaigns \\
+\hline
+
+Decentralized trust aggregation (blockchain) &
+Aggregates local trust metrics into global trust and supports dispute handling (\cite{gazdar2022decentralized}) &
+Heuristic/proximity-based trust exploitable; lacks privacy-preserving evidence validation; limited resilience to coordinated flooding/collusion \\
+\hline
+
+Blockchain + learning-assisted trust &
+Enhances trust evaluation using learning plus blockchain-backed storage (\cite{chang2025blockchain}) &
+Not tailored to explicit false-accusation variants (timing-based accusations, forged logs, controller fabrication); potential overhead without end-to-end verification \\
+\hline
+
+GNN-based anomaly detection &
+Uses graph learning to detect relational/topology anomalies in network security data (\cite{zoubir2024integrating}) &
+Typically detection-only unless integrated with verifiable reputation evidence; no direct accusation authenticity mechanism \\
+\hline
+
+GNN security analytics &
+Applies GNN message passing to learn coordinated attack signatures in graph-structured data (\cite{chattopadhyay2024gnn}) &
+Does not ensure evidence integrity/privacy; mitigation not explicitly tied to accusation workflows and trust updates \\
+\hline
+
+Advanced DL for security analytics &
+Uses modern DL enhancements to improve robustness to evolving/stealthy attacks (\cite{belcastro2025enhancing}) &
+Not accusation-specific; lacks blockchain/ZKP-style verifiability for trust decisions under false accusations \\
+\hline
+\end{tabularx}
+
+\caption{Related work on false accusation and trust distortion in networked systems.}
+\label{tab:false_accusation_detection}
+\end{table}
 
 
 \chapter{Methodology}
@@ -397,18 +461,19 @@ Additionally, cryptographic evidence validation ensures that accusations lacking
     \label{fig:sybil_attack_data_plane_version}
 \end{figure}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_CV.png}
-    \caption{Sybil-Amplified Consensus Flooding Attack Control Plane Version}
-    \label{fig:sybil_attack_control_plane_version}
-\end{figure}
 
 Sybil attacks create multiple fake identities to flood the network with coordinated accusations, attempting to achieve artificial consensus. The methodology employs three defensive layers. First, the Registration Smart Contract with Zero-Knowledge Proofs ensures that each node possesses unique cryptographic credentials tied to physical vehicle identities \cite{bensasson2018scalable}. Creating Sybil identities requires either stealing legitimate credentials or registering through out-of-band channels, both of which are computationally expensive and detectable.
 
 Second, new nodes start with minimal trust weights. Even if an attacker successfully registers multiple Sybil identities, they initially carry near-zero influence in reputation decisions. Trust accumulates gradually only through consistent honest behavior over extended periods, making instant consensus flooding ineffective \cite{balaram2023highly}.
 
 Third, the Graph Neural Network detects coordinated attack patterns by analyzing the network topology \cite{chen2025sybil}. When multiple low-trust nodes simultaneously target a single victim, the GNN identifies this star-topology accusation pattern as anomalous. Features such as identical registration timestamps, similar behavioral patterns, and temporal clustering of accusations trigger high-confidence Sybil detection, prompting immediate investigation and potential preemptive blacklisting of the attacker cluster.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_CV.png}
+    \caption{Sybil-Amplified Consensus Flooding Attack Control Plane Version}
+    \label{fig:sybil_attack_control_plane_version}
+\end{figure}
 
 \subsection{Timing-Based Accusations During High-Noise Periods}
 
@@ -467,6 +532,14 @@ In scenarios where the SDN controller itself is compromised and colluding with m
 The proposed framework will be validated through simulation-based evaluation where all five false accusation attack variants are implemented at varying intensities from 0\% to 100\% network penetration. Performance will be measured using standard vehicular network metrics: Packet Delivery Ratio (percentage of packets successfully delivered), Packet Interception Ratio (percentage compromised by attackers), and Matthews Correlation Coefficient for attack detection accuracy \cite{nayak2021tbddosa}.
 
 Comparative analysis against existing approaches, including traditional trust-based systems, pure cryptographic methods, and basic blockchain implementations—will demonstrate the framework's superiority in maintaining network performance under attack while correctly identifying and isolating malicious nodes. Statistical significance will be assessed through repeated trials with different network topologies and mobility patterns, ensuring results are not artifacts of specific scenarios \cite{adnan2021towards}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Functional_Diagram.png}
+    \caption{Functional Diagram }
+    \label{fig:functional_diagram}
+\end{figure}
+
 
 \chapter{Timeline and Resource Required}
 
