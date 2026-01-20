@@ -468,9 +468,150 @@ The framework operates under the following security and infrastructure assumptio
 \end{itemize}
 
 
+\section{Overview of the False Accusation Attack}
+\subsection{Single-Accuser Opportunistic Fabrication (Malicious Vehicle/RSU)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_DV.png}
+    \caption{Single-accuser fabrication when a vehicle/RSU is malicious (data-plane).}
+    \label{fig:overview_single_accuser_dv}
+\end{figure}
+
+Figure~\ref{fig:overview_single_accuser_dv} tells the data-plane story step by step. First, in
+\textbf{(1) Position of the Attacker}, a malicious vehicle/RSU positions itself near the honest node.
+Next, in \textbf{(2) Fabrication of the Accusation}, it forges a false accusation packet. The attacker then
+uploads this claim in \textbf{(3) Reporting to Brain (The Upload)} via the RSU to the controller. In
+\textbf{(4) The Decision (Processing)}, the controller processes the report and updates the trust decision.
+Finally, \textbf{(5) The Execution of the Consequence (The Block)} is issued, and the honest node is
+blacklisted and isolated.
+
+\subsection{Single-Accuser Opportunistic Fabrication (Malicious Controller)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_CV.png}
+    \caption{Single-accuser fabrication when the controller is malicious (control-plane).}
+    \label{fig:overview_single_accuser_cv}
+\end{figure}
+
+Figure~\ref{fig:overview_single_accuser_cv} narrates the control-plane case where the controller is malicious.
+In \textbf{(1) Target Identification}, the controller selects an honest vehicle as the victim. It then performs
+\textbf{(2) Internal Reputation Fabrication} by creating false evidence against that node. Without external checks,
+the controller issues \textbf{(3) Blacklist Command}. Through \textbf{(4) Network-Wide Propagation}, the blacklist is
+sent across RSUs and neighboring nodes. The sequence ends in \textbf{(5) Complete Isolation}, where the victim is
+fully cut off from the network.
+
+\subsection{Sybil-Amplified Consensus Flooding (Malicious Vehicle)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_DV.png}
+    \caption{Sybil-amplified consensus flooding with attacker-generated Sybils (data-plane).}
+    \label{fig:overview_sybil_dv}
+\end{figure}
+
+Figure~\ref{fig:overview_sybil_dv} shows a data-plane Sybil attack as a staged narrative. In
+\textbf{(1) Sybil Generation}, the attacker creates multiple fake identities. Those Sybils then begin
+\textbf{(2) The Flooding (The Attack)} by sending coordinated false accusation packets toward the RSU.
+These accusations are forwarded in \textbf{(3) Reporting to Brain (The Upload)} to the controller, which
+perceives them as coming from many distinct nodes. The controller performs \textbf{(4) The Decision (Processing)},
+interpreting the volume as consensus. The story ends at \textbf{(5) The Consequence (The Block)}, where the
+victim is blacklisted via revocation commands.
+
+\subsection{Sybil-Amplified Consensus Flooding (Malicious Controller)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_CV.png}
+    \caption{Sybil-amplified consensus flooding when the controller fabricates Sybils (control-plane).}
+    \label{fig:overview_sybil_cv}
+\end{figure}
+
+Figure~\ref{fig:overview_sybil_cv} presents the control-plane Sybil story where the controller itself
+manufactures consensus. In \textbf{(1) Create Phantom Sybil IDs}, the controller generates fictitious identities
+(S1*, S2*, S3*). It follows with \textbf{(2) Insert Fabricated Reports}, injecting false accusations tied to those IDs.
+To legitimize the appearance of agreement, the controller performs \textbf{(3) Data Retrieval for Trust Evaluation},
+then applies \textbf{(4) Trust Evaluation (Sybil-amplified consensus)} to justify a downgrade. The sequence ends with
+\textbf{(5) The Consequence (The Block)} as the victim is blacklisted through controller-issued revocation commands.
+
+\subsection{Timing-Based Accusations During High-Noise Periods (Malicious Controller)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_CV.png}
+    \caption{Timing-based accusations when the controller is malicious (control-plane).}
+    \label{fig:overview_timing_cv}
+\end{figure}
+
+Figure~\ref{fig:overview_timing_cv} shows a control-plane timing attack as a sequence. In
+\textbf{(1) Continuously Monitoring the Logs}, the malicious controller watches for packet-loss events.
+When \textbf{(2) Legitimate Packet Loss (due to high noise)} occurs, the controller seizes the moment and
+performs \textbf{(3) Opportunistic Fabrication}, framing the noise-induced loss as misbehavior. It then
+executes \textbf{(4) Blacklist with Proof to All Nodes and RSU}, broadcasting revocation commands that isolate
+the victim.
+
+\subsection{Timing-Based Accusations During High-Noise Periods (Malicious Vehicle, Honest Controller)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_DV.png}
+    \caption{Timing-based accusations when the attacker is in the data plane (honest controller).}
+    \label{fig:overview_timing_dv}
+\end{figure}
+
+Figure~\ref{fig:overview_timing_dv} narrates the data-plane timing attack under an honest controller. The attacker
+starts by \textbf{(1) Sending too many packets during high-noise periods} to induce congestion. This leads to
+\textbf{(2) Legitimate Packet Loss (due to high noise)} across the links. While loss persists, the attacker keeps
+\textbf{(3) Checking the Logs} to pinpoint the moment of maximum degradation, then issues a \textbf{(4) Fabricated
+Accusation (timed to align with high noise)}. The honest controller proceeds with \textbf{(5) Controller Validates
+Accusation}, and if accepted, it completes \textbf{(6) Sending Blacklist with Proof to all Nodes and RSU}, resulting
+in the victim’s isolation.
+
+\subsection{Evidence-Spoofing Attack (Malicious Vehicle Collaboration)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Node Attack - Evidence Spoofing.png}
+    \caption{Evidence-spoofing when malicious vehicles collude.}
+    \label{fig:overview_evidence_node}
+\end{figure}
+
+Figure~\ref{fig:overview_evidence_node} shows how colluding vehicles frame an honest node using tampered evidence.
+The story begins with \textbf{(1) Vehicle Send Legitimate Traffic}, where normal packets flow toward the honest RSU.
+Next, in \textbf{(2) Multiple Vehicles Coordinates and Collaboratively Fabricate the Evidence}, the attackers in the
+collusion zone craft malicious packets and forward the falsified evidence toward the controller. Meanwhile, the RSU
+performs \textbf{(3) RSU Sends the Legitimate Traffic to the Controller}, so the controller sees a mix of legitimate
+and tampered records. The sequence ends at \textbf{(4) Controller Trusting the Seemingly Corroborated Tampered Evidence},
+leading to blacklisting of the target victim.
+
+\subsection{Evidence-Spoofing Attack (Malicious RSU)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious RSU Attack - Evidence Spoofing.png}
+    \caption{Evidence-spoofing when the RSU is malicious.}
+    \label{fig:overview_evidence_rsu}
+\end{figure}
+
+Figure~\ref{fig:overview_evidence_rsu} describes the RSU-side spoofing scenario. First, in \textbf{(1) Nodes Send
+Legitimate Traffic to RSU}, honest vehicles forward normal packets to the RSU. The RSU then executes
+\textbf{(2) RSU Intercepts, Tampers the Packet, and Tampered Packet Sent to the Controller}, replacing the evidence
+before it reaches the controller. Finally, the process concludes with \textbf{(3) Victim BlackListed}, as the
+controller trusts the spoofed packet trail and isolates the honest node.
+
+\subsection{Evidence-Spoofing Attack (Malicious Controller)}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Controller Attack - Evidence Spoofing.png}
+    \caption{Evidence-spoofing when the controller is malicious.}
+    \label{fig:overview_evidence_controller}
+\end{figure}
+
+Figure~\ref{fig:overview_evidence_controller} shows evidence spoofing from a compromised controller. In
+\textbf{(1) Both Vehicles Send Legitimate Traffic}, normal packets move through the network. The honest RSU
+performs \textbf{(2) RSU Forwards Legitimate Packet to Controller}, delivering unmodified evidence. The attack
+occurs at \textbf{(3) Malicious Controller Itself Tampers The Packet \& Targets Vehicle B Unfairly}, where the
+controller alters the evidence and fabricates blame, leading to the victim’s blacklist action.
+
+
+\section{Proposed mitigation framework}
+\subsection{Proposed system architecture}
 \begin{figure}[H]
 	\centering
-    \includegraphics[width=1\textwidth]{diagrams/simple_blockdiagram.png}
+	\includegraphics[width=1\textwidth]{diagrams/simple_blockdiagram.png}
 	\caption{Simple Block Diagram}
 	\label{fig:simple_block}
 \end{figure}
@@ -489,7 +630,8 @@ from the ledger to detect abnormal behavior and generate a recommended response.
 and the outcomes are fed back into the trust update process to keep future decisions consistent with the
 recorded history.
 
-\section{Blockchain-Based Decentralized Trust Management}
+
+\subsubsection{Blockchain-Based Decentralized Trust Management}
 \label{subsec:blockchain-trust}
 
 \begin{figure}[h]
@@ -555,19 +697,19 @@ who joined, when they joined, and under what trust conditions. The same authenti
 event is also forwarded to the learning layer (``GNN: Add Node to Network Graph''), ensuring that the
 AI components operate on blockchain-consistent, verified participation states.
 
-\section{AI-Driven Anomaly Detection}
+\subsubsection{AI-Driven Anomaly Detection}
 While blockchain provides immutability and consensus, artificial intelligence adds intelligent pattern recognition to detect coordinated attacks that might evade rule-based systems. The vehicular network is modeled as a temporal graph where vehicles and roadside units form nodes, and communication links form edges \cite{zhou2020automating}. Graph Neural Networks (GNN) analyze this dynamic topology to identify anomalous patterns indicative of coordinated attacks.
 
 Specifically, the GNN detects Sybil attack clusters by identifying groups of nodes with suspiciously similar behavioral patterns, identical registration timestamps, or star-topology accusation patterns where multiple accusers simultaneously target a single victim \cite{balaram2023highly}. Temporal attention mechanisms track how reputation scores change over time, flagging sudden drops that correlate with accusation floods. Recent research demonstrates that heterogeneous graph attention networks achieve over 99\% accuracy in identifying Sybil nodes in vehicular networks \cite{chen2025sybil}.
 
 Large Language Models (LLM) complement the GNN by processing unstructured data sources such as controller logs, error messages, and system alerts \cite{zhang2024large}. The LLM performs semantic reasoning to understand causal relationships between events, for example, recognizing that a controller failover occurring minutes before a reputation spike suggests a timing-based attack. The LLM generates human-readable incident reports that explain detected attacks, identify suspected malicious nodes, assess confidence levels, and recommend mitigation actions. This interpretability is crucial for network administrators who must make final decisions on high-stakes actions like controller failover.
 
-\section{Cryptographic Defense Mechanisms}
+\subsubsection{Cryptographic Defense Mechanisms}
 Cryptographic protocols form the foundation of attack prevention. Digital signatures ensure that every packet and accusation can be attributed to a specific authenticated node, preventing evidence fabrication \cite{pournaghi2020necppa}. Post-quantum cryptography algorithms protect against future quantum computing threats, particularly important for long-term infrastructure like vehicular networks. Time-stamped authentication tokens with limited validity windows prevent replay attacks where adversaries re-transmit old legitimate packets to disrupt routing \cite{benjaballah2021security}.
 
 Location verification smart contracts validate that nodes claiming specific geographic positions are present there, preventing wormhole attacks where distant colluding nodes pretend to be neighbors \cite{quevedo2020intelligent}. Cross-validation with multiple roadside units ensures location claims are accurate, and kinematic constraints (maximum velocity and acceleration limits) detect physically impossible location changes that indicate GPS spoofing.
 
-\section{Integrated Defense Workflow}
+\subsubsection{Integrated Defense Workflow}
 As illustrated in Figure~\ref{fig:simple_block}, the complete system operates as a continuous closed-loop
 cycle across monitoring, validation, analysis, and response. Vehicles periodically authenticate in the
 \textit{Registration and Authentication Module}, where legitimacy is verified without exposing sensitive
@@ -602,25 +744,10 @@ decentralized agreement, trust scoring, and AI-driven anomaly detection---thereb
 coordinated attacks significantly harder to succeed while preserving operational requirements \cite{huo2023trustgnn}.
 
 
-\section{Attack-Specific Mitigation Strategies}
+\subsection{Attack-Specific Mitigation Strategies}
 The proposed methodology addresses each false accusation attack variant through targeted defense mechanisms:
 
 \subsection{Single-Accuser Opportunistic Fabrication}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_DV.png}
-    \caption{Single-Accuser Opportunistic Fabrication Attack Data Plane Version}
-    \label{fig:single_accuser_data_plane_version}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Single_Accuser/Single_Accuser_CV.png}
-    \caption{Single-Accuser Opportunistic Fabrication Attack Control Plane Version}
-    \label{fig:single_accuser_control_plane_version}
-\end{figure}
-
 
 This attack occurs when a single privileged malicious node fabricates convincing evidence against legitimate vehicles. The weighted endorser trust mechanism in the Reputation Management Smart Contract prevents this by requiring accusations to be validated by multiple high-trust endorsers \cite{alshaibani2023blockchain}. A single accuser, regardless of how convincing their evidence appears, contributes only their weighted trust score to the reputation change calculation. Since blacklisting requires $\geq$2/3 weighted consensus, a lone attacker cannot unilaterally blacklist a victim unless multiple independent high-trust nodes corroborate the accusation.
 
@@ -628,42 +755,14 @@ Additionally, cryptographic evidence validation ensures that accusations lacking
 
 \subsection{Sybil-Amplified Consensus Flooding}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_DV.png}
-    \caption{Sybil-Amplified Consensus Flooding Attack Data Plane Version}
-    \label{fig:sybil_attack_data_plane_version}
-\end{figure}
-
-
 Sybil attacks create multiple fake identities to flood the network with coordinated accusations, attempting to achieve artificial consensus. The methodology employs three defensive layers. First, the Registration Smart Contract with Zero-Knowledge Proofs ensures that each node possesses unique cryptographic credentials tied to physical vehicle identities \cite{bensasson2018scalable}. Creating Sybil identities requires either stealing legitimate credentials or registering through out-of-band channels, both of which are computationally expensive and detectable.
 
 Second, new nodes start with minimal trust weights. Even if an attacker successfully registers multiple Sybil identities, they initially carry near-zero influence in reputation decisions. Trust accumulates gradually only through consistent honest behavior over extended periods, making instant consensus flooding ineffective \cite{balaram2023highly}.
 
 Third, the Graph Neural Network detects coordinated attack patterns by analyzing the network topology \cite{chen2025sybil}. When multiple low-trust nodes simultaneously target a single victim, the GNN identifies this star-topology accusation pattern as anomalous. Features such as identical registration timestamps, similar behavioral patterns, and temporal clustering of accusations trigger high-confidence Sybil detection, prompting immediate investigation and potential preemptive blacklisting of the attacker cluster.
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Sybil_Attack/Sybil_Attack_CV.png}
-    \caption{Sybil-Amplified Consensus Flooding Attack Control Plane Version}
-    \label{fig:sybil_attack_control_plane_version}
-\end{figure}
-
 \subsection{Timing-Based Accusations During High-Noise Periods}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_DV.png}
-    \caption{Timing-Based Accusations During High-Noise Periods Attack in Data Plane Version}
-    \label{fig:timing_based_data_plane_version}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Timing_Based_Accusations/Timing_Based_Accusations_CV.png}
-    \caption{Timing-Based Accusations During High-Noise Periods Attack in Control Plane Version}
-    \label{fig:timing_based_control_plane_version}
-\end{figure}
 
 Sophisticated attackers exploit periods of legitimate network stress—congestion, controller handovers, or channel degradation—to mask malicious accusations as genuine failures. The temporal attention mechanism in the GNN specifically addresses this by analyzing accusation timing relative to network conditions \cite{zhou2020automating}. The system maintains historical baselines of legitimate packet loss rates during various network states (normal operation, moderate congestion, severe congestion, handover periods).
 
@@ -673,26 +772,6 @@ Furthermore, the weighted endorser mechanism inherently provides resilience: dur
 
 \subsection{Evidence-Spoofing with Tampered Logs and Collusion}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Node Attack - Evidence Spoofing.png}
-    \caption{Malicious Node Attack - Evidence Spoofing Scenario}
-    \label{fig:evidence_node}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Malicious RSU Attack - Evidence Spoofing.png}
-    \caption{Malicious RSU Attack - Evidence Spoofing Scenario}
-    \label{fig:evidence_rsu}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Malicious Controller Attack - Evidence Spoofing.png}
-    \caption{Malicious Controller Attack - Evidence Spoofing Scenario}
-    \label{fig:evidence_controller}
-\end{figure}
 
 The most sophisticated attack involves fabricating cryptographically convincing but falsified evidence—tampered packet logs, forged signatures, or collusion among multiple compromised nodes. The methodology employs multi-layer cryptographic validation as the primary defense \cite{pournaghi2020necppa}. Every accusation must include: (1) valid digital signatures from authenticated nodes, (2) unfalsifiable timestamps within acceptable time windows, (3) Zero-Knowledge Proofs demonstrating the accuser's legitimate network presence, and (4) location proofs validated by multiple independent roadside units \cite{quevedo2020intelligent}.
 
