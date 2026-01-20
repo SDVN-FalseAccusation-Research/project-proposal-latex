@@ -378,7 +378,7 @@ Not accusation-specific; lacks blockchain/ZKP-style verifiability for trust deci
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\linewidth]{diagrams/FYP_Architecture_small.png}
-	\caption{AI analysis layer and Hyperledger Fabric blockchain layer integrated with SDVN control and data planes.}
+	\caption{Integrated High‑Level Architecture of the Proposed SDVN Framework.}
 	\label{fig:arch}
 \end{figure}
 
@@ -612,7 +612,7 @@ controller alters the evidence and fabricates blame, leading to the victim’s b
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=1\textwidth]{diagrams/simple_blockdiagram.png}
-	\caption{Simple Block Diagram}
+	\caption{Simple Block Diagram of the Proposed Mitigation Framework.}
 	\label{fig:simple_block}
 \end{figure}
 
@@ -634,12 +634,6 @@ recorded history.
 \subsubsection{Blockchain-Based Decentralized Trust Management}
 \label{subsec:blockchain-trust}
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.85\linewidth]{diagrams/Functional_Diagram.png}
-    \caption{Functional workflow for node registration and authentication with blockchain-backed trust evaluation.}
-    \label{fig:functional_diagram}
-\end{figure}
 
 The core of our approach utilizes blockchain technology to eliminate single points of failure
 inherent in centralized SDN architectures \cite{sharma2017distblocknet}. A permissioned blockchain serves as
@@ -696,6 +690,14 @@ update (``Blockchain: Update Authentication Timestamp''). These events provide a
 who joined, when they joined, and under what trust conditions. The same authenticated admission
 event is also forwarded to the learning layer (``GNN: Add Node to Network Graph''), ensuring that the
 AI components operate on blockchain-consistent, verified participation states.
+
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=1\linewidth]{diagrams/Functional_Diagram.png}
+	\caption{Functional workflow for node registration and authentication with blockchain-backed trust evaluation.}
+	\label{fig:functional_diagram}
+\end{figure}
 
 \subsubsection{AI-Driven Anomaly Detection}
 While blockchain provides immutability and consensus, artificial intelligence adds intelligent pattern recognition to detect coordinated attacks that might evade rule-based systems. The vehicular network is modeled as a temporal graph where vehicles and roadside units form nodes, and communication links form edges \cite{zhou2020automating}. Graph Neural Networks (GNN) analyze this dynamic topology to identify anomalous patterns indicative of coordinated attacks.
@@ -789,7 +791,6 @@ Comparative analysis against existing approaches, including traditional trust-ba
 \chapter{Timeline and Resource Required}
 
 \section{Timeline}
-Provide a realistic timeline for completing the project. Use a Gantt chart or table.
 \include{timeline}
 
 \section{Resource Required}
