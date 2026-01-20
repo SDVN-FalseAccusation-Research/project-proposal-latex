@@ -242,7 +242,7 @@ False accusation attacks in Software-Defined Vehicular Networks (SDVNs) occur wh
 
 
 \subsection{Limitations of Existing Works}
-Existing security and trust management solutions for SDVN suffer from several key limitations in addressing false accusation attacks. Most approaches assume simplified or isolated attack behaviors and fail to capture coordinated, adaptive, and multi-variant accusation strategies under realistic vehicular conditions. Additionally, many solutions require extensive disclosure of behavioral evidence, compromising privacy, while relying on centralized or mutable reputation storage that is vulnerable to tampering and single-point failures. Furthermore, traditional rule-based or statistical detection mechanisms lack the intelligence to model complex relational and temporal patterns of accusation behavior, resulting in limited robustness and scalability in dynamic SDVN environments.
+Existing security and trust management solutions for SDVN suffer from several key limitations in addressing false accusation attacks. Most approaches assume simplified or isolated attack behaviors and fail to capture coordinated, adaptive, and multi-variant accusation strategies under realistic vehicular conditions \cite{lee2012efficient}. Additionally, many solutions require extensive disclosure of behavioral evidence, compromising privacy \cite{ullah2025decentralized}, while relying on centralized or mutable reputation storage that is vulnerable to tampering and single-point failures. Furthermore, traditional rule-based or statistical detection mechanisms lack the intelligence to model complex relational and temporal patterns of accusation behavior, resulting in limited robustness and scalability in dynamic SDVN environments \cite{cardona2020software}.
 
 \section{Problem Statement}
 Existing trust and reputation systems in Software-Defined Vehicular Networks cannot reliably mitigate false accusation attacks under realistic conditions involving high mobility, coordinated adversaries, and privacy constraints, resulting in unjust penalization of honest nodes and degraded network trust.
@@ -275,12 +275,12 @@ This defined scope ensures that the research remains targeted toward developing 
 \subsection{Methodological Contributions}
 The key methodological contributions of this research are as follows:
 \begin{itemize}
-    \item A multi-layered defense framework for Software-Defined Vehicular Networks that jointly integrates blockchain, Zero-Knowledge Proofs, and AI-based learning models to mitigate false accusation attacks across both data plane and control plane entities.
-    \item A blockchain-based decentralized reputation management mechanism with immutable logging and weighted endorser trust scoring, preventing unilateral or Sybil-amplified false accusations from influencing blacklist decisions.
-    \item A privacy-preserving accusation verification approach using Zero-Knowledge Proofs that allows vehicles and RSUs to prove accusation legitimacy without revealing sensitive identity or contextual information.
-    \item A graph-based anomaly detection model using Graph Neural Networks to capture spatio-temporal and relational patterns of coordinated accusation behaviors in highly dynamic SDVN topologies.
-    \item An LLM-assisted semantic reasoning layer that analyzes unstructured controller logs and network events to interpret complex attack scenarios, generate explainable incident reports, and support administrator decision-making.
-    \item A controller trust evaluation mechanism implemented via smart contracts to detect compromised SDN controllers and automatically trigger failover, ensuring resilience against insider and control-plane attacks.
+    \item \textbf{Multi-Layered Defense Framework:} A framework for Software-Defined Vehicular Networks that jointly integrates blockchain, Zero-Knowledge Proofs (ZKPs), and AI-based learning models to mitigate false accusation attacks across both data plane and control plane entities.
+    \item \textbf{Decentralized Reputation Management:} A blockchain-based reputation mechanism with immutable logging and weighted endorser trust scoring, preventing unilateral or Sybil-amplified false accusations from influencing blacklist decisions.
+    \item \textbf{Privacy-Preserving Accusation Verification:} A Zero-Knowledge Proof (ZKP) approach that allows vehicles and RSUs to prove accusation legitimacy without revealing sensitive identity or contextual information.
+    \item \textbf{Graph-Based Anomaly Detection:} A Graph Neural Network (GNN) model to capture spatio-temporal and relational patterns of coordinated accusation behaviors in highly dynamic SDVN topologies.
+    \item \textbf{LLM-Assisted Semantic Reasoning:} A semantic reasoning layer that analyzes unstructured controller logs and network events to interpret complex attack scenarios, generate explainable incident reports, and support administrator decision-making.
+    \item \textbf{Smart Contract-Based Controller Trust Evaluation:} A controller trust mechanism implemented via smart contracts to detect compromised SDN controllers and automatically trigger failover, ensuring resilience against insider and control-plane attacks.
 \end{itemize} 
 
 \subsection{Implications of the Research}
