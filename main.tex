@@ -374,9 +374,64 @@ Not accusation-specific; lacks blockchain/ZKP-style verifiability for trust deci
 
 \chapter{Methodology}
 \section{Research Design}
-This research proposes a blockchain-based security framework integrated with artificial intelligence to mitigate False Accusation Attacks in Software-Defined Vehicular Networks (SDVN). The framework operates on a Zero-Trust Architecture principle, where no network entity—vehicles, roadside units, or controllers—is trusted by default \cite{rose2020zero}. Instead, continuous verification and validation mechanisms ensure that only legitimate nodes participate in routing decisions.
 
-The methodology addresses four distinct attack variants that exploit reputation management systems in SDVN: (1) single-accuser fabrications where privileged nodes falsely accuse legitimate vehicles, (2) Sybil-amplified attacks where multiple fake identities create artificial consensus, (3) timing-based accusations that exploit network congestion periods, and (4) evidence-spoofing through tampered logs \cite{khan2017topology}, \cite{arif2020sdn}. Each variant requires specialized detection and mitigation strategies integrated into a cohesive defense framework.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{diagrams/FYP_Architecture_small.png}
+	\caption{AI analysis layer and Hyperledger Fabric blockchain layer integrated with SDVN control and data planes.}
+	\label{fig:arch}
+\end{figure}
+
+The AI analysis layer sits at the top and acts as the intelligence and reporting component.
+It consumes two main categories of inputs: (i) the current network state (e.g., node status and trust values)
+and (ii) continuous logs and events generated from RSUs and controllers (e.g., warnings, repeated anomalies,
+and observed misbehavior). A graph-based model processes the network as connected entities (vehicles, RSUs,
+and controllers) to identify suspicious patterns from relationships and traffic behavior. Its output is then
+passed to a language-based reasoning component that produces a concise, human-understandable explanation of
+what is happening, why it is suspicious, and what response is recommended. The final output of this layer is
+an attack detection decision plus a response report that is forwarded to the enforcement path.
+
+The blockchain layer is implemented using \textbf{Hyperledger Fabric} to maintain a shared, tamper-resistant
+record of security-relevant updates across multiple controllers. This layer contains three smart contract
+modules (SC1--SC3) that coordinate different types of trust decisions:
+\begin{itemize}
+    \item \textbf{SC1: Registration and Authentication} -- manages joining/participation status of nodes and
+    stores whether a node is allowed to operate in the network.
+    \item \textbf{SC2: Reputation Management} -- stores behavior scores and reputation updates derived from
+    validated event evidence, preventing one controller from unfairly manipulating trust values.
+    \item \textbf{SC3: Controller Trust} -- maintains trust levels for controllers themselves, supporting
+    safer operation if a controller becomes unreliable or compromised.
+\end{itemize}
+When controllers submit updates (e.g., a reputation change or a controller trust update), Fabric validates
+the update through endorsement and ordering before committing it to the ledger, ensuring that critical trust
+decisions are jointly accepted and auditable.
+
+The control plane contains multiple SDN controllers (Controller 1--3) that manage their corresponding RSU
+regions. Each controller:
+\begin{itemize}
+    \item collects measurements and alerts from RSUs,
+    \item produces structured logs/events for security evaluation,
+    \item exchanges coordination messages with peer controllers through east--west communication to keep
+    policies consistent,
+    \item queries the Fabric-maintained state (participation, reputation, controller trust) before applying
+    sensitive actions,
+    \item enforces response actions (e.g., isolation, access restriction, forwarding adjustments) back toward RSUs.
+\end{itemize}
+In this design, controllers are both \textit{contributors} (they submit events/updates to Fabric) and
+\textit{consumers} (they read the trusted state from Fabric to guide enforcement decisions).
+
+The data plane contains vehicles and RSUs where actual wireless communication occurs.
+Vehicles exchange messages directly (V2V) and also interact with nearby RSUs (V2I).
+RSUs serve as the operational gateway between vehicles and controllers by:
+\begin{itemize}
+    \item relaying traffic and connectivity between vehicles and the control plane,
+    \item collecting local observations (e.g., abnormal message rates, repeated suspicious behavior),
+    \item forwarding summarized observations and alerts to the assigned controller for analysis and logging.
+\end{itemize}
+After the control plane decides a mitigation action (guided by the trusted Fabric state and AI reports),
+the action is pushed down to RSUs, which then apply it to the local vehicular environment (e.g., restricting
+a node’s access through network rules or prioritization).
+
 
 \section{Threat Model}
 The adversary model adopts a Zero-Trust Architecture where any network component may potentially be compromised. The threat model defines attacker capabilities, attack scenarios, and security assumptions \cite{adnan2021towards}.
@@ -412,14 +467,93 @@ The framework operates under the following security and infrastructure assumptio
     \item \textbf{A8 - Honest Majority:} The majority of network participants are honest, with high-trust endorsers predominantly following protocol specifications.
 \end{itemize}
 
+
+\begin{figure}[H]
+	\centering
+    \includegraphics[width=1\textwidth]{diagrams/simple_blockdiagram.png}
+	\caption{Simple Block Diagram}
+	\label{fig:simple_block}
+\end{figure}
+
+As shown in Figure~\ref{fig:simple_block}, the system operates as a closed-loop workflow.
+The \textit{Registration and Authentication Module} controls which entities are allowed to participate,
+while the \textit{Location Verification and Behavioral Monitoring} component continuously observes node
+activity and produces \textit{logs and events}. These logs are forwarded to the \textit{Trust Update Core},
+which processes security-relevant evidence and updates three trust functions: \textit{participation status}
+(SC1), \textit{reputation updates} (SC2), and \textit{controller trust} (SC3). The validated outputs are
+recorded in the \textit{shared trusted state/ledger}, which represents the latest trusted network state.
+
+In parallel, the \textit{AI Analysis and Report} block reads both the logs/events and the trusted state
+from the ledger to detect abnormal behavior and generate a recommended response. Finally, the
+\textit{Mitigation and Enforcement} block applies the response actions through the control/monitoring path,
+and the outcomes are fed back into the trust update process to keep future decisions consistent with the
+recorded history.
+
 \section{Blockchain-Based Decentralized Trust Management}
-The core of our approach utilizes blockchain technology to eliminate single points of failure inherent in centralized SDN architectures \cite{sharma2017distblocknet}. A permissioned blockchain serves as a distributed ledger that records all network events, routing decisions, and reputation changes immutably. This prevents attackers from erasing evidence of malicious behavior or manipulating historical records. The blockchain operates across multiple SDN controllers, forming a consortium where critical decisions require consensus among trusted nodes \cite{yahiatene2018blockchain}.
+\label{subsec:blockchain-trust}
 
-Three specialized smart contracts govern different security aspects. The Registration and Authentication Smart Contract manage node identity verification using Zero-Knowledge Proofs, allowing vehicles to prove their authenticity without revealing sensitive information such as vehicle identification numbers or driver identities \cite{bensasson2018scalable}. This privacy-preserving mechanism prevents attackers from tracking specific vehicles while ensuring only registered nodes participate in the network.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\linewidth]{diagrams/Functional_Diagram.png}
+    \caption{Functional workflow for node registration and authentication with blockchain-backed trust evaluation.}
+    \label{fig:functional_diagram}
+\end{figure}
 
-The Reputation Management Smart Contract implements weighted endorser trust scoring to prevent false accusations from influencing blacklist decisions \cite{alshaibani2023blockchain}. When a node accuses another of malicious behavior, the accusation undergoes multi-endorser validation where each endorser's vote is weighted by their historical accuracy. New nodes and previously malicious nodes carry minimal weight, preventing Sybil attackers from immediately impacting reputation scores. Reputation changes require consensus from multiple high-trust endorsers, typically requiring agreement from at least two-thirds of weighted trust scores \cite{bessani2014state}.
+The core of our approach utilizes blockchain technology to eliminate single points of failure
+inherent in centralized SDN architectures \cite{sharma2017distblocknet}. A permissioned blockchain serves as
+a distributed ledger that records authentication events, routing-related security decisions,
+and reputation changes immutably. This prevents attackers from erasing evidence of malicious
+behavior or manipulating historical records. The blockchain operates across multiple SDN
+controllers, forming a consortium where critical decisions require consensus among trusted
+nodes \cite{yahiatene2018blockchain}. Figure~\ref{fig:functional_diagram} summarizes how these blockchain
+capabilities are used during node admission (registration and authentication) and how trust
+decisions are enforced.
 
-The Controller Trust Evaluation Smart Contract addresses the critical threat of controller compromise through continuous behavioral monitoring \cite{khan2017topology}. Random subsets of nodes validate whether the controller's reported network topology matches actual packet flows. Discrepancies trigger trust score reductions, and if controller trust falls below a threshold, the system automatically switches to a pre-designated backup controller, ensuring network continuity even under insider attacks \cite{raja2020energy}.
+Three specialized smart contracts govern different security aspects. First, the Registration
+and Authentication Smart Contract manages node identity verification using Zero-Knowledge
+Proofs (ZKPs), allowing vehicles/RSUs to prove authenticity without revealing sensitive
+identifiers \cite{bensasson2018scalable}. As shown in Figure~\ref{fig:functional_diagram}, when a node attempts
+to join the network, the workflow branches depending on whether it is a \emph{first-time access}.
+For first-time access, a Registration Authority performs out-of-band verification and checks
+physical identity attributes (e.g., VIN/serial number). After successful verification, cryptographic
+credentials are issued and the node creates its key materials and ZKP-related artifacts before
+submitting an initial registration request (left branch of Figure~\ref{fig:functional_diagram}).
+For returning nodes (right branch), the node generates a session request, constructs a ZKP of
+identity, and sends an authentication request to the controller, which then retrieves the node
+record from the blockchain (``Blockchain: Retrieve Node Record'') as illustrated in
+Figure~\ref{fig:functional_diagram}. The ZKP validity decision (``ZKP Valid?'') ensures that only
+registered entities can proceed without exposing private identity information \cite{bensasson2018scalable}.
+
+Second, the Reputation Management Smart Contract implements weighted endorser trust
+scoring to prevent false accusations from influencing blacklist decisions \cite{alshaibani2023blockchain}. In the
+workflow of Figure~\ref{fig:functional_diagram}, this corresponds to the trust decision stage
+(``Trust Score Sufficient?'') after ZKP verification. Rather than trusting a single report, reputation
+updates and punitive actions require endorsement from multiple parties, where each endorser’s
+vote is weighted by historical accuracy. New nodes and previously malicious nodes carry minimal
+weight, preventing Sybil attackers from immediately impacting reputation scores. Reputation
+changes require consensus from multiple high-trust endorsers, typically requiring agreement
+from at least two-thirds of weighted trust scores \cite{bessani2014state}. If trust is insufficient, the system
+follows the ``Blacklisted?'' decision path: blacklisted nodes are rejected, while borderline cases
+trigger enhanced verification (e.g., additional evidence checks) before any access is granted, as
+captured in Figure~\ref{fig:functional_diagram}. This design ensures that a node cannot progress
+from authentication into active participation unless both cryptographic proof and trust policy
+conditions are satisfied.
+
+Third, the Controller Trust Evaluation Smart Contract addresses the critical threat of controller
+compromise through continuous behavioral monitoring \cite{khan2017topology}. In Figure~\ref{fig:functional_diagram},
+the controller is responsible for validating incoming authentication attempts (``Controller Validates'')
+and initiating blockchain lookups and policy checks. To prevent a malicious/compromised controller
+from abusing this role, random subsets of nodes validate whether the controller’s reported network
+topology matches actual packet flows. Discrepancies trigger trust score reductions, and if controller
+trust falls below a threshold, the system automatically switches to a pre-designated backup controller,
+ensuring network continuity even under insider attacks \cite{raja2020energy}.
+
+Finally, upon successful verification and trust approval in Figure~\ref{fig:functional_diagram}, the system
+issues session keys (``Issue Session Keys Encrypt with Kyber-1024'') and commits an immutable record
+update (``Blockchain: Update Authentication Timestamp''). These events provide an auditable trail of
+who joined, when they joined, and under what trust conditions. The same authenticated admission
+event is also forwarded to the learning layer (``GNN: Add Node to Network Graph''), ensuring that the
+AI components operate on blockchain-consistent, verified participation states.
 
 \section{AI-Driven Anomaly Detection}
 While blockchain provides immutability and consensus, artificial intelligence adds intelligent pattern recognition to detect coordinated attacks that might evade rule-based systems. The vehicular network is modeled as a temporal graph where vehicles and roadside units form nodes, and communication links form edges \cite{zhou2020automating}. Graph Neural Networks (GNN) analyze this dynamic topology to identify anomalous patterns indicative of coordinated attacks.
@@ -434,12 +568,39 @@ Cryptographic protocols form the foundation of attack prevention. Digital signat
 Location verification smart contracts validate that nodes claiming specific geographic positions are present there, preventing wormhole attacks where distant colluding nodes pretend to be neighbors \cite{quevedo2020intelligent}. Cross-validation with multiple roadside units ensures location claims are accurate, and kinematic constraints (maximum velocity and acceleration limits) detect physically impossible location changes that indicate GPS spoofing.
 
 \section{Integrated Defense Workflow}
-The complete system operates through continuous cycles. Vehicles authenticate periodically using zero-knowledge proofs, proving their legitimacy without revealing identities. During each authentication cycle, nodes exchange routing information and may submit accusations if they observe suspicious behavior. All accusations include cryptographic evidence—digital signatures, timestamps, and location proofs—which smart contracts validate before accepting.
+As illustrated in Figure~\ref{fig:simple_block}, the complete system operates as a continuous closed-loop
+cycle across monitoring, validation, analysis, and response. Vehicles periodically authenticate in the
+\textit{Registration and Authentication Module}, where legitimacy is verified without exposing sensitive
+identity information. During each cycle, nodes exchange routing and status information through RSUs and
+controllers, and any suspicious behavior observed in the field is captured by the
+\textit{Location Verification and Behavioral Monitoring} component, producing the \textit{Logs and Events}
+stream shown in the diagram.
 
-Simultaneously, the GNN analyzes the network graph updated every few seconds, identifying clusters and patterns. When anomalies are detected, the LLM processes this alongside system logs to generate threat assessments. If both AI systems and weighted endorser consensus agree that an attack is occurring, the reputation management contract updates scores and potentially blacklists malicious nodes. Throughout this process, the controller trusts evaluation contract monitors for insider threats, ready to trigger failover if needed.
+When an accusation is generated, it is submitted through the controller path to the trust update process.
+As indicated by the \textit{Trust Update Core} and the Fabric blocks in Figure~\ref{fig:simple_block}, each
+accusation is accompanied by verifiable evidence (e.g., signatures, timestamps, and location-related proofs),
+which is checked before it contributes to any trust update. Validated updates are then processed by the
+Fabric trust functions: participation handling (SC1), reputation updates (SC2), and controller reliability
+tracking (SC3). Accepted outcomes are committed to the \textit{Shared Ledger/World State}, ensuring that all
+controllers and analysis components query a consistent trusted state.
 
-This multi-layered approach ensures that attackers must simultaneously defeat multiple independent security mechanisms—cryptographic verification, blockchain consensus, weighted trust scoring, and AI anomaly detection—making successful attacks computationally infeasible \cite{huo2023trustgnn}. The framework maintains vehicular network performance requirements while providing comprehensive security against reputation manipulation attacks.
-%
+In parallel, the \textit{AI Analysis Layer} in Figure~\ref{fig:simple_block} continuously consumes both
+(i) the \textit{Logs and Events} and (ii) the Fabric-maintained \textit{Shared Ledger/World State}. The graph
+analysis component evaluates the evolving network graph to identify suspicious structures and behavior patterns.
+When anomalies are detected, the language-based reasoning component combines these findings with system logs to
+produce threat assessments and recommended actions.
+
+If the AI assessment and the decentralized validation outcome support the presence of an attack, the response
+is applied through the \textit{Mitigation and Feedback} block (Figure~\ref{fig:simple_block}). The controllers
+enforce the selected actions back to the field (e.g., restricting or isolating malicious nodes), while the final
+decision and outcomes are recorded back into Fabric so that subsequent cycles build on verified history. In the
+same loop, SC3 continuously tracks controller reliability to detect insider threats and support safe controller
+switching when required.
+
+This integrated design forces an adversary to overcome multiple independent protections---evidence-based validation,
+decentralized agreement, trust scoring, and AI-driven anomaly detection---thereby making reputation manipulation and
+coordinated attacks significantly harder to succeed while preserving operational requirements \cite{huo2023trustgnn}.
+
 
 \section{Attack-Specific Mitigation Strategies}
 The proposed methodology addresses each false accusation attack variant through targeted defense mechanisms:
@@ -545,14 +706,6 @@ In scenarios where the SDN controller itself is compromised and colluding with m
 The proposed framework will be validated through simulation-based evaluation where all five false accusation attack variants are implemented at varying intensities from 0\% to 100\% network penetration. Performance will be measured using standard vehicular network metrics: Packet Delivery Ratio (percentage of packets successfully delivered), Packet Interception Ratio (percentage compromised by attackers), and Matthews Correlation Coefficient for attack detection accuracy \cite{nayak2021tbddosa}.
 
 Comparative analysis against existing approaches, including traditional trust-based systems, pure cryptographic methods, and basic blockchain implementations—will demonstrate the framework's superiority in maintaining network performance under attack while correctly identifying and isolating malicious nodes. Statistical significance will be assessed through repeated trials with different network topologies and mobility patterns, ensuring results are not artifacts of specific scenarios \cite{adnan2021towards}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{diagrams/Functional_Diagram.png}
-    \caption{Functional Diagram }
-    \label{fig:functional_diagram}
-\end{figure}
-
 
 \chapter{Timeline and Resource Required}
 
