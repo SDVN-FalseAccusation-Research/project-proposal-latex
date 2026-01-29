@@ -670,7 +670,7 @@ distributed database to record authentication requests, decisions related to the
 reputation updates, in an unaltered way. This ensures that an attacker cannot remove evidence related to
 illegal activity or coerce the historical state of the system. The blockchain runs over multiple SDN
 controllers, creating a consortium where essential decisions are made by consensus of trusted members
-\cite{yahiatene2018blockchain}. Figure \ref{fig: functional_diagram} shows how these blockchain‘s features are
+\cite{yahiatene2018blockchain}. Figure \ref{fig:functional_diagram} shows how these blockchain‘s features are
 utilized for node admission, registration and authentication, and the way that trust decisions are
 implemented.
 
@@ -691,7 +691,7 @@ registered entities can proceed without exposing private identity information \c
 
 Second, the Reputation Management Smart Contract uses a weighted endorser trust scoring scheme to
 minimize the impact of false accusations on the blacklisting decision \cite{alshaibani2023blockchain}. In
-the flowchart of Figure~\ref{fig: functional_diagram}, this maps into the trust decision step (``Trust Score
+the flowchart of Figure~\ref{fig:functional_diagram}, this maps into the trust decision step (``Trust Score
 Sufficient?’’) following ZKP validation. Instead of relying on one report, reputation updates and
 punishment actions are endorsed by multiple endorsers, each of whom‘s vote is weighted according to
 past reputation accuracy. New nodes and previously malicious nodes have little impact on endorser trust
@@ -699,12 +699,12 @@ voting, obstructing Sybil attackers from quickly undermining reputation scores. 
 consensus from multiple high, trust endorsers, often requiring at least 2/3 of total trust vote to sanction
 or admit a node \cite{bessani2014state}. If there is not enough trust, the path takes the branch
 (``Blacklisted?’’), where blacklisted nodes are rejected and borderline nodes require additional proof
-checks before receiving access, as summarized in Figure~\ref{fig: functional_diagram}. This prevents a
+checks before receiving access, as summarized in Figure~\ref{fig:functional_diagram}. This prevents a
 node from transitioning from authenticating to active participation without satisfying both crypto
 verification and trust policy.
 
 Third, the Controller Trust Evaluation Smart Contract maintains vigilance against controller compromise
-by constantly auditing the controller \cite{khan2017topology}. In Figure~\ref{fig: functional_diagram}, the
+by constantly auditing the controller \cite{khan2017topology}. In Figure~\ref{fig:functional_diagram}, the
 controller is responsible for authenticating each new login (``Controller Validates’’) and reporting this
 to the blockchain to trigger subsequent policy checks. To circumvent a malicious/compromised
 controller, a randomized fraction of nodes comment on whether the controller‘s fed topology images
@@ -712,7 +712,7 @@ actual packet flows. If inconsistencies are observed, trust score is reduced, an
 below a set minimum, a backup node is automatically designated to preserve the network‘s health
 \cite{raja2020energy}.
 
-Finally, Figure~\ref{fig: functional_diagram} shows that once a node has been validated and trusts VOTE,
+Finally, Figure~\ref{fig:functional_diagram} shows that once a node has been validated and trusts VOTE,
 the system distributes session keys (``Issue Session Keys Encrypt with Kyber, 1024’’) and immutably logs
 this event (``Blockchain: Update Authentication Timestamp’’). These serve as a verifiable record of the
 join event so any audit trail records who was added, when, and with what trust status. This same
@@ -748,7 +748,7 @@ with several roadside units validates a location claim, while kinematic constrai
 detect impossible location changes that reveal GPS spoofing.
 
 \subsubsection{Integrated Defense Workflow}
-The entire system, as shown in Figure~\ref{fig: simple_block}, flows in the form of a continous closed,
+The entire system, as shown in Figure~\ref{fig:simple_block}, flows in the form of a continous closed,
 loop cycle in monitoring, validation, analysis and response. Vehicles authenticate to the
 \textit{Registration and Authentication Module} on a regular basis, where legitimacy is checked without
 revealing private identity data. In every cycle, nodes pass routing and status information to the RSUs
@@ -771,8 +771,8 @@ When anomalies are detected, the language-based reasoning component combines the
 produce threat assessments and recommended actions.
 
 If both the AI evaluation and the decentralized validation result reach conclusions that indicate the existence of
-an attack, then the response is issued from the \textit{Mitigation and Feedback} block (Figure~\ref{fig:
-simple_block}). The controllers execute the chosen response back in the field (e. g., isolating or limiting any
+an attack, then the response is issued from the \textit{Mitigation and Feedback} block (Figure~\ref{fig:simple_block}).
+The controllers execute the chosen response back in the field (e. g., isolating or limiting any
 malicious hosts), while the final decision and results are stored back into Fabric so future cycles can incorporate
 verified history. In parallel, SC3 monotonically observes controller trustworthiness to prevent insider attacks and
 facilitate safe controller switching if needed.
