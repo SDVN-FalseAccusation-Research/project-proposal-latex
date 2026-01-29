@@ -422,22 +422,22 @@ passed to a language-based reasoning component that produces a concise, human-un
 what is happening, why it is suspicious, and what response is recommended. The final output of this layer is
 an attack detection decision plus a response report that is forwarded to the enforcement path.
 
-The blockchain layer is implemented using \textbf{Hyperledger Fabric} to maintain a shared, tamper-resistant
-record of security-relevant updates across multiple controllers. This layer contains three smart contract
-modules (SC1--SC3) that coordinate different types of trust decisions:
+The blockchain layer is created using \textbf{Hyperledger Fabric} to provide a shared, tamper-proof audit
+log of security-relevant updates across all controllers. This layer contains three smart contract modules
+(SC1--SC3) that handle different classes of trust decisions:
 \begin{itemize}
-    \item \textbf{SC1: Registration and Authentication} -- manages joining/participation status of nodes and
-    stores whether a node is allowed to operate in the network.
-    \item \textbf{SC2: Reputation Management} -- stores behavior scores and reputation updates derived from
-    validated event evidence, preventing one controller from unfairly manipulating trust values.
-    \item \textbf{SC3: Controller Trust} -- maintains trust levels for controllers themselves, supporting
-    safer operation if a controller becomes unreliable or compromised.
+    \item \textbf{SC1: Registration and Authentication} -- holds the status of joined/participating nodes and
+    whether a node is allowed to operate in the network.
+    \item \textbf{SC2: Reputation Management} -- stores scores acquired from different events and updates
+    based on confirmed evidence, so no single controller can tamper with trust values.
+    \item \textbf{SC3: Controller Trust} -- stores controller trust values to ensure safe operation if a
+    controller becomes unreliable or compromised.
 \end{itemize}
-When controllers submit updates (e.g., a reputation change or a controller trust update), Fabric validates
-the update through endorsement and ordering before committing it to the ledger, ensuring that critical trust
-decisions are jointly accepted and auditable.
+Using Fabric, controllers can submit updates (e.g., a reputation update or a controller trust update) to the
+blockchain, which validates the update through endorsement and ordering before committing it to the ledger.
+This ensures that trust decisions are consistent, correct, and auditable.
 
-The control plane contains multiple SDN controllers (Controller 1--3) that manage their corresponding RSU
+The control plane comprises a set of SDN controllers (Controller 1--3) that manage their respective RSU
 regions. Each controller:
 \begin{itemize}
     \item collects measurements and alerts from RSUs,
@@ -483,14 +483,14 @@ The adversary model adopts a Zero-Trust Architecture where any network component
 
 \textbf{Scenario 3 - Timing-Based Accusations:} Attackers exploit legitimate network stress events (congestion, handovers) to mask malicious accusations as genuine failures.
 
-\textbf{Scenario 4 - Evidence-Spoofing:} Adversaries fabricate tampered packet logs, forged routing traces, or manipulated sensor data to frame honest nodes.
+\textbf{Scenario 4 - Evidence-Spoofing:} Malicious vehicles fabricate report logs tied to manipulated packets, invent routes through the network, falsify sensor observations, or claim rule violations to frame honest nodes.
 
 \section{System Assumptions}
 The framework operates under the following security and infrastructure assumptions:
 \begin{itemize}
-    \item \textbf{A1 - Cryptographic Security:} All cryptographic primitives (FALCON-1024, Kyber-1024, RSA-2048, ECDH-256, AES-256, HMAC-SHA-256) are secure against known attacks when correctly implemented \cite{bensasson2018scalable}.
-    \item \textbf{A2 - Byzantine Fault Tolerance:} BFT-SMaRt consensus tolerates up to $\lfloor(n_o-1)/3\rfloor$ Byzantine faults among orderers, maintaining safety and liveness \cite{castro1999practical}.
-    \item \textbf{A3 - Bootstrap Trust:} At least one trusted controller exists during initial deployment for credential distribution and blockchain initialization.
+    \item \textbf{A1 - Cryptographic Security:} Cryptographic primitives (FALCON-1024, Kyber-1024, RSA-2048, ECDH-256, AES-256, HMAC-SHA-256) are impervious to known attacks when correctly used \cite{bensasson2018scalable}.
+    \item \textbf{A2 - Byzantine Fault Tolerance:} BFT-SMaRt consensus supports up to $\lfloor(n_o-1)/3\rfloor$ Byzantine orderers, ensuring safety and liveness \cite{castro1999practical}.
+    \item \textbf{A3 - Bootstrap Trust:} A trusted controller exists during initial deployment to organize credentials and start the blockchain.
     \item \textbf{A4 - Physical Layer Availability:} Underlying communication infrastructure (IEEE 802.11p, cellular backhaul) provides sufficient availability for safety-critical applications.
     \item \textbf{A5 - Time Synchronization:} All entities maintain loosely synchronized clocks ($\pm$1 second) via GPS or NTP for timestamp-based replay detection.
     \item \textbf{A6 - Computational Resources:} Vehicles and RSUs possess sufficient processing power (multi-core CPUs, HSMs) for cryptographic operations and ML inference.
