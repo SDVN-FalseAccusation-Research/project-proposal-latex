@@ -1,0 +1,4119 @@
+BQLLDA: A Blockchain, Q-Learning, and Cryptography-Driven Secure Approach to
+Mitigate Link Discovery Attacks in SDVNs
+Patikiri Arachchige Don Shehan Nilmantha Wijesekara
+a,
+, Kalupahana Liyanage Kushan Sudheera
+b
+Sandaruwan Gardiyawasam Pussewalage , Geeth Priyankara Wijesiri
+a
+, Harsha
+a
+a Department of Electrical & Information Engineering, Faculty of Engineering, University of Ruhuna, Galle, 80000, Sri Lanka
+b Department of Information and Communication Technology, Faculty of Engineering & Science, University of Agder, Grimstad, Norway
+Abstract
+In a Software-Defined Vehicular Network (SDVN), the operation of vehicular networks can be improved due to opti-
+mizations at the controller driven by a global network view. However, such performance can be drastically affected if
+the network topology is poisoned by Link Discovery Attacks (LDAs), causing packet loss, exhausting the network, and
+enabling eavesdropping. Recent solutions for LDA mitigation are centralized with no fault tolerance and assume a high
+trust in the controller in the LD process. Moreover, they struggle to mitigate the attack for dynamic SDVN LD owing
+to frequent topology changes with non-adaptive link rediscovery. Other key shortcomings include (i) lack of distributed
+node behavioral monitoring and blacklisting, (ii) high communication interception, (iii) lack of authenticity and integrity,
+and (iv) relying on single observation without distributed consensus. In order to respond to this research gap, we first
+demonstrate 5 LDAs that can exist in a Zero-Trust (ZT) standard SDVN architecture by exploiting the vulnerabilities
+in location tracking and the LD service. Our main contribution is to propose a novel framework to detect LDA by
+using Q-learning to derive link states by considering the link’s suspicious behavior, packet delivery, and latency and with
+a location-driven adaptive LD technique. Attack mitigation is achieved through (i) cycle- and non-cycle-based digital
+signatures with mixed post-quantum and classical cryptography, (ii) Zero-Knowledge Proofs (ZKPs) of Hash Message
+Authentication Codes (HMACs) stored in the blockchain, (iii) time-limited session-based HMACs, (iv) packet limiting
+with signature matching, (v) location verification and behavioral monitoring, and (vi) symmetric key deriving using
+Diffie Hellman. Moreover, a permissioned blockchain is utilized by using 3 Smart Contracts (SCs). The first SC handles
+node registration using a challenge-response mechanism and subsequent node authentication using signatures, ZKPs,
+attributes, and encrypted HMACs. The second SC is used to maintain non-tamperable node reputation and location
+scores by monitoring node behavior and maintaining endorser trust scores for weighted reputation updates for consensus-
+based node blacklisting. Furthermore, a third SC is used to verify the discovered link state and penalize the controller’s
+malicious behavior using the trust-score-weighted blockchain endorsement policy-driven consensus of the broadcasted
+HELLO packet and packet-out received nodes to further evaluate the controller’s trust and switch it under low trust. We
+tested all 5 attack scenarios individually and in combination using NS-3 and Hyperledger Fabric simulations. Results
+show that the proposed BQLLDA is effective in mitigating the attacks, as the combined attack evaluations resulted in (i)
+the best packet delivery ratio (97%-98% under 80% attacks), (ii) zero packet interception ratio, (iii) the best Matthews
+correlation coefficient (0.95-0.66 under 80% attacks), (iv) competitive channel utilization (14%-37%), and (v) latency
+(24-170 ms), albeit with higher computational complexity (46-323 ms) compared to existing approaches.
+Keywords: Blockchain, Link discovery attack, Reinforcement-learning, SDVN, Vehicular networks
+1. Introduction
+Email addresses: nilmantha@eie.ruh.ac.lk (Patikiri
+Arachchige Don Shehan Nilmantha Wijesekara
+),
+kushan@eie.ruh.ac.lk (Kalupahana Liyanage Kushan
+Sudheera
+), harsha.sandaruwan@uia.no (Harsha Sandaruwan
+Gardiyawasam Pussewalage), geeth@eie.ruh.ac.lk (Geeth
+Priyankara Wijesiri
+)
+Preprint submitted to Computer Networks
+1.1. Background on SDVN and link discovery
+Programmability and flexibility of vehicular networks
+can be improved by deploying the idea of Software-Defined
+Networking (SDN) to retrieve the scheme called Software-
+Defined Vehicular Networks (SDVN) [1]. The Link Discov-
+ery (LD) Attack (LDA), also known as the topology poi-
+soning attack in a narrow scope, attempts to manipulate
+the link states of the topology view by attacking the link
+discovery process with attacks causing up to 90% packet
+January 3, 2026loss, enabling widespread eavesdropping, and disrupting
+safety-critical vehicle-to-vehicle communications [10]. In
+SDN, this attack takes advantage of the vulnerabilities
+in the Link Layer Discovery Protocol (LLDP). Due to
+this, the performance gains that can be achieved using the
+global network view of the controller can be drastically
+reduced.
+In traditional VANETs, links are usually discovered by
+broadcasting of HELLO packets, where the neighbors that
+received the packet add the sender’s identifying informa-
+tion as one of their neighbors [2]. In this technique of
+link discovery, there is no validation of links by a trusted
+entity such as a controller, and thus it has a high vulner-
+ability to attacks like link fabrication, replay, etc., due to
+the possible existence of attacks in the data plane.
+In SDVN, the link discovery service is location-driven
+[3], and it needs to be initiated frequently owing to
+mobility-induced link changes, unlike in SDN. This makes
+the LDS in SDVN more complex and vulnerable than
+that of SDN, bringing in necessities for real-time decision-
+making (as links are volatile) with robust security mecha-
+nisms to defend against attacks such as location-triggered
+attacks. However, software-defined link discovery can
+bring in additional vulnerabilities such as controller mis-
+configuration attacks [4], misbehavior due to software or
+hardware bugs and hacker attacks [5], and denial of service
+attacks [6], which can totally deteriorate the functioning of
+the link discovery service. A comprehensive survey on the
+attacks on the control plane further confirms that attacks
+on the control plane can poison the network topology view
+[7]. In such a case, the link discovery service can become a
+single point of failure. The existing link discovery service
+protocol in SDN (LLDP) basically relies on the trust in
+the centralized controller to discover links; however, this
+trust is questionable given that recent studies have shown
+that the controller can be attacked.
+First, they assume controller trustworthiness and employ
+centralized architectures that lack Byzantine fault toler-
+ance [14, 16], making them vulnerable when controllers
+are compromised. Second, they use non-adaptive link re-
+discovery mechanisms unsuitable for high-mobility vehic-
+ular environments, resulting in excessive communication
+overhead or stale topology information [10]. Third, they
+rely on single-observation verification without distributed
+consensus, increasing false negative rates in dynamic wire-
+less scenarios experiencing temporary congestion, interfer-
+ence, or channel fading. Fourth, they do not adequately
+address the full spectrum of attacks possible in zero-trust
+[11] architectures and lack distributed node behavioral
+monitoring and blacklisting. Moreover, they lack com-
+prehensive cryptographic defense, making them vulnerable
+to eavesdropping, tampering and manipulation, replaying,
+and flooding attacks under high attack prevalence. These
+deficiencies leave SDVNs vulnerable to sophisticated co-
+ordinated attacks that can systematically deteriorate the
+link discovery process.
+Currently, only one LLDP packet is used in declaring
+a link state as on or off. Even though the preceding ap-
+proach can provide a good output in a wired SDN domain,
+we argue that using a single observation can increase the
+probability of false negatives (incorrectly determining links
+as off) in a dynamic wireless SDVN scenario due to tem-
+porary packet congestion, interference, channel fading, etc.
+Thus, in an SDVN scenario, deploying reinforcement learn-
+ing with multiple observations in arriving at a decision is
+a better approach.
+1.4. Contributions and novelty
+Contributions: This paper addresses these limitations
+through the following contributions:
+1. Comprehensive attack modeling: We systemati-
+cally identify and demonstrate five LDA variants that
+exploit vulnerabilities in zero-trust SDVN architec-
+tures: (1) falsified location-triggered flooding attacks,
+(2) packet flooding by large quantities, (3) link fabri-
+cation attacks, (4) man-in-the-middle/replay attacks,
+and (5) link vanishing attacks. We show how these
+attacks can be launched from compromised vehicles,
+Road Side Units (RSUs), and even malicious con-
+trollers, targeting both control plane and data plane
+components.
+2. Q-learning driven-adaptive link discovery We
+propose a novel blockchain and Q-learning-driven link
+discovery attack mitigation framework that integrates
+three core mechanisms: Q-learning-based adaptive
+link state determination- using Q learning that con-
+siders suspicious behavior, packet delivery, and la-
+tency with state-adaptive epsilon-greedy exploration
+to intensively verify suspicious links while minimizing
+overhead for confirmed stable links;
+3. Blockchain-based authentication and trust
+management framework:
+A permissioned
+1.2. Significance and impact of link discovery attacks in
+SDVN
+Mitigating LDA in SDVN is important because it deter-
+mines whether the communication takes place reliably and
+securely. These networks often broadcast or route packets
+through multiple hops, based on diverse applications, to
+disseminate various information like mobility data, traf-
+fic conditions, environmental conditions, etc. If fake links
+are created, communication is eavesdropped on, or exist-
+ing links appear to have vanished, it can drastically affect
+the reliability, security, and efficiency of the communica-
+tion. If attackers become successful, it can lead to in-
+correct routing decisions, inefficient traffic management,
+safety hazards, etc., degrading the overall performance of
+the network.
+1.3. Limitations of existing approaches
+Despite the severity of these threats, existing LDA mit-
+igation approaches suffer from fundamental limitations.
+2blockchain architecture with triple smart contracts—
+(i) one for challenge-response-based registration and
+dual-stage authentication (RASC algorithm) using
+Zero-Knowledge Proofs (ZKP-STARK), FALCON-
+1024 signatures, and encrypted attributes, (ii) second
+one for consensus-based reputation management
+with weighted endorser trust scoring and black-
+listing (BWTRCB algorithm), and (iii) third one
+for controller trust evaluation (BCTES algorithm)
+enabling automatic switch to trusted controllers
+when controllers exhibit malicious behavior.
+4. Multi-layered cryptographic defense for link
+discovery: We employ comprehensive security mech-
+anisms with explicit attack mitigation roles: mixed
+(i) post-quantum (FALCON-1024 signatures for non-
+repudiation of packeti n authentication and Kyber-
+1024 for quantum-resistant encryption of symmetric
+keys) and (ii) classical cryptography (RSA-2048 for
+cycle-based packeto ut signatures preventing fabrica-
+tion, ECDH-256 for ephemeral shared secret estab-
+lishment enabling forward secrecy, and AES-256 for
+uplink encryption protecting identities from intercep-
+tion), providing both current security and quantum
+computing resistance; (iii) time-limited session-based
+HMACs (HMAC-SHA-256 with timestamps) ensuring
+strict temporal binding to invalidate replayed pack-
+ets beyond their validity window; (iv) cycle-based
+digital signatures with AES-256 encrypted secret
+keys preventing attackers from fabricating controller-
+originated LLDP packets; (v) location verification
+through inter-aggregate validation (detecting falsi-
+fied neighbor locations via HMAC-SHA-256 integrity
+checks), (vi) intra-aggregate validation (identifying
+aggregator location tampering through distance con-
+sistency), and (vii) behavioral monitoring (flagging
+physically impossible location changes via kinematic
+constraints) to eliminate location falsification attacks;
+(viii) packet limiting with signature-based duplicate
+detection (restricting identical RSA-2048/FALCON-
+1024 signed packets to thresholds) mitigating data
+plane and control plane flooding; and (ix) reverse
+LLDP with IEEE 802.11p MAC-layer port mirror in-
+spection (authenticating traced ports via HMAC ver-
+ification) countering link vanishing attacks where ma-
+licious nodes drop or fabricate packets to hide legiti-
+mate links.
+5. Comprehensive evaluation: We conduct exten-
+sive simulation-based evaluation using NS-3 and Hy-
+perledger Fabric across all five attack scenarios indi-
+vidually and in combination with attack penetration
+ranging from 0% to 100%. Statistical analysis us-
+ing Wilcoxon signed-rank tests with Holm-Bonferroni
+correction validates BQLLDA’s superior performance:
+maintaining 97-98% packet delivery ratio under 80%
+attack penetration (compared to 9-50% for existing
+techniques), achieving zero packet interception across
+all scenarios, and sustaining a Matthews Correlation
+Coefficient of 0.95-0.66 (versus 0.35-0.44 for base-
+lines).
+Novelty: To the best of our knowledge, this is the first
+work to: (1) model link discovery in SDVN as a zero-trust
+architecture without assuming controller or RSU trust-
+worthiness, (2) integrate blockchain-based distributed con-
+sensus with reinforcement learning for adaptive link state
+determination under adversarial conditions, (3) address
+controller-level attacks through trust evaluation and auto-
+matic failover mechanisms, and (4) provide comprehensive
+defense against the full spectrum of LDAs (flooding, fabri-
+cation, replay, vanishing) in a unified framework validated
+through rigorous statistical analysis.
+1.5. Proposed approach and design rationale
+In this paper, we first investigate diverse (location falsifi-
+cation, flooding, man-in-the-middle, link fabrication, and
+link vanishing) LDAs for the zero-trust standard SDVN
+architecture, where both the control plane and the data
+plane can be attacked. First, we use a permissioned
+blockchain for node registration, authentication, and node
+reputation management. Next, we deploy a blockchain-
+based Q-learning approach for detecting all LDAs re-
+inforced with adaptive location verification and behav-
+ioral monitoring (location falsification, fabrication, replay,
+flooding, packet dropping), packet limiting with signature
+matching to reduce flooding attacks, cycle-based digital
+signatures with asymmetric encrypted secret keys to pre-
+vent packet fabrication, time-limited session-based hash
+message authentication secret key issuing with their link
+node IDs and timestamps stored on the blockchain to re-
+duce man-in-the-middle attacks, and reverse LLDP having
+port mirror with packet tracing inspection to mitigate link
+vanishing attacks. Next, as the controller can become a
+single point of attack in software-defined link discovery, we
+verify the discovered link state by selecting a random set of
+non-malicious nodes, broadcasting a HELLO packet, and
+then using node trust-score-weighted endorsement policy-
+driven consensus of the received nodes to further evaluate
+the controller’s trust using received HELLO packets and
+packet out in the blockchain and switch the controller to
+the nearest available trusted controller if the trust score
+is too low. Thus, our approach is hybrid, where we use a
+secure LLDP to reduce data plane attacks and verify the
+operation of LLDP using a secure blockchain endorsement
+policy-driven consensus-based HELLO packet discovery.
+Finally, we present a systematic framework and algorithm
+to mitigate the attacks. As we felt, we are the pioneers to
+propose a classical Q-learning and blockchain-based frame-
+work with multiple security measures to mitigate LDSA in
+a zero-trust standard SDVN architecture.
+Recent works in this domain do not model link discov-
+ery in SDVN as a zero-trust architecture, and they have
+assumed that certain entities like road-side units and con-
+trollers are fully trusted. However, we argue that such
+assumptions are unrealistic owing to the fact that RSUs
+3and controllers cannot be fully trusted. In contrast, we
+use the permissioned blockchain to derive trust scores for
+each endorser in the blockchain used in distributed en-
+dorsement and subsequent consensus approaches. In an
+SDVN, trust is essential for secure communication and co-
+ordination. Blockchain enables trustless interactions be-
+tween vehicles, RSUs, and controllers, ensuring data ex-
+changes are verified and tamper-resistant. We propose
+to switch the controller to the closest trusted controller,
+when the controller is detected as untrusted. Moreover, we
+prevent modification of zero-knowledge proofs required for
+registration and authentication of nodes by storing them
+in the blockchain, making sure that only authorized de-
+vices can join and operate in the network. Regardless of
+the size of the vehicular network, there exist few endorsers
+for a given operation in the permissioned blockchain, im-
+proving the scalability compared to a public blockchain.
+For instance, for reputation management of the proposed
+scheme, only the location aggregating nodes and the con-
+troller are needed as endorsers in the endorsement policy-
+driven consensus process. Moreover, we do not use com-
+putationally inefficient proof of work consensus, but use
+the more computationally efficient and Byzantine fault-
+tolerant scheme BFT-SMaRt in the ordering stage. Fur-
+thermore, the permissioned blockchain improves the secu-
+rity of the overall link discovery, as only registered nodes
+are permitted in blockchain endorsement, consensus, and
+validation processes. Finally, blockchain is utilized to track
+the long-term behavior of the network elements and peri-
+odic registration and updating, and while during authenti-
+cation in a link discovery cycle, a blockchain transaction is
+committed only once at the end of reinforcement learning
+as a private data collection; thus, it does not compromise
+the real-time functioning of the SDVN.
+Deep reinforcement learning is less suitable for the pro-
+posed link discovery framework, as the state-action space
+is discrete and finite and does not involve a generalization
+of a continuous state-action space. The proposed location-
+based adaptive link discovery can reduce the overall com-
+putational and communication cost by adaptively discov-
+ering links upon requirement without periodic link inves-
+tigation, unlike in existing studies. Furthermore, we use
+a state-adaptive epsilon-greedy for Q-learning to discover
+more (exploit the action space more) when a link contains
+one or more malicious nodes and to discover less (explore
+the action space more) otherwise.
+2. Related Work
+In VANETs, some have used modified versions of
+HELLO packet-based neighbor discovery by utilizing a
+gossip-driven information passing approach and consid-
+ered cases of multi-packet reception known as GSIM-ND
+[8].
+Earlier work has demonstrated link fabrication and re-
+play attacks as two of the forms of link discovery attacks,
+and attack procedure and impact have been studied [9]. In
+[10], authors show host-based and switch-based link dis-
+covery attacks in SDN and propose an active port-based
+defense mechanism with an empirical analysis. The au-
+thors in [12] deploy an anomaly detection mechanism using
+correlation and round-trip time measurements to analyze
+network traffic to determine whether link discovery attacks
+exist.
+SLDP has been shown as a lightweight and secure link
+discovery mechanism in SDN that has modified the LLDP
+packet structure and used algorithms to protect against
+poisoning, replay, and flooding attacks of the link discov-
+ery service [13]. Similarly, Link Guard is a framework to
+discover links by mitigating LDA by using link latency
+measurements specially applicable for host- and switch-
+driven fabrication attacks [14]. Moreover, ESLD is an-
+other LDA mitigation scheme in SDN specially designed
+to prevent link fabrication attacks by using a port clas-
+sification method, message authentication codes, and di-
+rectional transmissions [15]. Alternatively, another study
+uses pure cryptographic approaches: authentication codes
+and elliptic curve cryptography in the Mininet emulator
+for combating against topology poisoning attacks [16].
+Recently, some researchers have investigated the topol-
+ogy poisoning attacks for a software-defined vehicular edge
+network under the assumption of road-side units being ide-
+ally secure, and the impact of attacks has been studied [3].
+Another similar work studies the effect of link discovery
+attacks in software-defined vehicular edge networks under
+4 controllers and further proposes a deep reinforcement
+learning-based self-recovery mechanism [17].
+Recent studies have shown blockchain as a candidate for
+mitigating diverse attacks in SDN, like distributed denial
+of service, misrouting, man-in-the-middle, flow table poi-
+soning, etc. [18]. However, as we know, this is the first
+time blockchain is applied to mitigate link discovery at-
+tacks in the SDVN domain. Blockchain is essential here
+because: (1) controller compromise requires distributed
+trust rather than centralized verification, (2) Byzantine
+fault tolerance is needed when multiple controllers may
+collude, and (3) immutable node reputation management
+and behavioral monitoring in a distributed manner with-
+out a centralized authority (4) Automatic trusted node
+registration, authentication, and controller switching with-
+out a third party.
+Table 1 shows a summary of the comparison of existing
+approaches with the proposed BQLLDA framework.
+1.6. Paper organization
+The remaining sections are arranged as follows: Sec-
+tion 2 reviews existing work on LDAs; Section 3 presents
+the methodology of the proposed cryptographically secure,
+blockchain and reinforcement learning-based LDA mitiga-
+tion framework; Section 4 presents the test results of how
+5 attacks can be mitigated using the proposed system; and
+finally, Section 6 concludes the paper.
+4Table 1: Comparison of LDA mitigation approaches.
+SLDP [13]Controller
+Trust
+AssumedQuantum Re-
+sistance
+NoByzantine
+Tolerance
+NoNoLink-Guard [14]AssumedNoNoNoESLD [15]
+Pure Crypto [16]
+Port-based
+de-
+fense [10]
+Proposed
+BQLLDAAssumed
+AssumedNo
+NoNo
+NoNo
+NoAttack Cover-
+age
+Fabrication only
+Fabrication/Replay/
+Flooding
+Fabrication only
+Fabrication/Replay
+AssumedNoNoNoFabrication
+Verified via BCYes
+(PQ+classical)Yes
+(BFT
+consensus)YesAll 5 attacks
+Approach
+3. Methodology
+Adaptive LD
+3.1.3. Open Flow discovery protocol in brief
+In Open-Flow Discovery Protocol (OFDP), all switches
+(MAC address and port IDs) are initially discovered by
+the controller, and then LLDP packets are created for
+each switch port as packet out. In the packet out sent
+by the controller, it explicitly sets the LLDP Data Unit
+(LLDPDU)’s chassis ID, port ID, and Time to Live (TTL)
+TLVs. Switches that receive the packet out forward it
+through the specified ports, and the switches that receive
+the packet create a packet in by embedding its received
+port ID and MAC address as metadata and sending it back
+to the controller. This process has to be shown vulnerable
+to several attacks in the SDN context under the assump-
+tions given above, and its vulnerability is even higher in
+the context of SDVN, specifically in a zero-trust case, as
+discussed in the attack scenarios demonstrated in the fol-
+lowing sections.
+3.1. Link discovery in SDVN
+3.1.1. Key differences from prior work and as-
+sumptions
+Recent work has assumed that connections between
+Road Side Units (RSUs) and controllers are fully secured,
+and ignored the vulnerabilities in Vehicle-to-Vehicle (V2V)
+links [3]. Moreover, they have assumed the architecture of
+the SDVN to be constricted to a vehicular edge network
+[3, 17]. However, we argue that V2V links are the most
+vulnerable links for LDA in SDVN due to the lowest link
+lifetimes (high mobility of vehicles). Moreover, there is a
+possibility that LDA can be launched from a compromised
+RSU as well. Furthermore, SDVN is not always restricted
+to vehicular edge network architecture (hierarchical con-
+trol plane), while the most generic one is the SDN applied
+to VANET having a flat data plane [19].
+3.2. Threat model and attack scenarios
+3.1.2. LLDP packet transmission strategy in Zero-
+Trust SDVN
+We consider that Link Layer Discovery Protocol (LLDP)
+packets are unicasted to detect I2I (typically wired) and
+I2V (wireless) links, while they are broadcasted to detect
+V2V (wireless) and V2I links. The choice of broadcast-
+ing LLDP for more mobile links reduces the requirement
+of frequent unicasting of multiple packets for individual
+links. We do not use the HELLO packet broadcast used
+in traditional VANETs for discovering non-I2I links, as it
+does not involve controller validation; thus, it is highly
+vulnerable to attacks. Moreover, we consider a zero-trust
+scenario, where we trigger LLDP packets based on an as-
+sessment of location tracking; the endorsers of locations
+and duplicate packets are given trust scores based on en-
+dorsement policy-driven consensus; and we adaptively in-
+vestigate links more when the nodes are detected as sus-
+picious; and finally, we verify LLDP and evaluate con-
+troller trust and consider switching it using blockchain-
+based HELLO packets and packet out counting for a sub-
+set of non-malicious nodes.
+3.2.1. Threat model
+We model attackers with capabilities: (C1) compromise
+up to n-f data plane nodes where n is the total num-
+ber of data plane nodes and f ∈ [0, n] is the number of
+data plane attacker nodes not necessarily byzantine fault
+tolerant, (C2) compromise controllers up to nc − 1 (up
+to all 3 out of 4 in evaluations); the ordering service
+(run by a subset of trusted consortium nodes, not nec-
+essarily controllers) tolerates up to ⌊(no − 1)/3⌋ Byzan-
+tine faults among orderers (no = numberof orderers) via
+BFT-SMaRt, with additional resilience against controller
+compromise provided by trust evaluation and automatic
+switching (BCTES), (C3) intercept/modify/replay/flood
+wireless transmissions, (C4) computationally bounded
+by classical computers for non-cryptographic operations;
+cryptographic attacks are assumed unsuccessful due to the
+use of post-quantum-secure primitives for long-term keys
+and frequent key rotation for classical components. We
+assume: (A1) cryptographic primitives are secure, (A2)
+the blockchain consensus mechanism is BFT-resilient, and
+(A3) at least one trusted controller exists initially.
+53.2.2. Overview of the five link discovery attacks
+Attacks 1 to 5, with variants for the cases where the
+attackers reside in the control plane or data plane, are
+illustrated in Fig. 1.
+where the uplink and downlink are typically connected
+using the same communication channel (LTE/Ethernet).
+This results in packet losses in the network.
+Control plane fabrication. On the other hand, when
+the controller acts maliciously, existing links will be dis-
+covered using LLDP, as shown in Fig. 1e. Once they are
+discovered, the controller will maliciously create fake links
+between data plane nodes, where links do not exist.
+3.2.3. Attack 1: Falsified location triggered flooding at-
+tacks
+In a standard SDVN, location tracking is used to identify
+the location of RSUs and highly dynamic vehicles. An
+attacker (for example, the car in Fig. 1a) can falsify the
+location of vehicles, continuously provoking the controller
+to trigger LLDP packets, as depicted in Fig. 1a. Moreover,
+if an RSU is compromised, its location can be falsified to
+frequently provoke other nodes for link discovery. In this
+attack, fake links cannot be fabricated; however, it can
+exhaust the controller and switches. Furthermore, when
+the controller is malicious, it can contribute to changing
+the locations and trigger copies of LLDP packets itself, as
+shown in Fig. 1a. Moreover, it can be proved that the
+number of link discovery packets, even for a 50% falsified
+location in a location-driven link discovery in SDVN, is
+less than the link discovery overhead in SDN for a given
+topology with the same number of nodes. Thus, the effect
+of this attack is minor.
+3.2.6. Attack 4: Man in the middle/replay attack
+Data plane MiTM/Replay. In this attack (data
+plane), a compromised host can replay the legitimate
+LLDP packets, convincing the controller that a direct link
+exists between two other hosts, directing the traffic in-
+tended for another host to itself. Due to this, the compro-
+mised hosts can eavesdrop on the communication. This is
+demonstrated in Fig. 1f, where the RSU is compromised,
+where it utilizes the legitimate link discovery packets of
+the car and bus to deceive the controller that a link exists
+between the car and bus, eavesdropping on the communi-
+cation between them.
+Control plane MiTM/Replay. Similar to a link fab-
+rication attack, when the controller acts as a malicious,
+existing links will be discovered using LLDP, as shown in
+Fig. 1g. Once they are discovered, the controller will ma-
+liciously create fake links between data plane nodes, where
+links do not exist; however, in this case, between 2 ports
+of the same channel. In this case, an intermediate node
+can overhear the communication that nodes try to send
+among the fake link.
+3.2.4. Attack 2: Flooding attacks by large quantities of
+packets
+Data Plane Flooding. In this attack (data plane), as
+shown in Fig. 1b, an attacker attempts to send a large
+quantity of copies of legitimate link discovery packets to
+the neighbor switches to exhaust them. The controller
+uplink will also be unnecessarily loaded due to neighboring
+switches forwarding the received packets to the controller.
+3.2.7. Attack 5: Link vanishing attack
+Data plane vanishing. In the data plane attack version,
+this is a combined version of link fabrication and packet
+replay attacks. Vehicles and RSUs in SDVN are associ-
+ated with broadcast domain ports. An attacker can first
+fabricate LLDP packets to change the broadcast domain
+port of a vehicle or RSU (for example, attackers 1 and 2 in
+Fig. 1h). Next, these fabricated packets sent through the
+legitimate port can be replayed in an intermediate node
+(for example, attacker 3 in Fig. 1h), deceiving the con-
+troller that links through the legitimate port do not exist.
+This also contributes to packet losses. This attack in the
+data plane can also be launched by the attackers inten-
+tionally dropping legitimate LLDP packets, as shown in
+the magenta-color crosses in Fig. 1h.
+Control Plane Flooding. When the attack exists in the
+control plane, many copies of LLDP packets will be sent
+by the controller to exhaust the network, as shown in Fig.
+1c.
+3.2.5. Attack 3: Link fabrication attack
+Data plane fabrication. In this attack (data plane), as
+shown in Fig. 1d, a hijacked vehicle or RSU can be injected
+with a fabricated LLDP packet to deceive the controller of
+links that do not exist. For instance, with reference to Fig.
+1d, an attacker (the compromised car), upon receiving a
+packet out, sends a fabricated (P acket in + P acket out)
+LLDP packet directly to the controller, deceiving the con-
+troller that a link between the attacker (car) and the bus
+exists. Moreover, a second node (RSU, being the attacker)
+can also fabricate a packet ((P acket in + P acket out))
+when a legitimate LLDP packet forwarded by the previous
+node is received, where it will discard the legitimate packet
+(packet out), as shown in Fig. 1d. This attack is highly
+effective if the attacking node is aware of the other node
+IDs and ports in the network, which can be achieved by in-
+tercepting the packet in and packet out intended for and
+from other nodes that can occur in an SDVN scenario,
+Control plane vanishing. In the control plane attack
+version, links are discovered using the LLDP protocol as
+usual; however, some packets may be maliciously discarded
+by the controller, resulting in existing links vanishing, as
+highlighted in Fig. 1i.
+6(a)(b)(c)
+(d)(e)(f )
+(g)(h)(i)
+Figure 1: Link Discovery attack scenarios in SDVN (a) Attack 1: Falsified location triggered flooding attacks (b)
+Attack 2: Flooding attacks by large quantities of packets –Data plane (c) Attack 2 – control plane (d)Attack 3: Link
+fabrication attack–data plane (e) Attack 3–control plane (f) Attack 4: Man-in-the-middle attack – data plane (g) Attack
+5: Link vanishing attack–data plane (h) Attack 5 – control plane.
+3.3. Proposed mitigation framework
+Consortium formation and controller switch-
+ing. As the proposed solution is blockchain-based, the
+blockchain network is required to be formed first. All
+primary controllers will create their own consortiums
+with their own dynamic subordinate certificate authori-
+ties (initially, the controller itself for bootstrapping the
+3.3.1. Proposed system architecture
+Multi-controller and permissioned blockchain ar-
+chitecture. The architecture of the proposed system with
+a multi-controller SDVN and underlying permissioned
+blockchain is graphically illustrated in Fig. 2.
+7Figure 2: System architecture.
+blockchain) governed by a static global certificate author-
+ity (hosted outside the SDVN) and orderers (a sub-set of
+trusted nodes). Note that subordinate CAs are imple-
+mented inside Docker containers and are thus indepen-
+dent from the ledger. Thus, each consortium will have
+their own communication channels, and peers (data plane
+nodes except orderers) will join each consortium, as shown
+in Fig. 2. Note that if a data plane node is directly con-
+nected to multiple controllers, they will be part of all such
+consortiums unless the controller is found malicious. We
+consider a flat multi-controller architecture for the SDVN
+with controllers fully connected for synchronization.
+As shown in Fig. 2, each controller is responsible for
+managing (link discovery in this work) their own sub-
+network, as shown in the corresponding control plane com-
+munication. Note that for each sub-network, there exists
+a separate blockchain consortium with a separate commu-
+nication channel, as shown in Fig. 2. However, if the con-
+troller is found to be malicious, then it will be switched
+to the nearest trusted controller. If the nearest trusted
+controller is a backup controller, the consortium’s channel
+will not be deleted; however, it will be reconfigured with
+a new subordinate certificate authority. Otherwise, the
+consortium will be deleted, and the peers and orderers of
+the deleted consortium will be assigned to the consortium
+of the nearest trusted controller. As the architecture is
+zero-trust and due to the requirement of the controller in
+the endorsement process, once initial registration is done,
+the subordinate certificate authority will be switched to a
+Docker container in a trusted node. Furthermore, it will
+be changed from time to time among a subset of the most
+trusted nodes (as the trust of the node acting as the certifi-
+cate authority should also be monitored and as the trust
+can be dynamic), and we give priority to the RSUs over
+vehicles due to their stationary nature and tendency to
+Figure 3: Block diagram of the proposed LDA mitigation
+system.
+remain in the network longer.
+3.3.2. Overall LDA mitigation process
+Block Diagram and High-Level Modules. Block dia-
+gram of the proposed secure LDS attack mitigation system
+is shown in Fig. 3.
+Key Interacting Modules. As shown in Fig. 3, the sys-
+tem consists of a registration and authentication module
+to handle vehicle and RSU registration and authentication
+with the controller using a permissioned blockchain. Links
+that need to be discovered are output by the Location-
+based Link creation and expiration driven Adaptive Link
+Discovery Initiation (LLALDI) module based on the dis-
+tance matrix and malicious nodes found by the location
+verification and behavioral monitoring module. Based on
+LLALDI output, the link discovery service will discover
+links, and the state of links will be updated. Note that
+the LLALDI module, link discovery service, and state de-
+termination are embedded in a blockchain and Q-learning-
+8(a)
+(b)
+Figure 4: The process flow of proposed authentication and registration module (a) Registration (b) Authentication.
+based algorithm known as BQLLDA to discover link states.
+These modules are discussed in detail in the following sec-
+tions.sonation attacks. Note that in the proposed permis-
+sioned blockchain-based module, for node registration, a
+challenge-response mechanism is utilized.
+3.3.3. Cryptographic definitions and notations
+KDF refers to a key derivation function, which is deter-
+mined as given in (1), unless otherwise specified.Registration phase: initial handshake and key
+negotiation. First, similar to the TLS-1.3 handshake,
+the node (i) first sends a HELLO message to the con-
+troller (C) with ECDHE curves, which are negotiated
+curves from a secure set (e.g., Curve25519 or NIST
+P-256), and nonce (N onv –to prevent registration re-
+play attacks) with a signature created from the node’s
+long-term private key (Lipri,LT ). Next, the controller
+sends a Proof-of-Work challenge and a registration key–
+k reg along with the ephemeral public key of the con-
+troller (LC
+pub ), the echoed nonce, the selected Elliptic
+curve, the Elliptic Curve Diffie-Hellman public key 1
+Ci Ci
+(point QCi
+1 (x, y) = d1 G ), and the signature of the
+registration key, the ECDH key, the ephemeral pub-
+lic key, the challenge, and the echoed nonce signed
+using the controller’s long-term private key (σreg,C =
+C
+[k reg||QCi
+) to the
+1 (x, y)||Lpri ||challenge||N onv ]LC
+pri,LT
+node i. Note that, in previous steps, both the controller
+and the particular node will verify the signatures by ob-
+taining the corresponding long-term public keys from the
+blockchain.
+Derived key = KDF (Secret key||Secret seed
+||Salt||Context)
+(1)
+The ECDH public key of entity r (Qr ) refers to the pub-
+lic key shared as Qr = dr G, where G is the base point
+(generator) of the elliptic curve and dr is r’s private scalar.
+We notate an encryption key using K, a digital signature
+public key using Lpub , a digital signature private key using
+Lpri , and an HMAC key using M. To notate signature,
+we use σ = [arguments]L , use G = e({arguments}, K) for
+encrypting the arguments using the encryption key K, let
+h = hash(arguments) denote the cryptographic hash, and
+use H = HM AC(M, arguments) to denote the HMAC
+computed for arguments using the key M.
+3.3.4. Registration and authentication module
+The process flow of the proposed registration and au-
+thentication module is depicted in Fig. 4.
+Registration phase:
+PoW solution and key
+derivation. Then, the node solves the PoW work
+puzzle and computes the response using its global Po-
+seidon HMAC (keyed Poseidon-based hashing [27] –
+HPCi = HM ACP oseidon (MCi
+P oseidon , challenge response))
+Ci
+key (MCi
+=
+KDF (KDHSC
+||dCi
+2 ||secret seed
+P oseidon
+Ci
+Ci
+||node ID||salt||context); KDHSC
+=
+dCi
+2 Q1 (x, y)),
+derives its digital signature public key using the
+registration key given by the controller through
+Registration and authentication process overview.
+All nodes need to register with the controller initially,
+and for any subsequent communication session, the nodes
+need to authenticate themselves. All entities (controllers,
+vehicles, and RSUs) need to be pre-registered with the
+blockchain with a long-term public key in order to re-
+duce registration phase man-in-the-middle and imper-
+9{Lipub , Lipri }
+=
+KDF key pair(algorithm, k reg
+||secret seed||salt||node id||context).
+i
+i
+Ci
+[GKyber,ASCON
+||GKyber,HM
+AC ||HM AC(KDHSC ,
+i
+i
+) will be sent to the
+GKyber,ASCON
+||GKyber,HM
+AC ]LC
+pri
+corresponding node.
+Registration phase: Zero-Knowledge Proof and
+blockchain storage. The node computes the zero-
+knowledge proof (ZKP-STARK–πi ; which proves that the
+Ci
+node knows private values: dCi
+2 and MP oseidon without re-
+vealing them at all), and stores it in the blockchain (to pre-
+vent possible interception of the global Poseidon HMAC
+key in initial unencrypted communication) along with the
+node’s digital signature FALCON 1024 public key (Lipub –
+security attribute) and node id.
+Registration phase: rationale for cryptographic
+choices in key delivery. Note that ASCON-128 is uti-
+lized for downlink encryption to prevent interception of
+sensitive node IDs, port IDs, and HMAC keys by the
+attackers and thus contribute to reducing link fabrica-
+tion attacks. Similarly, ECDH-derived key-based AES-
+256 is utilized for uplink encryption to reduce exposure of
+sensitive node IDs and port IDs, leading to link fabrica-
+tion attacks, which can be amplified under the possibility
+of breaking post-quantum digital signatures under side-
+channel attacks. Note that, two separate symmetric keys
+using two different encryption algorithms are used for the
+uplink (packet in and authentication requests) and down-
+link (packet out and HMAC key issuing) communication,
+adhering to the NIST 800-57 recommendation for key man-
+agement [28] in order to drive towards perfect forward se-
+crecy. Global HMAC-SHA-256 will be utilized to create
+an HMAC for each node’s location to reduce tampering
+of node locations by intermediate data-collecting (agent)
+nodes.
+Registration phase:
+node’s final message to
+controller. After that, it sends the global Posei-
+don HMAC (HPCi ), the signature of ZKP, the node
+ID, the Kyber public key, and the DH public key
+with the HMAC of them produced using the shared
+i
+Diffie-Hellman secret key, which is signed (σZKP,DH
+=
+Ci
+Ci
+i||i
+(x,
+y)||K
+||HM
+AC(K
+,
+π
+[π i||i||QCi
+2
+DHSC
+pub,kyber
+Ci
+||QCi
+2 (x, y)||Kpub,kyber )]Li ) using the node’s quantum-
+resistant digital signature FALCON 1024 private key,
+Elliptic Curve Diffie Hellman (ECDH)-256 public key 2
+Ci Ci
+(Point QCi
+2 (x, y) = d2 G ), and quantum-resistant en-
+Ci
+cryption CRYSTALS-Kyber1024 public key (Kpub,kyber
+)
+Ci
+derived using KDF given in (1) with KDHSC as the
+secret key, back to the controller (using uplink in control
+channel).
+Registration phase: key security properties and
+advantages. Note that the proposed node registration
+technique is more secure than traditional authentication
+techniques like Diffie-Hellman (DH) alone, as the latter
+is vulnerable to man-in-the-middle attacks before encryp-
+tion is established. However, during the node registra-
+tion process, the ECDH-256 public keys are exchanged.
+Furthermore, storing the ZKP of the hashed message in
+the blockchain eliminates reliance on centralized servers
+and enables tamper-proof verification. Thus, the proposed
+technique is more suitable in the zero-trust architecture,
+as traditional techniques assume some degree of trust.
+Registration phase: controller verification and reg-
+istration finalization. The controller validates the re-
+sponse using the ZKP retrieved from the blockchain
+(Here, the ZKP proof (πi ) is verified using public in-
+Ci
+Ci
+puts: QCi
+1 (x, y), Q2 (x, y), challenge response, HP , salt)
+and register the node ID with its ports and add the times-
+tamp to the blockchain, as shown in Fig. 4a. However,
+the FALCON-1024 public key and ZKP-STARK should
+only be accessible to the controller; therefore, we utilize
+role-based access control for achieving that purpose (the
+nodes with only the ”controller” role will be able to access
+them). Moreover, all access control-related data are stored
+in the blockchain using private data collections with the
+controller and the corresponding node as private nodes.
+Observe that at the end of registration, existing registra-
+tion will be renewed or newly added if it does not exist
+or deleted if a registration request is not received for a
+certain period of time, and blockchain will be configured
+accordingly.
+Authentication phase: overview and latency ben-
+efits. As the same ZKP-STARK (π i) and global Posei-
+don HMAC (HPCi ) can be reused for subsequent authen-
+tication, it simplifies the authentication process and thus
+reduces latency compared to traditional approaches that
+require high computational demands. This is important,
+as vehicular networks are delay sensitive. Before authenti-
+cation (during long-term propagation of the network), the
+reputation (r) score and location (l) of the node (behav-
+ioral attributes) will be stored in the blockchain (refer to
+Algorithm 2 given later).
+Registration phase: secure symmetric key deliv-
+ery. After that, a Kyber 1024 encrypted ASCON-128
+Ci
+symmetric key (KASCON
+–derived using KDF given
+Ci
+in (1) with KDHSC as the secret key) with 128-bit
+i
+Ci
+Ci
+nonce (Gkyber,ASCON
+= e(KASCON
+||nonce, Kpri,kyber
+))
+and Kyber 1024 encrypted global HMAC-SHA-256
+i
+Ci
+key (Gkyber,HM
+= e(MiGlobal , Kpri,kyber
+)), and
+AC
+i
+their signature with integrity check (σkeys,down
+=
+Authentication phase:
+Stage 1 – Requesting
+Session HMAC Key 2. During subsequent au-
+thentication stage 1, the ZKP (π j) will be retrieved
+from the blockchain and verified using the received
+cryptographically secured global Poseidon HMAC
+Cj
+Cj
+ijp
+(GCj
+=
+pos = e(HP , KDHSC )), session HMAC 1 (H1
+10HM AC(Mijp
+1 , i||j||p)), signature of ZKP and Diffie-
+j
+Hellman key (σZKP,DH
+), and signature of i, j, p, HMAC1
+node will be removed from the particular blockchain con-
+sortium. Note that registration update here means either
+updating a too-old registration (to improve security, reg-
+istration will be renewed with new credentials), new reg-
+istration with a new controller, or deleting existing reg-
+istration when the old controller is not reachable (when
+the node’s ping request is not heard for a given time).
+Therefore, the security of the authentication mechanism is
+very strong, as it is a blockchain-based session, signature,
+attribute, role, and encryption combined authentication
+mechanism.
+′
+ijpp
+ijp
+ijp
+(σHM
+AC1 = [i||j||p||H1 ]Li ) by sending Guplink,1 =
+′
+j
+ijp
+ijp
+ijpp
+e(i||j||p||p′ ||H1ijp ||σZKP,DH
+||σHM
+(x, y)
+AC1 ||σC ||Q2
+j
+ijp
+j
+ijp
+′
+||HM AC(MGlobal , i||j||p||p ||H1 ||σZKP,DH ||σHM AC1
+′
+ijp
+Cj
+||σC
+||Qijpp
+(x, y)), KDHSC
+).
+2
+Authentication phase: Stage 2 – packet in Sub-
+mission. In authentication stage 2, the previous content
+along with attributes obtained from the blockchain
+′
+(rj , lj ), encrypted attributes and identifiers (Gijpp
+uplink,2 =
+′
+′
+′
+′
+j
+ijpp
+ijpp
+e(tijpp ||rj ||lj ||i||j||p||p′ ||H2ijpp ||σZKP,DH
+||σHM
+||
+AC2 ||σC
+′
+′
+j
+HM AC (MjGlobal , tijpp ||rj ||lj ||i||j||p||p′ ||H2ijpp ||σZKP,DH
+||
+′
+′
+′
+ijpp
+ijpp
+Cj
+σHM
+), KDHSC
+)), and HMAC2 (H2ijpp =
+AC2 ||σC
+ijpp′ ijpp′
+HM AC(M2 , t
+||rj ||lj ||i||j||p||p′ ||H1ijp ))
+are
+unicasted, and the signature of HMAC and IDs
+ijpp′
+ijpp′
+′
+(σHM
+]Lj ) are utilized for au-
+AC2 = [i||j||p||p ||H2
+thentication as shown in Fig. 4b.
+Authentication phase: attribute- and role-based ac-
+cess control. Note that –encrypted authentication re-
+′
+quest time (tijpp -environment attribute), reputation and
+location (rj , lj -behavioral attributes), and link node IDs
+and port IDs (i, j, p, p′ -user attributes)– act as attributes
+in the proposed authentication for attribute-based access
+control. Note that in the registration and authentication
+smart contract, the node that has the role ”controller”
+will be able to retrieve attributes and ZKPs from the
+blockchain for authentication, implementing a version of
+role-based access control.
+Registration and Authentication Smart Contract
+(RASC). The algorithm of the Registration and Authen-
+tication Smart Contract (RASC) is shown in Algorithm 1.
+Note that as shown in Algorithm 1, the RASC runs in
+the authenticating node and the controller. Note that the
+RASC algorithm stores ZKP and the node’s FALCON-
+1024 digital signature public key in blockchain as private
+data collections, as they do not form a part of a link dis-
+covery cycle explicitly. So, at the node, it retrieves the
+location and reputation of the particular node. On the
+other hand, at the controller, it extracts the link’s repu-
+tation and location information from the blockchain and
+provides it to the client application. As per the verifica-
+tions done at the client, it will authenticate the node based
+on verification results, as described before. At the end, af-
+ter authentication, node IDs, port IDs, and timestamps
+are updated in the blockchain as private data once at the
+end of reinforcement learning (to reduce latency in a link
+discovery process).
+3.3.5. LLALDI module
+Expected link state prediction. Let N , Z, ZRSU , and
+ZV EH be the total nodes and the node ID sets of all nodes,
+RSUs, and vehicles, respectively. Let the location tracking
+period and frequency be TL and HL , respectively. Let B t
+be the tensor that represents the discovered link state at
+t
+t
+time t. At time t for node i, the location is (lxi
+, lyi
+).
+It is a large waste of network resources to send LLDP
+packets for all the nodes (no need to discover links if it is
+highly probable that a link state won’t change). Instead,
+we do the location monitoring at HL frequency and derive
+possible link expirations or new links. Let D be a ma-
+trix containing the expected q
+link state between all nodes,
+t
+t − lt )2 + (lt − lt )2 )],
+where Dij
+= [U0 (Rmax − σ − (lxi
+xj
+yi
+yj
+Authentication phase: integration with link discov-
+ery. For a given link discovery, authentication takes place
+at two instances (stages). First, in the first stage, the
+second node needs to authenticate itself to request a sec-
+′
+ond session HMAC key (Mijpp
+) using global Poseidon
+2
+j
+), and ses-
+j),
+signature
+(σZKP,DH
+HMAC (GCj
+),
+ZKP
+(π
+pos
+ijp
+sion HMAC 1 (H1 ). Then, in the second stage, the same
+node should authenticate itself when it sends the packet in
+to the controller. Thus, when a packet in is received at the
+controller, using the registration and authentication smart
+contract, it can verify that the link authentication for the
+request of the second HMAC key is not expired, the de-
+crypted reputations matched, two nodes are in range, and
+the node and port IDs matched in addition to verifications
+related to authentication stage 1.
+while U0 (x) is the unit step function at step 0, while Rmax
+is the average of maximum transmission distance at the
+transmission power level and σ is its standard deviation.
+It is calculated for V2V (DSRC) using a log-distance prop-
+agation loss model considering shadowing effects, as per
+previous studies [20]. However, link state cannot be ex-
+actly predicted by distance, while it can only be used as
+an approximation. That’s because in a highly dynamic
+network like vehicular networks, link direction, transmis-
+sion power, link quality, etc., can be changed [21].
+Periodic registration update in dynamic networks.
+As the vehicular network is dynamic, the nodes can move
+out of a given consortium and into new consortiums. To
+check the preceding condition, the nodes need to periodi-
+cally contact the available trusted controllers and update
+registration, and the blockchain needs to be updated ac-
+cordingly. If node registration with a controller fails, that
+11Algorithm 1 Registration and Authentication Smart Contract (RASC).
+1: procedure RASC(Con ID, Cur N ID, Cur P ID, Oth N ID, Oth P ID, cur T S, H2 T S, Rep sta, Loc sta, ID sta, H mat,
+ZKP ver, DS P K, ZKP , Ope, Sig ver, RL f in)
+if (Req ID==Con ID)&& (Ope == GetStates) then
+: { BC.GetReput(Cur N ID,
+Return {loc
+:
+{BC.GetLoc(Cur N ID, BC.GetLoc(Oth N ID}, rep
+BC.GetReput(Oth N ID}, ZKP : BC.GetP riDatZKP (Cur N ID), DS P K : BC.GetP riDatDS(Cur N ID)}
+4:
+end if
+5:
+if (Req ID==Con ID) then
+6:
+Aut T S ← BC.GetP riT imestamp(Cur N ID, Oth N ID, Cur P ID, Oth P ID)
+7:
+t exp ← Compare(cur T S, H2 T S, Auth T S)
+8:
+if ((Ope == Auth s1)&&(H mat==true) && (ZKP ver==true))OR((Ope == Auth s2)&&(Rep sta
+mat)&&(Loc sta==true)&&(ID sta==true)&&(t exp==false)&&(H mat==true) &&(Sig ver)&& (ZKP ver==true))
+then
+9:
+Auth ← true
+10:
+if (RL f in) && (Auth expired) then
+11:
+BC.P utP riT S(Cur N ID, Oth N ID, Cur P ID, Oth P ID, cur T S)
+12:
+end if
+13:
+else
+14:
+Auth ← f alse
+15:
+end if
+16:
+Return {auth : Auth}
+17:
+end if
+18:
+if (Req ID==Cur N ID)&&((Ope == GetStates)) then
+19:
+Reputation ← BC.GetReput(Cur N ID)
+20:
+Location ← BC.GetLoc(Cur N ID)
+21:
+Return {loc : Location, rep : Reputation}
+22:
+end if
+23:
+if (Req ID==Cur N ID)&&(Ope == Reg) then
+24:
+BC.P utP riDatZKP (Cur N ID, ZKP )
+25:
+BC.P utP riDatDS P K(Cur N ID, DS P K)
+26:
+Return {reg : true}
+27:
+end if
+28: end procedure
+2:
+3:
+Deriving non-malicious and suspicious link sets.
+Then, we get an expected link state difference matrix
+(I t = Dt − D(t−1) ) and extract a link discovery-wise non-
+t
+malicious set P = {i, j} where Iij
+= 0, and a set of com-
+t
+pletely or partially malicious Q = {i, j} irrespective of Iij
+p
+p
+to unicast LLDP (Eij = 1) or broadcast LLDP (Fi = 1)
+packet based on whether node i is an RSU/slow-moving
+vehicle or a fast-moving vehicle, respectively. Note that
+even though the original LLDP in SDN is broadcast, as
+we utilize adaptive link discovery, we use unicast under
+low-link changing probability in order to reduce the over-
+all link discovery overhead. The flow chart for this process
+is shown in Fig. 5.
+Figure 5: Flow chart for LLALDI module.
+Summary of notations of BQLLDA. A summary of
+the notations used in the proposed BQLLDA mitigation
+scheme is shown in Table 2.
+Note that if a reported location is found to be malicious
+in any of the below-mentioned ways, we approximate the
+node’s real location by inspecting its non-malicious neigh-
+bors from the discovered links and getting their average
+location. If there are no non-malicious neighbors, the ma-
+licious location will not be updated. We store the verified
+location of each node in the blockchain to use it as an
+attribute in authentication.
+3.3.6. Location verification and behavioral monitoring
+Overview of multi-layer location defense. Fabri-
+cated locations can pose a huge threat to the link discovery
+service, as they can contribute to all attacks discussed. At
+HL frequency, first, each node should broadcast its present
+location (lxt , lyt ). Then, the agent nodes will aggregate the
+received location with their own location and unicast to
+the controller. We use the data collection optimization
+model proposed in research [22] to collect location data.
+Step 1: inter-aggregate location verification. First,
+a data-aggregating node can check whether the location
+sent from a neighbor is falsified or not by comparing the
+12Table 2: Notations utilized in the proposed BQLLDA
+mitigation scheme.
+Notation
+N, Z,
+ZRSU , ZV EH
+TL , H L
+B t , Dt , I t ,
+D ′ t, I ′
+t
+t
+lxi
+, lyi
+P, Q, R
+Rmax , σ, U′
+p
+Eij
+, Fip
+p
+Sij
+, ap
+ij ,
+p
+Wij
+µ1 , µ2 , µ3
+Tmax ,
+wsuspicion ,
+p
+λp
+ij , tij
+Description
+Node number of nodes, Node ID set of all nodes, node
+ID set of RSUs, and node ID set of vehicles, respec-
+tively
+Location tracking period, location tracking frequency
+Discovered link state tensor at time t, Expected link
+state matrix, expected link state difference matrix,
+immediate real link state tensor, and immediate real
+link state difference tensor, respectively
+x coordinate of node i at time t, and y coordinate of
+node i at time t, respectively
+Non-malicious link set, Malicious link set, LLDP
+dropping node set
+average of maximum transmission distance, standard
+deviation of maximum transmission distance, and
+unit step function at step 0, respectively
+Tensor to track unicasting LLDP, matrix to track
+broadcasting LLDP, respectively
+State, action, and reward for link i − j through port
+p, respectively
+Precedence coefficient of suspicion, LLDP delivery,
+and LLDP latency, respectively
+Maximum expected latency, reward for the link’s sus-
+picious behavior, event of LLDP delivery for link i − j
+through port p, LLDP latency for link i − j through
+port p, respectively
+Figure 6: Block diagram for location verification & be-
+havioral monitoring.
+q
+t
+t
+t − l l )2 + (lt − l l )2 ≤ (1 + µ
+(lxj
+dis )(Vmax TE +
+yj
+yj
+xj
+1
+2
+Amax TE ) (3)
+2
+In (3), µdis ≥ 0 is the tolerance for distance, tl repre-
+sents the last known non-malicious time step, TE repre-
+sents time elapsed since then, Vmax is maximum feasible
+node velocity, and Amax is maximum node acceleration.
+If (3) does not hold true, such a node’s reputation will go
+down drastically and can be deemed malicious if the repu-
+tation is less than a threshold. We represent the malicious
+node set by M . The location verification and behavioral
+monitoring block diagram is shown in Fig. 6.
+Note that in Fig. 6, ’flag’ refers to contributing to the
+reputation reduction of a given node whose location has
+been mismatched or falsely identified. However, we uti-
+lize a distributed approach for node reputation manage-
+ment using a permissioned blockchain, where the endorser
+nodes (controllers and aggregators) submit their own rep-
+utation scores, whose scores will be weighted based on the
+endorser’s trust score to calculate the overall score. Note
+that we incentivize endorsers by rewarding them with a
+positive reward for aligning with the majority decision.
+received location with its own location, as given in (2),
+to update the reputation score of node j. Then, the con-
+troller will verify whether the locations corresponding to
+node IDs received from all aggregated packets are the same
+(check if an aggregated node has a falsified location). Note
+that due to the computation of HMAC-SHA-256 for each
+location by each node, if a data-aggregating node changes
+the location of another node maliciously, it can be detected
+by the controller. In this manner, the controller can iden-
+tify the nodes that have different locations for the same
+node ID, and then those nodes that aggregated the data’s
+reputation score in the permissioned blockchain will go
+down and may be flagged as malicious if the reputation
+is below a threshold after blockchain endorsement policy-
+driven consensus. Note that the first stage of defense is
+the HMAC-SHA-256, and if it passes for all i (aggregat-
+ing node) and neighbor node (j), the condition in (2) is
+checked for a neighbor node j among different aggregates.
+Among aggregates, if a majority of the tests fail, node j’s
+location is probably malicious.
+BWTRCB algorithm. Algorithm 2 provides the
+Blockchain-based Weighted endorser Trust-driven node
+Reputation and Consensus-based Blacklisting (BWTRCB)
+algorithm.
+Step 2 intra-aggregate location verification. Next,
+if an aggregating node in a link has falsified its own lo-
+cation, we can check the condition in (2) for all j ∈ N
+in the aggregate received. Here, i is the node ID of the
+aggregated node. If (2) does not hold for the majority of
+non-malicious j of the aggregate, node i’s reputation score
+will go down and may be flagged malicious if the score is
+below a threshold.
+q
+t − lt )2 + (lt − lt )2 ≥ 0
+(2)
+Rmax − σ − (lxi
+xj
+yi
+yj
+BWTRCB: Function descriptions. Note that an en-
+dorser in Algorithm 2 is a controller or a data aggrega-
+tion node; ”GetT rustScr” is a function to get the trust
+score of a endorser; ”CalcLocRepu” is a function to cal-
+culate the reputation score of a given node ID for a re-
+ported location; ”CalcF loodRepu” is a function to calcu-
+late the reputation score of a given node ID for a given
+number of received duplicate packets; ”CalcF abricRepu”
+is a function to calculate the reputation score of a given
+node ID for a given number of received fabricated pack-
+ets; ”CalcReplayRepu” is a function to calculate the rep-
+utation score of a given node ID for a given number
+of received replayed packets; ”CalcLLDP Drop Repu” is
+a function to calculate the reputation score of a given
+Step 3: Node behavioral monitoring. For this, we
+check whether (3) holds true or not to assess the node’s
+dynamic behavior with respect to location for every node
+that passes the previous verification steps.
+13Algorithm 2 Blockchain-based Weighted endorser Trust-driven node Reputation and Consensus-based Blacklisting (BWTRCB).
+1: procedure BWTRCB(N ode ID, M atched LLDP, Rep loca, Dup count, F ab count, Replay count, Endorsers, N eighbors, Controllers)
+2:
+F in LLDP Drop rep chan ← 0, T ot wei ← 0, i ← 0
+3:
+for each Endo in N eighbors, Controllers do
+4:
+T rust wei ← Blockchain.GetT rustScr(Endo)
+5:
+LLDP Drop scr ← Endo.CalcLLDP Drop Repu(N ode ID, M atched LLDP [i])
+6:
+F in LLDP Drop rep chan ← F in LLDP Drop rep chan + (T rust wei ∗ LLDP Drop scr)
+7:
+T ot wei ← T ot wei + T rust wei, i + +
+8:
+end for
+Drop rep chan
+9:
+Repu chan ← F in LLDP
+abs(T ot wei)
+10:
+11:
+12:
+13:
+14:
+15:
+16:
+17:
+18:
+19:
+20:
+21:
+22:
+23:
+24:
+25:
+26:
+27:
+28:
+29:
+30:
+31:
+Reput[N ode ID] ← Blockchain.GetLLDP Drop Reput(N ode ID) + Repu chan
+Blockchain.U pd LLDP Drop Reput(N ode ID, Reput[N ode ID])
+if Reput[N ode ID] < LLDP Drop Blacklist thresh then
+BLS1 ← Blockchain.GetConsBlacklist LLDP Drop N ode(N ode ID)
+end if
+for each Endo in N eighbors, Controllers do
+Blockchain.RewardEndorser(Endo, N ode ID, BLS1)
+end for
+F in loc rep chan ← 0, F in loc chan ← 0, F in f lood rep chan ← 0, F in f abric rep chan ← 0,
+F in replay rep chan ← 0, T ot wei ← 0, i ← 0, F in loc chan ← 0
+for each Endo in Endorsers do
+T rust wei ← Blockchain.GetT rustScr(Endo)
+F in loc rep chan += (T rust wei ∗ Endo.CalcLocRepu(N ode ID, Rep loca[i]))
+F in f lood rep chan += (T rust wei ∗ Endo.CalcF loodRepu(N ode ID, Dup count[i]))
+F in f abric rep chan += (T rust wei ∗ Endo.CalcF abricRepu(N ode ID, F ab count[i]))
+F in replay rep chan += (T rust wei ∗ Endo.CalcReplayRepu(N ode ID, Replay count[i]))
+F in loc rep chan ← F in loc rep chan + (T rust wei ∗ Location scr)
+F in loc chan ← F in loc chan + (T rust wei ∗ Rep loca[i])
+T ot wei ← T ot wei + T rust wei, i + +
+end for
+loc rep chan
+f lood rep chan
+f abric rep chan
+replay rep chan
+Repu chan ← Average( F in
++ F inabs(T
++ F in abs(T
++ F in abs(T
+)
+abs(T ot wei)
+ot wei)
+ot wei)
+ot wei)
+in loc chan
+Loca chan ← Fabs(T
+ot wei)
+loc rep chan
+Loca rep chan ← F in
+abs(T ot wei)
+33:
+Reput[N ode ID] ← Blockchain.GetReput(N ode ID) + Repu chan
+34:
+Blockchain.U pdReput(N ode ID, Reput[N ode ID])
+35:
+Location rep[N ode ID] ← Blockchain.GetLocRep(N ode ID) + Loca rep chan
+36:
+Blockchain.U pdLocatRep(N ode ID, Location rep[N ode ID])
+37:
+Blockchain.U pdLocat(N ode ID, Loca chan)
+38:
+if Reput[N ode ID] < Blacklist thresh then
+39:
+BLS2 ← Blockchain.GetConsBlacklistN ode(N ode ID)
+40:
+end if
+41:
+for each Endo in Endorsers do
+42:
+Blockchain.RewardEndorser(Endo, N ode ID, BLS2)
+43:
+end for
+44: end procedure
+32:
+node ID when a matched LLDP packet is received or
+not; ”U pd LLDP Drop Reput” is a function to update
+the LLDP packet dropping reputation score of a given
+node in the blockchain; ”GetLLDP Drop Reput” is a
+function to get LLDP dropping node reputation from the
+blockchain; ”U pdReput” is a function to update the repu-
+tation score of a given node in the blockchain; ”U pdLocat”
+is a function to update the location of a given node in
+the blockchain; ”U pdLocatRep” is a function to update
+the location reputation of a given node in the blockchain;
+”GetReput” is a function to get node reputation from
+the blockchain; ”GetLoc” is a function to get node lo-
+cation from the blockchain; ”GetLocRep” is a function
+to get node location reputation from the blockchain;
+”GetConsBlacklistN ode” is a function to collect votes
+for endorsement policy-driven consensus and then blacklist
+the node if consensus is reached that the node is malicious;
+”GetConsBlacklist LLDP Drop N ode” is a function to
+collect votes for endorsement policy-driven consensus and
+then blacklist the node if consensus is reached that the
+node is malicious in terms of dropping LLDP packets; and
+”RewardEndorser” is a function to reward or penalize a
+endorser based on the reached consensus and store the up-
+dated endorser’s trust score in the blockchain. Note that
+in Algorithm 2, when updating the reputation score, we
+set the reputation decrement for malicious behavior sig-
+nificantly higher than the reputation increment for benign
+behavior in order to prioritize detection of malicious be-
+havior, as detection of the latter is important to mitigate
+the LDAs.
+14BWTRCB: Attack detection mechanisms. Note
+that in the proposed link discovery technique, the fabri-
+cated packets can be identified by mismatched digital sig-
+natures and HMACs; replayed packets can be identified
+by using expired HMACs; intentional dropping of LLDP
+packets can be identified by tracking neighbors and con-
+trollers that received the particular LLDP packet; and
+flooded packets can be identified by duplicate digital sig-
+natures.by total weight. Then, the blockchain’s reputation score
+of the corresponding node will be updated, and if it goes
+below a threshold, the node will be blacklisted. Also, the
+location and location reputations will be updated in the
+blockchain. Ultimately, each endorser will be rewarded in
+agreement with the endorsement policy-driven consensus.
+Thus, Algorithm 2 rewards endorsers for complying with
+the consensus and data plane nodes for reporting correct
+locations and not sending duplicate packets.
+BWTRCB: Dual blacklisting strategy. We maintain
+two blacklists for nodes: the LLDP drop blacklist to track
+nodes that maliciously drop LLDP packets and another
+blacklist for nodes that behave maliciously by falsifying lo-
+cations, fabricating LLDP packets, replaying LLDP pack-
+ets, and flooding LLDP packets. The malicious functions
+of the second blacklist can be prevented by secure ap-
+proaches used in the proposed technique. However, mali-
+cious LLDP dropping cannot be prevented; thus, we main-
+tain a separate blacklist to monitor it and amend the link
+discovery process during Q-learning, when such nodes are
+detected (refer to Algorithm 4).Step 4: Controller behavioral monitoring. Finally,
+after the link discovery service, we evaluate the link dis-
+covery of the controller against poisoning, flooding, and
+replay attacks by it through cross-endorsing with the link
+state of a subset of non-malicious nodes. In this technique,
+we first select a percentage of random non-malicious nodes
+in the network and broadcast a HELLO packet. When a
+node receives the HELLO packet, it sends the acknowledg-
+ment to the sender that it received the packet, and then
+the total number of packet out that it has received for the
+link in the last link discovery service will be written to the
+blockchain. From the discovered link state tensor (B) of
+the controller, we can inspect the number and node IDs of
+existing links from the given node.
+BWTRCB: Processing LLDP packet dropping rep-
+utation. As shown in Algorithm 2, first, nodes’ reputa-
+tions for LLDP packet dropping will be updated. Here, the
+endorsers will be possible neighbors of the node (found by
+inspecting the distance matrix) and controllers. Here, the
+reputation will be increased if a matched LLDP packet is
+received by the endorsers or otherwise decreased, weighted
+with the endorser’s trust. Finally, if endorsement policy-
+driven consensus is reached after the node reputation
+threshold decreases below a specified value, then the node
+will be blacklisted as an LLDP dropping node.
+BCTES Algorithm. Then, we engage those received
+nodes as endorsers in the Blockchain-based Controller
+Trust Evaluation and Switching (BCTES) algorithm given
+in Algorithm 3. Moreover, to check whether the controller
+attempts to flood the network, we inspect the packet out
+count received by each endorser node weighted by their
+trust scores and get consensus from the endorsers to re-
+ward or penalize the controller.
+As shown in Algorithm 3, it takes the controller ID,
+broadcasting node ID, expected receiver node IDs, and
+actually received node ID set as inputs. It first calculates
+the trust score sum of the expected received nodes and the
+expected maximum packet out sum of endorsers. Then it
+calculates the endorsement policy-driven consensus count
+as the sum of the trust score weight of the actually received
+nodes. Further, it calculates the packet out count as the
+trust score weighted sum of packet out packets received by
+each endorser. After that, it evaluates whether the con-
+sensus count is greater than 2/3 of the trust score and
+P out count is greater than 2/3 of the packet sum and less
+than the packet sum, taking into account the effect of the
+Byzantine faults. If the preceding condition is satisfied,
+the controller’s trust score will be increased or otherwise
+decreased. The preceding condition makes sure that the
+controller will be rewarded when it does not attempt link
+fabrication, vanishing, replay, or flooding attacks. Finally,
+if the controller’s trust score goes below a specified thresh-
+old (becomes untrusted), the nodes that were governed by
+the controller will be allocated to the closest trusted con-
+troller, as per previous studies [23].
+BWTRCB: Processing location and other attack
+reputation. After that, it begins updating the reputation
+of nodes, considering location falsification, fabrication, re-
+play, and flooding attempts. For each endorser, first, a
+trust weight is obtained, and then an endorsement score is
+calculated based on the reported location (correctly re-
+ported locations will be rewarded), as specified in the
+previous section. Then, an endorsement score for flood-
+ing will be calculated based on the number of duplicate
+packets received (if duplicates are received, the endorse-
+ment score will be low). Similarly, endorsement scores for
+link fabrication attempts (by calculating a reputation score
+based on the number of fabricated packets received) and
+replay attempts (by calculating a reputation score based
+on the number of replayed packets received). Then each
+of the above endorsement scores will be weighted by the
+endorser’s trust score, and their cumulative sum is ob-
+tained. Also, the location is tracked and weighted with
+the endorser’s trust. Finally, after iterating through all en-
+dorsers, a final reputation change is obtained by obtaining
+the average of all the reputation scores. Location change
+is also computed by dividing the sum of weighted locations
+15Algorithm 3 Blockchain-based Controller Trust Evaluation and Switching (BCTES).
+1: procedure BCTE(Controller ID, Consortium ID, Broad ID, Exp Rec IDs, Rec IDs)
+2:
+Consensus count ← 0, T rust sum ← sum(Blockchain.GetT rstScr(Exp Rec IDs))
+3:
+P out count ← 0, P acket sum ← J ∗ A ∗ count(Rec IDs)
+4:
+for each Endo in Rec IDs do
+5:
+W eight ← Blockchain.GetT rustScr(Endo)
+6:
+Consensus count ← Consensus count + W eight
+7:
+P out ← Blockchain.GetP out(Broad ID, Endo)
+8:
+P out count ← P out count + W eight ∗ P out
+9:
+end for
+10:
+if (Consensus count ≥ 23 T rust sum) and ((P out count ≥ 32 P acket sum)&&(P out count ≤ P acket sum)) then
+11:
+Blockchain.RewardController(Controller ID)
+12:
+else
+13:
+Blockchain.P enalizeController(Controller ID)
+14:
+end if
+15:
+if Blockchain.GetT rustScr(Controller ID) < T rust threshold then
+16:
+Best controller ← Blockchain.GetN earestT rusted controller(Consortium ID, Controller ID)
+17:
+Blockchain.Change controller(Consortium ID, Best controller)
+18:
+end if
+19: end procedure
+3.3.7. State determination
+Link state determination follows priority logic: After the
+link discovery service using LLDP, at the controller, if the
+protocol specifies a link exists, then we check (1) if the im-
+p
+mediate real link state tensor (D′ ij == 1) and immediate
+p
+real link state difference tensor (I ′ ij == 0) to conclude
+p
+== 1). (2) If the
+that link state as conf irmed on (Sij
+p
+protocol specifies the link as vanished and if (D′ ij == 0)
+′p
+and (I ij == 0), then the link state is conf irmed of f
+p
+(Sij
+== 0), where i and j are link discovery-wise non-
+malicious. Moreover, if the expected link state is changed
+p
+(I ′ ij ! = 0), the link state will be either (3) normal of f
+p
+(Sij == 2) if LLDP is not received or (4) normal on
+p
+(Sij
+== 3) if LLDP is received. However, if i or j is
+link discovery-wise malicious or the LLDP reception status
+p
+contradicts with D′ ij , the link will be flagged suspicious
+p
+p
+as (5) suspicious of f (Sij
+== 4) when D′ ij == o or (6)
+p
+suspicious on (Sij
+== 5) otherwise. The flow chart for
+state determination is shown in Fig. 7. Note that if the
+LLDP packet is not transmitted, then the state will be de-
+termined by mapping Q values to the states by inspecting
+the closest state to the Q-value using (8) given later.
+Figure 7: Flow chart for state determination module.
+Pi =
+3.3.8. Packet limiting with signature matching
+We prevent the flooding link discovery attacks launched
+using a large quantity of packets (attack 2) by limiting the
+maximum amount of distinct digital signature P acket out
+transmitted and P acket in received to JAN 2 , P acket out
+received and P acket in transmitted limited to JAN , and
+intermediate link discovery packets (Pi ) that can be sent
+by a vehicle or an RSU in the data plane within a time
+period of TL , as in (4). Thus, excess identical packets sent
+by a malicious host will be discarded by a Non-Malicious
+(NM) receiver.
+
+
+
+JA,
+
+
+;if i is a fast-moving vehicle
+JAN
+;if i is a LD-wise malicious RSU
+
+
+
+JA(1 + µpac ) PN
+t
+j=1 Dij
+;i is a RSU/slow vehicle, j is NM
+(4)
+In (4), µpac is the tolerance for the number of pack-
+ets, A is the number of ports, and J is the number of
+Q-learning iterations. However, packet limiting is only
+possible in an uncompromised/non-malicious host. Thus,
+we use the blockchain smart contracts Algorithm 2 to
+identify and penalize data plane flooding nodes, while we
+use Algorithm 3 to penalize controllers that attempt to
+flood. Pi = JA for fast-moving vehicles, where broad-
+cast LLDP (Fip = 1) discovers all neighbors simultane-
+ously, requiring J iterations
+ports. For RSUs, uni-
+PN × A
+t
+cast LLDP requires JA j=1 Dij
+packets as each neigh-
+16(a) Block diagram for the proposed link discovery service mod- (b) Sequence diagram of packet flow in proposed link discovery.
+ule.
+Figure 8: Block and sequence diagram of link discovery in the proposed framework.
+bor receives targeted discovery,P
+hence the distance-matrix-
+N
+t
+.
+weighted bound JA(1 + µpac ) j=1 DijIDs (e.g., i, j, p0 , p1 , i, j, p0 , p2 ) can be detected at the
+controller.
+3.3.9. Digital signature, hashing, and controller validation
+Proposed link discovery sequence and flow dia-
+grams. The block diagram for the proposed link discov-
+ery service is shown in Fig. 8a, while Fig. 8b shows the
+sequence of packet flow with cryptographic notations.Reverse LLDP and port mirror inspection. Then,
+we send a reverse LLDP through j in all ports and lis-
+ten for the packet in, and in such an instance, only a
+response from the legitimate port will be heard. In or-
+der to verify the ports through which the packet in of
+the reverse LLDP was transmitted and received, the port
+mirrors of nodes i and j with traced port IDs can be in-
+spected. Similar to ERSPAN, the IEEE 802.11p trace
+sources at the MAC layer will add the node ID and port
+ID to the mirror as a header. Note that we send the
+HMAC-SHA-256 HMAC of the packet tagged port mirrors
+Cycle-based digital signatures for packet out pro-
+tection. To mitigate attacks 3 and 5 (link fabrication
+and link vanishing), we use two steps. First, the in-
+tegrity and authenticity of the LLDP packets are pro-
+tected by using Digital Signature (DS) [24] with hashing
+(H0ijp = HM AC(Mijp
+0 , i||j||p)), where the LLDP packet
+ijp
+is digitally signed (σLLDP
+= [i||j||p||H0ijp ]Lpri,C ) by the
+controller using an RSA-2048 secret key (LC ), while any
+node (vehicles, RSUs, and the controller itself) can use an
+RSA-2048 public key (Lpub,C ) to verify its authenticity.
+To prevent an attacker from stealing and using the secret
+keys of the controller, we encrypt using AES-256 and store
+the digital signature’s secret key, and DS public and pri-
+vate key pairs (Lpri,C , Lpub,C ) are issued for each new cycle
+(thus, quantum-resistant digital signature is not required
+for cycle-based digital signature). It is highly unlikely for
+an attacker to know about the secret key of the controller
+since it is encrypted and time-limited. This makes sure
+that link discovery packets (packet out) cannot be fabri-
+cated.
+′
+Np
+ji
+of each node j (HRev,j
+= HM AC(Mijpp
+, j||i || pq ρq ))
+2
+q=1
+ji
+and i (HRev,i
+= HM AC(Mijp
+1 , j||i ||q,r pq ρq pr γr )) to au-
+thenticate the mirrored packet tracing of a given node be-
+fore it is accepted by the controller. Here, ρq is the event
+that the packet is transmitted by port pq , while γq is the
+event that it is received from port pq . So, then, the fake
+ports can be identified and blocked.
+3.3.10. Strategies to mitigate attack 4
+Time-Limited
+Session
+HMACs. To
+prevent
+attack 4, we propose an approach where time-
+limited session HMACs (HMAC-SHA-256) [25] se-
+ijpp′
+cret keys (Mijp
+) are issued by the con-
+1 , M2
+troller. These HMAC secret keys are encrypted and
+unicasted to the corresponding node (Gijp
+=
+Down,1
+ijp
+ijp
+ijp
+C
+i
+e(i||j||p||M1 ||Lpub ||σC ||HM AC(MGlobal , i||j||p||M1
+Protection against packet in fabrication and port
+spoofing. Moreover, to prevent packet in from being fab-
+ijpp′
+ricated, we embed the FALCON-1024 signature (σHM
+AC2 )
+ijpp′
+and HMAC 2 (H2 )) of the port and node IDs. How-
+ever, we find that still, there is a possibility to deceive
+the controller with an incorrect fabricated port ID (p′ ) of
+the packet in as digital signatures (FALCON-1024) are is-
+sued on a per-node basis. In such a case, duplicate port
+′
+′
+ijpp
+ijp
+ijpp
+Ci
+′
+||LC
+pub ||σC ), KASCON ), GDown,2 = e(i||j||p||p ||M2
+′
+′
+j
+ijpp
+ijpp
+′
+||LC
+||Qijp
+1 (x, y)||HM AC(MGlobal , i||j||p||p ||M2
+pub ||σC
+′
+ijpp
+Cj
+||LC
+||Qijp
+1 (x, y)), KASCON )) in order to make
+pub ||σC
+sure that only the corresponding node is able to create
+a valid HMAC that can be validated at the controller
+within a given time frame, reducing the success of replay
+17attacks.
+the controller will send encrypted identifiers and signature
+′
+ijpp′
+(σC
+== [i||j||p||p′ ]LC ) with HMAC (Gijpp
+Down,2 ) back to
+node j. The controller will also, at the same time, encrypt
+and unicast the received ECDH public key of node j for
+link i − j through ports p − p′ back to node i (GPCiK,j,ijpp′ =
+packet out construction and transmission to node
+i. Note that raw data of the proposed packet out struc-
+ture are the session HMAC 1 secret key (Mijp
+1 ), the
+controller’s RSA-2048 digital signature public key (LC
+pub ),
+node IDs (i, j), and port IDs (p). First, it digitally signs
+the precedingly mentioned raw data of the packet out
+ijp
+(σC
+= [i||j||p||Mijp
+). Then, the controller encrypts
+1 ]LC
+pub
+the node and port identifiers, the controller’s signature,
+the controller’s digital signature public key, and session
+HMAC 1’s secret key using ASCON-128 of packet out
+(Gijp
+Down,1 ). After that, this encrypted content is trans-
+mitted as packet out to Node i. Node i decrypts it to
+retrieve the raw data and verifies the packet out signature
+using the controller’s DS public key.
+′
+′
+Ci
+e(Qijpp
+(x, y)||HM AC(MiGlobal , Qijpp
+(x, y)), KDHSC
+)).
+2
+2
+packet in construction and final submission.
+Then, node j will add its MAC address and port
+ID as destination ID (j) and destination port (p′ )
+to the received packet from i, as part of the new
+packet packet in. After that, using the received ses-
+′
+sion HMAC key 2 (Mijpp
+), it will create HMAC 2
+2
+ijpp′
+ijpp′ ijpp′
+(H2
+= HM AC(M2 , t
+||rj ||lj ||i||j||p||p′ ||H1ijp )–
+with timestamp, reputation, location, transmitter and
+receiver node IDs, port IDs, and HMAC 1 as the message),
+add its signature with receiver port ID, node ID, and
+HMAC 2 as the message using the FALCON 1024 private
+ijpp′
+ijpp′
+′
+key (σHM
+]Lj ), and embed it in the
+AC2 = [i||j||p||p ||H2
+packet in. It will also retrieve the node j’s reputation (rj )
+and location (lj ) from the blockchain, add a timestamp
+ijpp′
+(tj ), along with the controller’s (σC
+) and node i’s
+ijp
+(σHM
+)
+signatures,
+and
+embed
+them
+in
+the packet in
+AC1
+′
+with integrity protection and encrypt (Gijpp
+=
+uplink,2
+Intermediate
+LLDP
+packet
+forwarding
+by
+node i. Then, it embeds the session HMAC 1
+(H1ijp = HM AC(Mijp
+1 , i||j||p)–the message for ses-
+sion HMAC 1 is source i and destination j node
+IDs and port ID of node i) and the signature
+ijp
+ijp
+(σHM
+AC1 = [i||j||p||H1 ]Li –the message for the sig-
+nature is node IDs of node i and j, port number, and
+HMAC 1), raw payload data (node ID and port ID) into
+the controller’s digitally signed content, and transmits
+′
+′
+j
+ijpp′
+ijpp′
+ijp
+ijp
+ijp
+e(tijpp ||rj ||lj ||i||j||p||p′ ||H2ijpp ||σZKP,DH
+||σHM
+it (Pijp = i||j||p||LC
+AC2 ||σC
+pub ||σC ||σHM AC1 ||H1 ) to node j if
+′
+′
+j
+i is an RSU/low-speed vehicle (or broadcasts it if i is a
+||HM AC (MjGlobal , tijpp ||rj ||lj ||i||j||p||p′ ||H2ijpp ||σZKP,DH
+fast-moving vehicle). At this time step, it also unicasts
+ijpp′
+ijpp′
+Cj
+||σHM AC2 ||σC ), KDHSC )) and send it to the controller.
+the encrypted ECDH public key of node i (GPiCK,i,ijp =
+ijp
+ijp
+i
+Ci
+e(Qijp
+=
+prevention and additional security guaran-
+1 (x, y)||HM AC(MGlobal , Q1 (x, y)), KDHSC ); Q1 (x, y)Replay
+′
+ijp ij
+d1 G ) for the communication between link i − j through
+tees. The session HMAC secret key of node j (Mijpp
+)
+2
+port p back to the controller. Thus, the intermediate
+is strictly time-limited to the estimated uplink duration
+proposed LLDP packet consists of raw node and port IDs
+and a tolerance. Now, even if multiple attackers collabo-
+ijp
+(i, j, p), HMAC 1 (H1ijp ), node i’s signature (σHM
+rate, it will be impossible for secret key 2 to be utilized
+AC1 ),
+ijp
+for launching a replay attack by another node, as there
+and the controller’s signature (σC = [i||j||p]LC ).
+is no access for the second node using secret key 2 due
+Node j authentication and session key 2 request.
+to blockchain-driven authentication, where node IDs can-
+Once this intermediate LLDP packet is received by node
+not be changed, as they are registered in the permissioned
+′
+blockchain. In blockchain-driven stage 2 authentication,
+j, it should request a session HMAC secret key 2 (Mijpp
+)
+2
+the ZKP (πj ) of the global Poseidon HMAC of node j
+from the controller after blockchain-driven stage 1 au-
+retrieved from the blockchain, the signature of the ZKP
+thentication. In blockchain-driven stage 1 authentication,
+j
+and DHSC (σZKP,DH
+), the encrypted node location and
+the ZKP (πj ) of the global Poseidon HMAC of node j
+reputation attributes of node j, link identifiers, and times-
+retrieved from the blockchain, the signature of ZKP and
+′
+j
+shared symmetric key (σZKP,DH
+) and the global Poseidon
+tamps (Gijpp
+uplink,2 ), the signed node IDs of nodes i and j,
+ijpp′
+HMAC of node j (HPCj ), the ECDH public key of node j
+the port IDs in nodes i and j (σHM
+AC2 ), and the times-
+′
+′
+tamps retrieved from the blockchain, the ECDH-256 key-
+G ij ) for the communication between
+(Qijpp
+(x, y) = dijpp
+2
+2
+based AES-256 encrypted global Poseidon HMAC of node
+link i − j through ports p − p′ , the controller’s signature
+ijp
+ijp
+j (GCj
+(σC
+), and session HMAC 1 of node i (H1ijp ) are encrypted
+pos ), and the session HMACs of nodes i (H1 ) and
+′
+ijpp
+using the ECDH-256 key-based AES-256 and transmit-
+j (H2 ) will be verified by the controller to authenti-
+′
+ted in uplink with integrity protection (Gijpp
+cate node j for link i − j through specific ports. More-
+uplink,1 =
+j
+ijp
+ijp
+ijpp′
+over, it will be impossible for the same node to launch
+e(i||j||p||p′ ||H1ijp ||σZKP,DH
+||σHM
+||σ
+||Q
+(x,
+y)
+2
+AC1
+C
+a replay attack in the proposed system due to strict time
+j
+ijp
+j
+ijp
+′
+||HM AC(MGlobal , i||j||p||p ||H1 ||σZKP,DH ||σHM AC1
+limitations and duplicate monitoring. Note that packet in
+ijp
+ijpp′
+Cj
+||σC ||Q2 (x, y)), KDHSC )) to be verified by the con-
+is also authenticated using blockchain-driven authentica-
+troller to authenticate node j for link i − j. After that,
+tion. Moreover, to further mitigate eavesdropping, for an
+18accepted packet in, a symmetric key for private communi-
+cation between the nodes i and j is already derived using
+the Diffie-Hellman key exchange, which occurred during
+the link discovery process for subsequent secure communi-
+cation.
+The environment is deterministic:
+executing ac-
+tion a = send transmits an LLDP packet and ob-
+serves delivery success/failure (λpij ) and latency (tpij ),
+which—combined with expected link state from location
+tracking—deterministically updates the next state s′ ac-
+cording to the state determination rules (Fig. 7). No-send
+(a = 0) keeps the current state unchanged. With discount
+factor β = 0.01, Q-value updates depend mainly on imme-
+diate reward.
+3.3.11. Q-Learning
+State-action space and adaptive epsilon-greedy
+strategy. The state-action space is O(AN 2 ). Note that
+the state of reinforcement learning is the link flag, as in
+(5).
+Q-Value update and convergence. Q-values are com-
+puted using the well-known Bellman equation in rein-
+forcement learning [26] with β = 0.01 to represent near-
+independent links, as given in (9).
+p
+= link f lag; link f lag ∈ {0 − conf irmed of f,
+Sij
+1 − conf irmed on, 2 − normal of f, 3 − normal on (5)
+p t
+(Qpij )t = (1 − α)(Qpij )t + α[(Wij
+) + β max (Qpjm )t+1 ]
+, 4 − suspicious of f, 5 − suspicious on}
+m∈G
+The action is to send an LLDP packet or not, as given
+in (6). Note that we use a state-adaptive epsilon-greedy
+approach to select the action, where more link discov-
+ery is preferred (more exploitation with a lower epsilon
+value) when the link state is suspicious and less link dis-
+covery (more exploration with a higher epsilon value) is
+preferred when the link state is not suspicious. Here, state-
+adaptive exploiting involves the selection of a particular
+action based on an on-off state space adaptively by select-
+ing an action that minimizes Q-value in non-malicious off
+states/malicious on states, while selecting an action that
+maximizes Q-value in non-malicious on states/malicious
+off states. Here, exploration means random selection of
+action to discover the link state or not.
+We set β = 0.01(near − zero) rather than β = 0 be-
+cause links sharing nodes exhibit weak coupling: if node j
+is malicious in link i-j, adjacent link j-k warrants increased
+verification. However, β remains small because vehicle mo-
+bility (60 kmph) changes topology faster than multi-step
+lookahead, and LLALDI already handles expected changes
+via distance matrix Dt . This balances topological aware-
+ness with computational efficiency O(N AvgDegreeJ).
+In (9), α is the learning rate and β is the discount factor.
+3.4. BQLLDA: The complete LDA mitigation algorithm
+Algorithm 4 summarizes the algorithm for the
+Blockchain and Q-Learning-driven approach to mitigate
+Link Discovery Attacks (BQLLDA) framework. Let the
+set of LLDP dropping blacklist nodes be represented by
+R.
+apij = discover; discover ∈ {0 − don′ t send, 1 − send}
+(6)
+Thus, in Q-learning [26], the agent (controller) needs to
+learn a policy to confirm a link as on or off.
+3.4.1. Algorithm Summary and Key Steps
+The algorithm first initializes parameters and then en-
+queues node pairs to P and Q lists using the LLALDI
+module. In Algorithm 4, M apQ is a function that maps
+link state to Q-values: +0.5 (conf irmed on) or -0.5
+(conf irmed of f ). Similarly, M apS is a function to map
+link state to Q-learning state: 0 (conf irmed of f ) or 1
+(conf irmed on). After that, it engages in Q-learning by
+sending an appropriate packet out and listening to the
+packet in. The decision to send a packet out or not is
+taken by using a state-adaptive epsilon-greedy approach.
+Once the packet in is received, it will update state, reward,
+and Q-value. However, if node i is detected as a malicious
+LLDP dropping node and packet in is not received, a re-
+verse LLDP will be sent from node j to i, and then node i’s
+packet-traced port mirror will be inspected for reception
+of the reverse LLDP from j. A packet-traced port mirror
+operates at the data link layer and is independent from
+the higher layer’s malicious behavior; thus, it can be effec-
+tively utilized to verify that node i received reverse LLDP
+from node j regardless of its malicious behavior of drop-
+ping LLDP packets. Finally, B t will be derived using the
+updated Q-value and output, as indicated in Algorithm 4.
+Reward Function Design. The reward should be ob-
+tained from the environment (network). The controller
+may resend a timestamped, digitally signed link layer dis-
+covery packet from source i at each step of Q-learning.
+Thus, the reward function is formulated as given in (7).
+Wijp = µ1 (wsuspicion ) + µ2 (wdelivery ) + µ3 (wlatency )
+= µ1 (wsuspicion ) + µ2 (apij λpij ) − µ3 (apij
+tpij
+)
+Tmax
+(7)
+In (7), λpij is the event that the link discovery packet is
+delivered at node j, tpij is the link discovery packet latency
+for link i − j through port p, and Tmax is the maximum
+expected link latency.
+wsuspicion is the reward for the link’s suspicious behav-
+ior, and it can be obtained as in (8).
+wsuspicion = {−1 : normal of f, +1 : normal on,
++0.25 : suspicious of f, −0.25 : suspicious on,
+(9)
+(8)
+−0.50 : conf irmed of f, +0.50 : conf irmed on}
+19Algorithm 4 Blockchain and Q-Learning-driven approach to
+mitigate Link Discovery Attacks (BQLLDA).
+1: procedure BQLLDA(B t , D t , D t−1 , N, Z, ZRSU , ZV EH )
+2:
+M ← Blockchain.GetBlacklistN odes(), I t = Dt − Dt−1
+p
+p
+3:
+Initialize all D′ ij ← Dt [i, j]∀p, I ′ ij ← I t [i, j]∀p
+p
+p
+4:
+Initialize all Qij ← M apQ(XOR[B t [i, j, p, p′ ]∀p′ ]), Sij
+← M apS(XOR[B t [i, j, p, p′ ]∀p′ ])
+p
+p
+t
+5:
+Initialize all Eij [RL iter] ← ([1 − abs(IH
+[i, j])])AN D([1 − abs(ILt [i, j])]), Fi [RL iter] ←!(XOR[abs(I t [i, j])∀j])
+6:
+for i = 0, ..., N − 1 do
+7:
+for j = 0, ..., N − 1 do
+t
+8:
+if {(i ∈
+/ M )&&(j ∈
+/ M )&&(Iij
+! = 0)} then
+9:
+P.enqueue(i, j)
+10:
+else if {(i ∈ M )||(j ∈ M )} then
+11:
+Q.enqueue(i, j)
+12:
+end if
+13:
+end for
+14:
+end for
+15:
+for i = 0, ..., N − 1 do
+16:
+for j = 0, ..., N − 1 do
+17:
+for p = 0, ..., A − 1 do
+18:
+for k = 0, ...., RL iter − 1 do
+19:
+Select apij using state-adaptive epsilon-greedy approach
+20:
+if {([i, j] ∈ P )||([i, j] ∈ Q)} then
+p
+21:
+if {(i ∈ ZRSU )&(Eij
+[k] == 0)&(ap
+ij == 1)} then
+22:
+Sign & transmit LLDP packet out to i
+p
+23:
+Eij
+[k] ← 1
+24:
+end if
+25:
+if {(i ∈ ZV EH )&(Fip [k] == 0)&(ap
+ij == 1)} then
+26:
+Sign & transmit LLDP packet out to i
+27:
+Fip [k] ← 1
+28:
+end if
+29:
+end if
+30:
+Wait for packet in and get i, j, p, p′
+31:
+R ← Blockchain.GetBlacklist LLDP Drop N ode(i)
+32:
+if ((R == T rue)&&(packet in not received)) OR (Duplicate ports detected) then
+33:
+Sign & transmit ReverseLLDP packet out to j in all ports
+34:
+Inspect the packet traced port mirrors of i and j
+35:
+else
+36:
+Verify, & accept packet in and get i, j, p, p′
+37:
+end if
+p
+38:
+Update Sij
+p
+p
+39:
+Update D′ ij using packet in status and update I ′ ij
+p
+p
+40:
+Compute Wij and Qij
+41:
+end for
+42:
+Update B t [i, j, p, p′ ] ← M apB(U0 [Qpij ], p′ )
+43:
+end for
+44:
+end for
+45:
+end for
+46:
+return B t
+47: end procedure
+3.4.2. Convergence and complexity notes
+Moreover, we inspect the average change in Q-values in
+the last 3 time steps in an episode and stop the episode
+if the change in Q-value is less than a threshold (check
+for convergence). Refer to appendix 7.3 for complexity
+analysis of the algorithm.
+as existing using the LDS), channel utilization (overall
+combined DSRC, LTE, and Ethernet channel utilization
+percentage for link discovery), packet interception rate
+(percentage of packets captured by intermediate nodes
+when packets are transmitted in in links discovered as
+existing using the LDS), latency (the total time taken
+for link discovery service), Matthews Correlation Coeffi-
+cient (balanced performance metric for binary classifica-
+tion that takes into account all entries of the confusion
+matrix and returns a value between –1 and +1, where +1
+indicates perfect prediction, 0 indicates random predic-
+tion, and –1 indicates total disagreement), and computa-
+4. Results
+4.1. Performance evaluation metrics
+We utilize packet delivery rate (percentage of packet de-
+livered when packets are transmitted in links discovered
+20tional complexity (total computational load of the LDS in
+terms of time taken for computation–Refer to appendix
+7.4) as performance evaluation metrics.
+less applicable to the current observations in the selected
+link discovery problem, unlike in a traditional reinforce-
+ment learning approach. Additionally, for the proposed
+LDA mitigation scheme, we set µ1 = 0.7, µ2 = 1.0, and
+µ3 = 1.0, and we set the maximum number of RL iter-
+ations as 6. Hyperparameter β = 0.01 was selected via
+grid search 0, 0.01, 0.05, 0.1: β = 0 achieved M CC = 0.64,
+β = 0.01 achieved MCC=0.66 under 60% combined at-
+tacks, while βgeq0.05 degraded to M CC < 0.65 due to
+mobility-induced topology staleness.
+Simulation settings are summarized in Table 3.
+4.2. Simulation settings
+We selected an urban Colombo area in Sri Lanka for
+simulation by importing mobility traces using the SUMO
+and OpenStreetMap tools, while the network was simu-
+lated using Network Simulator 3. We used 4G-LTE and
+Ethernet for control plane communication from vehicles
+and RSUs, respectively. The maximum speed of vehicles
+was set at 60 kmph. The transmission power is set at 33
+dBm, and we place 16 RSUs at road junctions and sim-
+ulate 80 vehicles in the network. We deploy 4 controllers
+(1 primary and 1 backup controller pair and 2 other pri-
+mary controllers) in communication range of the network,
+where up to 3 primary controllers (1 from the pair and
+another additional two primary controllers) can act as ma-
+licious depending on the attack percentage (if the attack
+percentage is less than 10%, all controllers are benign; if
+greater than or equal to 10% and less than 33%, only 1
+controller will act as malicious; if greater than 33% and
+less than 66%, two controllers are malicious; otherwise, 3
+controllers act as malicious). Attackers are distributed us-
+ing two models: (1) 50% Random: uniform distribution
+across vehicles/RSUs, (2) 50% strategic: targeting nodes
+with highest betweenness centrality (computed from mo-
+bility traces). DSRC was used for data plane communi-
+cation with log-distance as the propagation loss model.
+Moreover, we used gRPC over TLS-secured TCP/IP for
+blockchain communication, where we selected Hyperledger
+Fabric version 3.0 as the blockchain platform, implemented
+smart contracts (chaincode) in JavaScript using Node.js,
+and selected BFT-SMaRt as the ordering stage consen-
+sus approach. Here, each SDVN node is connected to the
+blockchain network as a client through REST APIs so that
+in NS3, each node can call these APIs using CURL. More-
+over, we called shell scripts directly from the NS3 envi-
+ronment to configure the blockchain. In order to cater to
+low latency requirements of SDVN, we manually config-
+ured the settings of the Gossip protocol (maximum prop-
+agation burst latency = 100 ms, maximum propagation
+burst size = 50, publish certificate period = 2 s, pull in-
+terval = 500 ms), ordering service (batch timeout = 100
+ms, maximum message count = 30), and channel settings
+(batch timeout = 100 ms, maximum message count = 30).
+We stored all keys and cryptographic content (ciphertexts,
+signatures, hashes, etc.) by exporting them into hexadec-
+imal strings and converting them in to bytes for commu-
+nication in the SDVN network. Leader peer selection of
+the blockchain is set to dynamic in order to improve the
+security and to address the dynamic nature of nodes in
+the vehicular network. In an experiment, the total sim-
+ulation time was 240 s. A moderate learning rate of 0.4
+was selected to strike a balance in learning experience and
+present observations, while the discount factor was set to
+a low value of 0.01, as the rewards from future states are
+Table 3: Simulation settings.
+Parameter
+Network Simulation
+tool
+Optimization tool
+Mobility trace ex-
+traction
+Map
+Run time, cryptogra-
+phy
+Number of nodes
+Communication
+channels
+Location update fre-
+quency
+Q-learning parame-
+ters
+Blockchain, SC, con-
+sensus
+Value
+Network simulator version 3.35
+Gurobi commercial optimizer
+SUMO, OpenStreetMap
+Colombo, Sri Lanka (2000m x
+2000m)
+240 s, Pycryptodome and AS-
+CON (classical), Cairo and
+Scarb (ZKP-STARK), liboqs-
+python (post-quantum)
+96 (80 vehicles, 16 RSUs)
+5.9 GHz DSRC (data plane),
+4G-LTE and Ethernet (con-
+trol plane), gRPC over TLS-
+secured TCP/IP (blockchain)
+10 Hz
+Maximum 6 iterations/node,
+α = 0.40, β = 0.01
+Hyperledger-fabric
+V3.0,
+Chaincode (Node.js), BFT-
+SMaRt
+4.3. Test scenarios
+Our results are compared against state-of-the-art port-
+based defense [10], Link-Guard [14], and pure cryptogra-
+phy (HMAC-based) [16] (to compare with baseline secure
+LLPD approaches), without security measures for LLDP
+(to measure the impact of the attack), and without secu-
+rity measures for VANET hello packet (to compare with
+VANET). We exclude deep RL approaches [17] from com-
+parison because their continuous state-space DNN approx-
+imation requires extensive training data unavailable in our
+240s simulation window.
+4.3.1. Mitigation of attack 1
+In this experiment, the attackers change the location
+of the nodes continuously. Channel utilization, latency,
+and computational complexity of the proposed BQLLDA
+compared with other techniques under diverse attack per-
+centages are as given in Fig. 9.
+215
+30
+Proposed BQLLDA
+HELLO
+Link Guard
+25
+Normal LLDP
+Port-based
+Pure crypto
+20
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+15
+0
+20
+40
+60
+80
+Attack percentage (%)
+(a)
+(b)
+100
+Computational complexity ( s)
+10
+Normal LLDP
+Port-based
+Pure crypto
+Latency (ms)
+Channel Utilization (%)
+35
+Proposed BQLLDA
+HELLO
+Link Guard
+104
+8
+40
+15
+6
+Proposed BQLLDA
+HELLO
+Link Guard
+4
+Normal LLDP
+Port-based
+Pure crypto
+2
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+(c)
+Figure 9: Performance evaluation Attack 1 (a) Channel utilization (b) Latency (c) Computational complexity
+triggered flooding attacks. This stability stems from the
+LLALDI module, which intelligently filters link discovery
+attempts based on verified location tracking and behav-
+ioral monitoring. The blockchain-based location verifica-
+tion mechanism (inter-aggregate, intra-aggregate verifica-
+tion, and node behavioral monitoring) effectively identifies
+and mitigates falsified location reports before they trigger
+excessive LLDP flooding, maintaining computational effi-
+ciency even at 100% attack intensity. When compared to
+existing techniques, HELLO packets exhibit higher latency
+(38.2 ms) due to their broadcast nature without controller
+validation. Link-Guard shows moderate latency (32.1 ms)
+as it lacks the adaptive filtering capability of LLALDI, pro-
+cessing all requests uniformly, and the absence of location-
+triggered mechanisms. Normal LLDP and port-based ap-
+proaches maintain lower absolute latency values (15.9 ms)
+but lack security measures entirely, rendering these mea-
+surements meaningless under attack conditions where net-
+work topology becomes compromised. Pure cryptography
+achieves comparable latency (15.8 ms) to unsecured ap-
+proaches but fails to address the fundamental issue of at-
+tack prevention through intelligent filtering.
+Attack 1 - channel utilization analysis. The proposed
+BQLLDA, as observed from Figure 9a, maintains con-
+stant channel utilization (14.27%) regardless of attack per-
+centage, demonstrating exceptional resilience to falsified
+location triggered flooding attempts. This invariance is
+achieved through the LLALDI module’s proactive filter-
+ing of malicious location reports before LLDP transmis-
+sion, combined with packet limiting mechanisms defined
+in equation (4) and blockchain-based blacklisting through
+the BWTRCB algorithm. The consensus-driven reputa-
+tion system prevents malicious nodes from triggering ex-
+cessive link discovery cycles, while the Q-learning com-
+ponent optimally balances exploration and exploitation
+based on link suspicion states, effectively neutralizing the
+controller and data plane flooding attempts inherent in
+Attack 1. HELLO packets exhibit dramatically lower uti-
+lization (0.42%) due to their restriction to vehicular net-
+works without comprehensive SDVN infrastructure inte-
+gration, though this comes at the cost of inadequate se-
+curity. Link-Guard shows marginally higher utilization
+(14.63%) than BQLLDA, suggesting less efficient filter-
+ing of attack-induced traffic despite implementing some
+security measures. Normal LLDP, port-based defense, and
+pure cryptography all maintain 14.27% utilization, identi-
+cal to BQLLDA under baseline conditions; however, these
+techniques lack the behavioral monitoring, location verifi-
+cation, and adaptive link discovery components that en-
+able BQLLDA to prevent attack-induced traffic amplifica-
+tion, meaning their consistent utilization reflects an inabil-
+ity to distinguish between legitimate and attack-induced
+link discovery rather than effective mitigation owing to
+the fact that those techniques are not basically location-
+driven.
+Attack 1 - computational complexity analysis. BQLLDA
+exhibits significantly higher computational complexity
+(54,536-70,575 µs) compared to other techniques (refer
+to Figure 9c), with a notable increase at higher at-
+tack percentages (80-100%). This elevated complexity is
+attributable to the comprehensive security architecture
+encompassing blockchain consensus operations, crypto-
+graphic computations (mixed post-quantum and classical
+signatures, ZKP-STARK verification, HMAC generation),
+Q-learning iterations, and distributed trust score manage-
+ment through the BWTRCB algorithm. The computa-
+tional overhead represents a deliberate trade-off for achiev-
+ing robust security through multi-layered defense mech-
+anisms, including challenge-response registration, dual-
+stage authentication, and endorsement policy-driven con-
+Attack 1 - latency analysis. The proposed BQLLDA
+framework demonstrates consistently low latency across
+all attack percentages (29.5-30.1 ms), as evident from Fig-
+ure 9b, exhibiting remarkable resilience to falsified location
+2240
+300
+Normal LLDP
+Port-based
+Pure crypto
+250
+30
+20
+10
+0
+Proposed BQLLDA
+HELLO
+Link Guard
+200
+150
+100
+50
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+(a)
+(b)
+105
+3
+Normal LLDP
+Port-based
+Pure crypto
+Computational complexity ( s)
+Proposed BQLLDA
+HELLO
+Link Guard
+Latency (ms)
+Channel Utilization (%)
+50
+100
+Proposed BQLLDA
+HELLO
+Link Guard
+2.5
+Normal LLDP
+Port-based
+Pure crypto
+2
+1.5
+1
+0.5
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+(c)
+Figure 10: Performance evaluation Attack 2 (a) Channel utilization (b) Latency (c) Computational complexity
+sensus for reputation updates. Despite this overhead, the
+complexity remains manageable for vehicular network re-
+quirements. In contrast, HELLO packets demonstrate ex-
+ceptionally low complexity (159-230 µs) due to their sim-
+plistic broadcast mechanism without cryptographic pro-
+tection or controller validation, making them computa-
+tionally efficient but fundamentally insecure. Port-based
+defense shows moderate complexity (266-360 µs) by imple-
+menting basic port verification without comprehensive be-
+havioral monitoring or blockchain-based reputation man-
+agement. Pure cryptography approaches middle-ground
+complexity (24,379-24,508 µs) through HMAC operations
+but lack the intelligent attack detection and adaptive link
+discovery mechanisms that necessitate higher computa-
+tional investment in BQLLDA. Normal LLDP exhibits
+variable complexity (806-2,316 µs) with increasing over-
+head under attack conditions, demonstrating vulnerability
+without proper defense mechanisms.
+can be attributed to the adaptive link discovery mecha-
+nism (LLALDI module), which intelligently reduces un-
+necessary link discovery attempts for nodes identified as
+malicious through blockchain-based reputation monitor-
+ing (Algorithm 1). Furthermore, the blockchain-based
+weighted endorser trust-driven reputation system enables
+rapid identification and blacklisting of flooding nodes,
+preventing their duplicate packets from being processed
+beyond initial signature verification. In contrast, Nor-
+mal LLDP and Port-based approaches exhibit dramatic
+channel utilization increases from approximately 14.3% to
+43.2% as attack percentage rises to 100%, demonstrating
+their vulnerability to flooding attacks due to the absence
+of packet limiting and signature-based duplicate detec-
+tion mechanisms. Link Guard shows progressive degra-
+dation from 14.46% to 36.98%, suggesting partial miti-
+gation capabilities but lacking the comprehensive crypto-
+graphic validation and blockchain-driven behavioral moni-
+toring that enables BQLLDA to identify and isolate flood-
+ing sources effectively. Pure cryptography performs worst
+among secure approaches (escalating to 46.4% at 100%
+attack), as HMAC-based authentication alone cannot pre-
+vent malicious controllers from flooding the network—a
+vulnerability that BQLLDA addresses through its con-
+troller trust evaluation mechanism (Algorithm 3) and dy-
+namic controller switching capability. The HELLO packet
+approach maintains minimal channel utilization (rising
+only to 1.08%) but at the cost of lacking controller val-
+idation, rendering it unsuitable for secure SDVN environ-
+ments despite its efficiency.
+4.3.2. Mitigation of attack 2
+In this experiment, the attackers (controller or data
+plane nodes) send multiple copies of legitimate link dis-
+covery packets continuously. Channel utilization, latency,
+and computational complexity of the proposed BQLLDA
+compared with other techniques under diverse attack per-
+centages is as given in Fig. 10.
+Attack 2 - channel utilization analysis. The proposed
+BQLLDA framework demonstrates remarkably stable and
+efficient channel utilization across all attack intensities,
+maintaining approximately 13.5-14.3% utilization even as
+the attack percentage escalates from 0% to 100%, as ev-
+ident from Figure 10a. This trend reflects the effective-
+ness of the packet limiting mechanism defined in equa-
+tion 4, which restricts duplicate packets with matching
+digital signatures to a maximum threshold of JAN 2 for
+packet out/packet in pairs. The slight reduction from
+14.27% at 0% attack to 13.5% at higher attack percentages
+Attack 2 - latency analysis. BQLLDA exhibits a counter-
+intuitive latency reduction from 30.1ms at 0% attack to
+a stable 24.6ms at attack percentages of 20% and above,
+as seen from Figure 10b, which can be explained by the
+Q-learning-driven state-adaptive link discovery strategy.
+Under normal conditions, the framework performs com-
+prehensive authentication cycles including both stage 1
+23and stage 2 blockchain-driven authentication with ZKP
+verification, digital signature validation, and location-
+reputation attribute checking. However, as malicious
+nodes are identified through the BWTRCB algorithm (Al-
+gorithm 1) and added to blacklists, the system bypasses
+unnecessary link discovery attempts for these nodes, re-
+ducing overall authentication overhead while maintaining
+security. The persistent 24.6ms latency across high at-
+tack percentages demonstrates the efficiency of the dual
+symmetric key approach (ASCON-128 for downlink, AES-
+256 for uplink) and the caching of ZKP-STARK proofs
+and Poseidon HMACs in the blockchain, which eliminates
+repetitive cryptographic computations during subsequent
+authentication sessions. Conversely, Normal LLDP, Port-
+based, and Pure crypto methods suffer catastrophic la-
+tency increases to approximately 254.7ms at 100% attack,
+as they lack mechanisms to distinguish legitimate traffic
+from flooding attacks, forcing the system to process all
+packets including duplicates. Link Guard demonstrates se-
+vere latency degradation (reaching 203.4ms), attributable
+to its reactive defense mechanisms that must analyze traf-
+fic patterns post-reception rather than proactively pre-
+venting floods through signature-based duplicate rejection.
+The HELLO packet approach shows substantial latency
+increases (30.1ms to 98.2ms) despite minimal channel uti-
+lization, indicating processing bottlenecks when handling
+broadcast-based discovery without cryptographic valida-
+tion and controller trust assessment. Notably, BQLLDA’s
+ability to switch malicious controllers to trusted alterna-
+tives ensures consistent performance even when primary
+controllers participate in flooding attacks—a capability
+absent in all comparison techniques, which assume con-
+troller trustworthiness and consequently fail when control
+plane attacks occur.
+malicious nodes, thereby reducing the number of cryp-
+tographic operations despite maintaining comprehensive
+security for legitimate nodes. Interestingly, Pure crypto
+emerges as the most computationally intensive approach,
+escalating from 24,393 µs to 252,403 µs at 100% at-
+tack—significantly worse than BQLLDA—demonstrating
+that cryptography alone without intelligent filtering cre-
+ates unsustainable computational burdens when process-
+ing flooding attacks. Normal LLDP and Port-based meth-
+ods show moderate complexity increases (229 µs to 9,302
+µs and 3,193µs respectively) but achieve this efficiency by
+sacrificing security entirely, processing fraudulent packets
+without validation until system resources are exhausted.
+Link Guard maintains relatively modest computational
+overhead (498µs to 3,245µs), suggesting lightweight de-
+fense mechanisms that prove insufficient against sophisti-
+cated flooding attacks as evidenced by its poor channel
+utilization and latency performance. The HELLO packet
+approach exhibits minimal computational demands (136µs
+to 225µs) consistent with its lack of controller validation
+and cryptographic security. Critically, BQLLDA’s compu-
+tational investment delivers proportional security returns:
+the combination of blockchain-based behavioral monitor-
+ing, adaptive Q-learning, and controller trustworthiness
+evaluation ensures that computational resources are di-
+rected toward legitimate traffic processing rather than
+wasted on malicious packet handling—a fundamental ad-
+vantage absent in comparison techniques that either over-
+process attacks (Pure crypto) or under-secure the network
+(Port-based, Normal LLDP, HELLO).
+4.3.3. Mitigation of attack 3
+In this experiment, the attackers fabricate link discov-
+ery packets and send them to the controller continuously
+(data plane version), while controller will maliciously cre-
+ate fake links between data plane nodes, where links do
+not exist, when the controller is malicious. The packet
+delivery rate, packet interception rate, and Matthews cor-
+relation coefficient of the proposed BQLLDA compared
+with other techniques under diverse attack percentages is
+as given in Fig. 11.
+Attack 2 - computational complexity analysis. The pro-
+posed BQLLDA framework exhibits the second highest
+computational complexity among evaluated techniques,
+ranging from 53,458 µs at 0% attack to 46,349 µs at
+100% attack, as seen from Figure 10c, with interme-
+diate fluctuations reflecting the dynamic trade-off be-
+tween security operations and attack mitigation effi-
+ciency. This computational investment stems from the
+multi-layered security architecture: post-quantum cryp-
+tographic operations (FALCON-1024 digital signatures,
+Kyber-1024 encryption), ZKP-STARK generation and ver-
+ification for challenge-response authentication, blockchain
+consensus operations with weighted endorser trust scor-
+ing, Q-learning iterations (up to 6 iterations per link), and
+HMAC computations at multiple protocol stages (global
+Poseidon HMAC, session HMACs 1 and 2, and global
+HMAC-SHA-256 for location verification). The reduction
+in computational complexity at higher attack percentages
+(37,015 µs at 80%, 46,349 µs at 100%) relative to mod-
+erate attacks (53,458 µs at 0%) can be attributed to the
+blacklisting mechanism, which prevents repeated authen-
+tication attempts and Q-learning iterations for identified
+Attack 3 - packet delivery ratio analysis. The proposed
+BQLLDA framework, as shown in Figure 11a, exhibits
+outstanding resilience against link fabrication attacks, sus-
+taining a consistently high packet delivery ratio of 97–98%
+across all attack intensities from 0% to 100%. This stabil-
+ity arises from its multi-layered defense architecture, which
+fundamentally prevents fabricated links from entering the
+network topology. The slight fluctuation around 97.47% at
+60% attack intensity reflects normal variance, not degra-
+dation, thanks to blockchain-based authentication using
+ZKP-STARK proofs, dual-session HMAC verification, and
+FALCON-1024 signatures that filter out all fake link dis-
+covery packets before topology integration. Additionally,
+the BCTES algorithm enables detection and autonomous
+switching to a backup trusted controller when the primary
+241
+Normal LLDP
+Port-based
+Pure crypto
+60
+40
+20
+0
+15
+10
+Proposed BQLLDA
+HELLO
+Link Guard
+5
+Normal LLDP
+Port-based
+Pure crypto
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+0
+20
+40
+60
+80
+Attack percentage (%)
+(a)
+(b)
+100
+Matthews correlation coefficient
+Proposed BQLLDA
+HELLO
+Link Guard
+80
+Packet interception ratio (%)
+Packet delivery ratio (%)
+100
+0.8
+0.6
+0.4
+0.2
+0
+-0.2
+0
+Proposed BQLLDA
+HELLO
+Link Guard
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+80
+Attack percentage (%)
+100
+(c)
+Figure 11: Performance evaluation Attack 3 (a) Packet delivery ratio (b) Packet interception ratio (c) Matthews
+correlation coefficient
+even successful topology manipulation would yield useless
+intercepted traffic due to end-to-end encryption between
+authenticated nodes.
+In contrast, all baseline approaches exhibit persistent
+packet interception rates of approximately 9% to 16%,
+even at zero attack percentage, due to inherent vulnerabil-
+ities in link discovery mechanism that allow passive obser-
+vation of data plane traffic by intermediate nodes. A slight
+decreasing trend in PIR likely results from incorrect port-
+pair link fabrications. HELLO packet methods maintain
+interception rates between 9.34% and 15.91% as compro-
+mised RSUs can eavesdrop on unencrypted neighbor dis-
+covery broadcasts and insert themselves as phantom hops.
+Link-Guard (9.96% to 16.35%) and other cryptographic
+approaches (10.0% to 16.06%) fail to prevent interception
+because, despite verifying packet authenticity, they do not
+block attackers with legitimate network presence from fab-
+ricating links and passively or actively intercepting traf-
+fic. These techniques lack both the blockchain-based rep-
+utation system and behavioral monitoring (Algorithm 1:
+BWTRCB) needed to detect suspicious relay patterns or
+malicious controllers that route traffic through compro-
+mised nodes via fake topology views.
+one attempts malicious link injection, preserving legiti-
+mate topology and routing accuracy.
+In contrast, conventional methods suffer severe PDR
+degradation with increasing attack intensity. The HELLO
+packet approach drops from 93.27% to 9.96% at 100%
+attacks, as traditional VANET hello packets lack con-
+troller validation and cryptographic protection, making
+them easily exploitable. Link-Guard performs slightly
+better initially (58.14% at 20%) but falls to 11.04% at
+100%, limited by its inability to authenticate packet ori-
+gins or counter sophisticated fabrication when attackers
+know legitimate node IDs and port details. Normal LLDP
+(53.6% to 12.4%), port-based defense (55.9% to 12.5%),
+and pure cryptography methods (59.04% to 12.7%) all
+converge to similarly poor results at high attack levels
+due to the absence of distributed behavioral monitoring,
+blockchain consensus for topology verification, and effec-
+tive countermeasures against controller-originated attacks,
+allowing fake links to corrupt routing and divert traffic to
+nonexistent paths.
+Attack 3 - packet interception rate analysis. The pro-
+posed BQLLDA framework achieves zero packet intercep-
+tion across all attack scenarios (Figure 11b), providing
+a fundamental security guarantee unmatched by exist-
+ing techniques. This absolute protection stems primar-
+ily from private encrypted channels between discovered
+links, comprehensive elimination of fabricated links via
+cryptographic verification chains, and the inability of at-
+tackers to forge valid time-limited session HMACs (M1ijp
+′
+and M2ijpp ). Dual-stage blockchain-driven authentication
+binds node identities to registered credentials, preventing
+man-in-the-middle positioning. Attempted phantom link
+creation triggers blacklisting due to mismatched port IDs
+in packet in messages compared to authenticated port in-
+formation. Most importantly, ECDH-based symmetric key
+establishment during legitimate link discovery ensures that
+Attack 3 - MCC analysis. The proposed BQLLDA main-
+tains an exceptionally high MCC between 0.9542 and
+0.9675 across all attack intensities, while it barely deterio-
+rates, as seen from Figure 11c, demonstrating near-perfect
+link state classification accuracy with balanced consid-
+eration of true positives, true negatives, false positives,
+and false negatives. This superior performance emerges
+from the Q-learning-based state determination module
+that adaptively classifies links into six nuanced states using
+multiple information sources: distance-based expected link
+states (Dt matrix), LLDP packet delivery outcomes (λpi j),
+behavioral reputation scores retrieved from blockchain,
+and cryptographic verification results. The RL agent’s
+2560
+40
+20
+Prop. BQLLDA
+HELLO
+Link Guard
+0
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+80
+Attack percentage (%)
+15
+Proposed BQLLDA
+HELLO
+Link Guard
+10
+Normal LLDP
+Port-based
+Pure crypto
+5
+0
+100
+0
+20
+40
+60
+80
+Attack percentage (%)
+(a)
+(b)
+100
+Matthews correlation coefficient
+80
+0
+1
+20
+Packet interception ratio (%)
+Packet delivery ratio (%)
+100
+0.8
+0.6
+0.4
+0.2
+Prop. BQLLDA
+HELLO
+Link Guard
+0
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+80
+Attack percentage (%)
+100
+(c)
+Figure 12: Performance evaluation Attack 4 (a) Packet delivery ratio (b) Packet interception ratio (c) Matthews
+correlation coefficient
+diverse attack percentages is as given in Fig. 12.
+reward function incorporating suspicion weights, delivery
+confirmation, and latency measurements enables the con-
+troller to iteratively refine link state estimates even when
+attackers inject contradictory topology information, while
+the state-adaptive epsilon-greedy exploration strategy en-
+sures additional verification for suspicious links, prevent-
+ing both false positives from fabricated links and false neg-
+atives from vanished legitimate links.
+In contrast, existing methods suffer severe MCC degra-
+dation under increasing attack intensity, with most col-
+lapsing toward zero (random classification) at high at-
+tack rates. The HELLO packet approach drops from
+0.9025 to zero at 100% attacks due to its broadcast-
+only mechanism, which lacks controller validation and pro-
+duces high false positives from fabricated announcements
+while missing legitimate links under attack traffic. Link-
+Guard shows moderate resilience (0.91 to 0.07) via port-
+based filtering that reduces some false positives, but fails
+in dynamic vehicular networks because it lacks adaptive
+learning to differentiate legitimate topology changes from
+attack-induced fabrications. Standard LLDP (0.9729 to
+0.16), port-based (0.9729 to 0.17), and pure cryptographic
+methods (0.9729 to 0.18) exhibit comparable degradation,
+as they depend on single-observation topology inference
+without distributed consensus or behavioral reputation,
+leaving them vulnerable to collaborative Sybil attacks and
+unable to detect or recover from controller-level topology
+falsification.
+Attack 4 - packet delivery rate analysis. The proposed
+BQLLDA framework maintains exceptionally high packet
+delivery rates (97-98%) across all attack percentages,
+demonstrating robust resilience against replay attacks.
+This consistent performance stems from the integration
+of time-limited session-based HMACs that invalidate re-
+played packets and the blockchain-driven authentication
+mechanism that prevents unauthorized nodes from suc-
+cessfully impersonating legitimate communication end-
+points. The slight variation observed at 80% attack in-
+tensity (97.47%) reflects the adaptive Q-learning compo-
+nent dynamically adjusting link discovery patterns in re-
+sponse to heightened suspicious activity detected through
+behavioral monitoring. In contrast, existing techniques ex-
+hibit severe degradation as attack intensity increases, with
+HELLO packets dropping to 19.92% at 100% attack pen-
+etration due to the lack of controller validation and cryp-
+tographic protection. Link-Guard, Normal LLDP, Port-
+based, and Pure crypto approaches all converge to ap-
+proximately 23-24% delivery rates at maximum attack lev-
+els because they lack the proposed framework’s capability
+to detect and switch malicious controllers, leaving them
+vulnerable when control plane entities are compromised.
+The proposed method’s unique controller trust evaluation
+mechanism (BCTES algorithm) enables seamless transi-
+tion to backup controllers, maintaining network integrity
+even when primary controllers exhibit malicious replay be-
+havior, a critical advantage not present in any comparative
+technique. Packet Interception Rate Analysis
+4.3.4. Mitigation of attack 4
+In this experiment, the attackers replay the legitimate
+link discovery packets received from neighbors continu-
+ously (data plane version), while a malicious controller will
+fabricate a link between data plane nodes, where links do
+not exist between 2 ports of the same channel. Packet
+delivery rate, capture interception rate, and MCC of the
+proposed BQLLDA compared with other techniques under
+Attack 4 - packet interception rate analysis. The
+BQLLDA framework achieves zero packet interception
+across all attack scenarios, a remarkable result attributable
+to its multi-layered defense incorporating Diffie-Hellman
+key exchange for encrypted node-to-node communication
+and ASCON-128/AES-256 encryption for control plane
+26communications. Specifically, this framework’s crypto-
+graphic architecture, combining post-quantum and clas-
+sical cryptography with ZKP-based authentication, makes
+sure that even when attackers attempt man-in-the-middle
+strategies, they simply cannot decrypt intercepted traffic
+or extract session keys required for successful eavesdrop-
+ping. The blockchain-based reputation system (BWTRCB
+algorithm) continuously monitors and blacklists nodes ex-
+hibiting replay behavior, effectively isolating malicious en-
+tities before they can establish positions as intermedi-
+aries in fabricated link paths. Conversely, all baseline
+approaches demonstrate interception rates ranging from
+15-20%, with rates slightly increasing under higher attack
+percentages as more compromised nodes position them-
+selves as replay attack vectors increasing link fabrication
+between active ports. The HELLO packet approach shows
+particularly concerning vulnerability (18.67% at 100% at-
+tack) because it operates without controller involvement
+or cryptographic verification, allowing attackers to freely
+intercept and redirect traffic through fabricated interme-
+diate links.
+or penetration depth.
+4.3.5. Mitigation of attack 5
+In this experiment, the attackers collaborate and re-
+play fabricated LLDP packets continuously or drop legiti-
+mate LLDP packets in the data plane version or malicious
+LLDP packet discarding by the controller. The packet
+deliver rate, interception rate, and MCC of the proposed
+BQLLDA compared with other techniques under diverse
+attack percentages is as given in Fig. 13.
+Attack 5 - packet delivery rate analysis. The proposed
+BQLLDA framework maintains exceptionally high packet
+delivery rates across attack intensities, achieving 97.70-
+98% delivery for attack percentages from 0-80%, with
+a sharp decline to 27.2% only at 100% attack sat-
+uration. This resilience stems from the framework’s
+multi-layered defense mechanisms: the blockchain-based
+weighted endorser trust system (Algorithm 1) continuously
+monitors and blacklists malicious LLDP-dropping nodes
+with reverse LLDP when drop is suspected, while the
+Q-learning component adaptively investigates suspicious
+links through state-adaptive epsilon-greedy exploration,
+preventing both fabricated packet acceptance and legiti-
+mate packet drops. The controller trust evaluation mecha-
+nism (Algorithm 2, BCTES) enables seamless switching to
+the backup controller when the primary controller exhibits
+malicious behavior, ensuring service continuity even under
+severe attacks. In contrast, existing techniques demon-
+strate progressive degradation, with Link-Guard declin-
+ing from 97.78% to 83.01% and conventional approaches
+(Normal LLDP, Port-based, Pure crypto) dropping to 88-
+92% at 80% attacks before complete failure at 100%.
+These techniques lack controller-level attack mitigation
+and distributed behavioral monitoring capabilities, ren-
+dering them vulnerable to coordinated link vanishing at-
+tacks where malicious nodes systematically drop or fabri-
+cate LLDP packets without detection or countermeasures.
+Attack 4 - Matthews correlation coefficient analysis. The
+proposed BQLLDA maintains MCC values above 0.95
+across all attack intensities, indicating near-perfect clas-
+sification accuracy in distinguishing legitimate from fab-
+ricated link states even under complete network compro-
+mise scenarios. This superior performance derives from
+the Q-learning state determination module that com-
+bines multiple verification signals—suspicious behavior
+scoring, packet delivery confirmation, and latency anal-
+ysis—weighted through the reward function to accurately
+classify link states as conf irmed on, conf irmed of f , or
+suspicious variants. The framework’s blockchain-based
+weighted endorser trust mechanism ensures that link state
+decisions incorporate consensus from multiple trusted ob-
+servers rather than relying on single-point observations,
+providing Byzantine fault tolerance that maintains classi-
+fication accuracy when individual endorsers are compro-
+mised. Existing techniques show progressive MCC degra-
+dation, with Port-based and Pure crypto approaches de-
+clining to 0.39 at maximum attack levels, reflecting their
+inability to differentiate replayed legitimate packets from
+authentic current communications without time-bound au-
+thentication tokens. Link-Guard’s performance (0.34 at
+100% attack) suffers particularly because its detection
+mechanisms cannot address control plane attacks where
+malicious controllers deliberately fabricate links between
+existing ports, a scenario the proposed BCTES algorithm
+explicitly handles through cross-endorsement validation
+with non-malicious data plane subsets. The reinforcement
+learning component’s adaptive link rediscovery, triggered
+more frequently for suspicious nodes identified through
+behavioral monitoring, enables the proposed framework
+to continuously refine its link state classifications, main-
+taining high correlation coefficients that reflect accurate
+topological awareness regardless of attack sophistication
+Attack 5 - packet interception rate analysis. The proposed
+BQLLDA achieves zero packet interception across all at-
+tack scenarios (0-100%), demonstrating complete elimina-
+tion of man-in-the-middle vulnerabilities inherent to At-
+tack 5’s replay-fabrication-dropping combination. This su-
+perior performance results from the dual-HMAC authen-
+tication scheme with time-limited session keys (HMAC1
+for intermediate packets, HMAC2 for packet in) com-
+bined with post-quantum FALCON-1024 signatures and
+blockchain-verified ZKP authentication, which collectively
+prevent attackers from successfully replaying fabricated
+packets to deceive intermediate nodes about non-existent
+links. The cryptographic approach ensures that even if
+attackers intercept legitimate LLDP packets, they cannot
+create valid replays due to strict temporal constraints and
+node-specific authentication tied to blockchain-registered
+identities. Conversely, all baseline techniques exhibit per-
+sistent interception rates with a decreasing trend with the
+271
+80
+60
+40
+Prop. BQLLDA
+HELLO
+Link Guard
+20
+0
+Normal LLDP
+Port-based
+Pure crypto
+Matthews correlation coefficient
+Packet interception ratio (%)
+Packet delivery ratio (%)
+100
+15
+10
+Prop. BQLLDA
+HELLO
+Link Guard
+5
+Normal LLDP
+Port-based
+Pure crypto
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+100
+0
+20
+40
+60
+80
+Attack percentage (%)
+(a)
+(b)
+100
+0.8
+0.6
+0.4
+0.2
+0
+-0.2
+0
+Prop. BQLLDA
+HELLO
+Link Guard
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+80
+Attack percentage (%)
+100
+(c)
+Figure 13: Performance evaluation Attack 5 (a) Packet delivery ratio (b) Packet interception ratio (c) Matthews
+correlation coefficient
+mance worse than random classification. The absence
+of adaptive learning mechanisms, distributed behavioral
+monitoring through weighted endorsement, and controller-
+level attack detection in these techniques prevents them
+from maintaining classification accuracy when attackers
+systematically corrupt the link discovery topology through
+coordinated dropping and fabrication strategies.
+increment of the attack of 10-16% regardless of attack in-
+tensity, with HELLO packets showing marginally lower
+rates (14.40-16.37%) due to their broadcast nature lack-
+ing controller validation. Link-Guard, Pure crypto, and
+Port-based defenses, despite employing security measures,
+maintain 12-16% interception at high attack percentages
+because they lack comprehensive cryptographic protec-
+tion combining both classical and post-quantum primitives
+with blockchain-enforced authentication, allowing deter-
+mined attackers to exploit vulnerabilities in replay detec-
+tion or signature verification processes.
+4.3.6. Mitigation of combined LDAs
+In this experiment, all types of link discovery attacks
+are launched, and the resulting metrics are depicted in
+Fig. 14.
+Attack 5 - Matthews correlation coefficient analysis. The
+proposed BQLLDA maintains substantially higher MCC
+values throughout attack escalation, ranging from 0.9675
+at 0% attacks to 0.7461 at 80% attacks, indicating superior
+balanced classification performance in distinguishing legit-
+imate versus fabricated links even under extreme adversar-
+ial conditions. This robustness derives from the Q-learning
+reward function that integrates suspicious behavior mon-
+itoring, packet delivery confirmation, and latency analy-
+sis to iteratively refine link state classifications, while the
+blockchain-based reputation system provides distributed
+consensus on node trustworthiness to minimize false pos-
+itives and negatives. At 100% attack intensity, BQLLDA
+achieves 0.31 MCC compared to negative or near-zero val-
+ues for all baseline techniques, attributed to the controller
+switching mechanism that maintains partial network func-
+tionality by migrating nodes to the trusted backup con-
+troller, however; poor performance is owing to the reverse
+port-mirror-based LLDP performance being compromised
+under higher attack percentages when both sender and re-
+ceiver of a link are attackers. Existing approaches demon-
+strate steeper MCC degradation, with Link-Guard drop-
+ping from 0.9072 to 0.35 at 80% attacks and traditional
+LLDP-based methods declining to 0.39-0.44, ultimately
+reaching negative values at saturation indicating perfor-
+Packet delivery ratio analysis. The proposed BQLLDA
+maintains consistently high packet delivery ratios (98%
+to 96%) even at 80% attack penetration, only degrad-
+ing significantly to 50% at complete saturation (100%
+attack). This resilience stems from the Q-learning and
+cryptography-driven adaptive link discovery that prior-
+itizes suspicious links for verification, combined with
+blockchain-based behavioral monitoring that identifies and
+blacklists malicious nodes, ensuring traffic routing through
+verified paths. In contrast, existing techniques experience
+catastrophic degradation beyond 20% attack levels (drop-
+ping to 9.3-50.8%), as they lack distributed node reputa-
+tion management and controller trust evaluation mecha-
+nisms to systematically exclude compromised entities from
+the topology.
+Channel utilization analysis. The proposed approach ex-
+hibits moderate and controlled channel utilization growth
+from 14.27% to 36.8% as attack intensity increases, reflect-
+ing the state-adaptive epsilon-greedy exploration strategy
+that triggers additional LLDP transmissions only for sus-
+picious links while maintaining efficient unicast/broadcast
+decisions through LLALDI. The blockchain-based packet
+limiting with signature matching prevents flooding attacks
+from overwhelming the channel, and the controller trust
+2870
+Prop. BQLLDA
+HELLO
+Link Guard
+80
+Prop. BQLLDA
+HELLO
+Link Guard
+60
+Channel Utilization (%)
+Normal LLDP
+Port-based
+Pure crypto
+40
+20
+0
+50
+40
+30
+20
+10
+0
+20
+40
+60
+Attack percentage (%)
+80
+0
+100
+10
+20
+40
+60
+80
+Attack percentage (%)
+100
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+80
+Attack percentage (%)
+(b)
+Normal LLDP
+Port-based
+Pure crypto
+100
+(c)
+1
+Prop. BQLLDA
+HELLO
+Link Guard
+500
+4
+3
+2
+1
+Normal LLDP
+Port-based
+Pure crypto
+400
+300
+200
+100
+0
+Prop. BQLLDA
+HELLO
+Link Guard
+5
+0
+600
+Prop. BQLLDA
+HELLO
+Link Guard
+5
+10
+5
+Latency (ms)
+Computational complexity ( s)
+6
+15
+0
+0
+(a)
+0
+Normal LLDP
+Port-based
+Pure crypto
+Matthews correlation coefficient
+Packet delivery ratio (%)
+60
+Packet interception ratio (%)
+100
+20
+40
+60
+80
+Attack percentage (%)
+100
+0
+0
+20
+40
+60
+80
+Attack percentage (%)
+(d)
+(e)
+100
+0.8
+0.6
+0.4
+0.2
+0
+-0.2
+0
+Prop. BQLLDA
+HELLO
+Link Guard
+20
+Normal LLDP
+Port-based
+Pure crypto
+40
+60
+Attack percentage (%)
+80
+100
+(f )
+Figure 14: Performance evaluation of combined LD attack (a) Packet delivery rate (b) Channel utilization (c) Packet
+capture rate (d) Computational complexity (e) Latency (f) Mathews correlation coefficient
+evaluation mechanism (BCTES) penalizes malicious flood-
+ing behavior. Conversely, techniques like Normal LLDP
+and Port-based suffer from uncontrolled channel satura-
+tion (up to 63.7%) at high attack levels due to absence of
+intelligent packet limiting and malicious controller detec-
+tion.
+mechanisms that bind cryptographic keys to specific link
+sessions.
+Attack 6 - computational complexity analysis. The pro-
+posed system demonstrates higher computational over-
+head (55,456 to 323,397 µs) compared to lightweight ap-
+proaches, attributed to the combined computational bur-
+den of blockchain consensus operations, ZKP generation
+and verification, post-quantum cryptographic operations
+(FALCON-1024, Kyber-1024), and Q-learning state up-
+dates across multiple iterations. However, this complexity
+increases gracefully and remains manageable even at 80%
+attack levels (150,805 µs), while Pure crypto experiences
+comparable overhead (512,759 mus at 100%) without the
+distributed trust and adaptive learning benefits. The com-
+putational investment is justified by the comprehensive se-
+curity guarantees and controller switching capability that
+existing lightweight techniques cannot provide.
+Attack 6 - Packet interception ratio analysis. BQLLDA
+achieves zero packet interception across all attack scenar-
+ios through its comprehensive cryptographic defense com-
+prising time-limited session HMACs, mixed post-quantum
+and classical digital signatures, and Diffie-Hellman key ex-
+change for symmetric key derivation between legitimate
+link endpoints. The two-stage blockchain-driven authen-
+tication with ZKPs and encrypted attributes ensures only
+authenticated nodes with valid credentials can participate
+in link discovery, fundamentally eliminating man-in-the-
+middle and replay attack vectors. Other techniques ex-
+hibit persistently higher interception rates (8.8-16.06%)
+even at benign conditions, as they lack end-to-end encryp-
+tion for LLDP packets and sophisticated authentication
+Attack 6 - Latency analysis. BQLLDA exhibits controlled
+latency growth from 30.1ms to 170ms, reflecting the time
+required for multi-round Q-learning iterations (maximum
+29• H6: MCC of the proposed technique is lower than or
+equal to all other techniques.
+6), blockchain smart contract invocations for authentica-
+tion and reputation updates, and cryptographic opera-
+tions including signature verification and HMAC valida-
+tion. The permissioned blockchain’s optimized configura-
+tion (batch timeout 100ms, gossip protocol tuning) and the
+adaptive link discovery approach that avoids unnecessary
+verification of confirmed stable links help maintain reason-
+able latency even under 80% attack conditions (79.8ms).
+While Pure crypto shows lower latency at maximum attack
+(342ms vs 170ms), it lacks the distributed consensus and
+behavioral monitoring that enable BQLLDA’s resilience,
+and other techniques either suffer from timeout-induced
+delays (HELLO at 98.2ms) or complete service degrada-
+tion.
+We conducted one-sided Wilcoxon signed-rank tests
+comparing the proposed method against five baseline ap-
+proaches across six attack percentage levels. The Holm-
+Bonferroni correction was applied to control the family-
+wise error rate across multiple comparisons (α = 0.05)
+and the results are given in Table 4.
+All comparisons for H1 remained statistically signifi-
+cant, therefore null hypothesis H1 can be rejected. H2
+is rejected, as the proposed method demonstrated sig-
+nificantly higher channel utilization only compared to
+HELLO (p = 0.0156), while comparisons with Link guard
+(p = 0.7188), NormalLLDP (p = 0.9922), Portbased
+(p = 0.9922), and Purecrypto (p = 0.9844) were non-
+significant, indicating no statistical evidence that the pro-
+posed technique has higher channel utilization than these
+methods. H3 is rejected, as all comparisons were statis-
+tically significant (p = 0.0156), confirming significantly
+lower packet interception rates for the proposed method.
+H4 is supported, as results confirmed higher computational
+complexity than HELLO, Link Guard, NormalLLDP, and
+Port-based (allp = 0.0156), but no significant difference
+from Purecrypto (p = 0.781), representing an acceptable
+tradeoff for enhanced security and performance. The null
+hypothesis H5 was rejected for Link Guard, NormalLLDP,
+and Port-based methods (p < 0.05), while showing no sig-
+nificant latency decrease against HELLO and Pure Crypto.
+H6 is rejected, as all comparisons yielded p < 0.05, demon-
+strating that the proposed technique maintains signifi-
+cantly superior MCC values, contradicting the null hy-
+pothesis.
+Effect sizes using Cliff’s δ confirm large practical dif-
+ferences: For H1, H3, and H6, δ > 0.8 for all comparisons
+indicates BQLLDA achieves superior performance in terms
+of MCC, PDR, and PIR.
+Attack 6 - MCC analysis. The proposed technique main-
+tains strong link state classification performance (MCC:
+0.9675 to 0.66) up to 80% attack penetration through Q-
+learning-based state determination that integrates suspi-
+cious behavior rewards, LLDP delivery events, and latency
+observations to converge on correct link states despite
+adversarial interference along with signature and HMAC
+verifications, blockchain-driven authentication, and strong
+encryption. The blockchain-based controller trust evalua-
+tion with HELLO packet cross-validation and the reverse
+LLDP verification for suspected LLDP-dropping nodes en-
+able accurate topology reconstruction by switching away
+from malicious controllers and verifying disputed links
+through independent endorsement. Existing techniques
+experience rapid MCC degradation to near-zero or neg-
+ative values beyond 40% attacks, as they rely on single
+observations without distributed endorsement consensus
+and cannot adapt to persistent adversarial manipulation
+of the link discovery process.
+5. Discussion
+5.1. Statistical significance of the results
+5.2. Overall result interpretation
+The comprehensive evaluation across five attack sce-
+narios and combined attack conditions demonstrates that
+BQLLDA achieves superior security-performance balance
+through its multi-layered defense architecture. Statisti-
+cal analysis using Wilcoxon signed-rank tests with Holm-
+Bonferroni correction confirms significant improvements in
+packet delivery ratio (97-98% vs. 9-50% for baselines at
+high attack intensities), zero packet interception across all
+scenarios, consistently high Matthews Correlation Coef-
+ficient (0.95-0.66 up to 80% attacks), and competitive la-
+tency (24-170 ms) and channel utilization (14%-37%) com-
+pared to competing techniques. The framework’s ability to
+maintain network functionality even under extreme adver-
+sarial conditions (100% attack penetration) through con-
+troller switching and adaptive link discovery represents a
+fundamental advancement over existing approaches that
+assume controller trustworthiness. While BQLLDA incurs
+higher computational complexity (46-323 ms) compared to
+In order to verify the statistical significance of the re-
+sults, we state the following null hypotheses.
+• H1: The PDR of the proposed technique is lower than
+or equal to all other techniques.
+• H2: The channel utilization of proposed technique is
+higher than or equal to all other techniques except
+HELLO.
+• H3: The packet interception ratio of the proposed
+technique is higher than or equal to all other tech-
+niques.
+• H4: Computational complexity of the proposed tech-
+nique is higher than or equal to all other techniques
+except the technique pure cryptography.
+• H5: Latency of the proposed technique is higher than
+or equal to all other techniques.
+30Table 4: Statistical significance analysis of the performance of the proposed BQLLDA.
+Hypothesis
+H1
+H2
+H3
+H4
+H5
+H6
+HELLO
+W = 21, p = 0.0156
+W=0, p=0.0156
+W = 0, p = 0.0156
+W = 21, p = 0.0156
+W = 3, p = 0.156
+W=20, p=0.0312
+Link guard
+W = 21, p = 0.0156
+W = 11, p = 0.7188
+W = 0, p = 0.0156
+W = 21, p = 0.0156
+W = 0, p = 0.015
+W=20, p=0.0312
+Normal LLDP
+W = 15, p = 0.0312
+W=18, p=0.9922
+W = 0, p = 0.0156
+W = 21, p = 0.0156
+W = 1, p = 0.031
+W=20, p=0.0312
+unsecured baselines, these costs are justified by the com-
+prehensive security guarantees and represent acceptable
+trade-offs for mission-critical vehicular applications. The
+controlled degradation pattern observed in combined at-
+tack scenarios—maintaining 96% PDR at 80% attacks be-
+fore dropping to 50% at saturation—demonstrates graceful
+performance decay rather than catastrophic failure char-
+acteristic of existing techniques.
+Port-based
+W = 15, p = 0.0312
+W=18, p=0.9922
+W = 0, p = 0.0156
+W = 21, p = 0.0156
+W = 1, p = 0.031
+W=20, p=0.0312
+Pure crypto
+W = 15, p = 0.0312
+W = 17, p = 0.9844
+W = 0, p = 0.0156
+W = 7, p = 0.781
+W = 5, p = 0.109
+W=20, p=0.0312
+With K = N/30 controllers (one per 30 nodes), effec-
+tive complexity becomes O(30N AJ), achieving linear scal-
+ing. However, inter-consortium link discovery for bound-
+ary nodes introduces overhead O(BK) where B is the
+number of boundary nodes, limiting practical scalability
+to metropolitan areas (K < 20 controllers) before coordi-
+nation overhead dominates. However, empirical validation
+is limited to N=96. Future work must evaluate boundary
+node overhead O(B×K) empirically for 200-500 node net-
+works to validate the claimed linear scaling, as blockchain
+gossip latency may exhibit non-linear growth beyond our
+tested scale. The state-adaptive epsilon-greedy Q-learning
+strategy reduces computational scaling concerns by per-
+forming intensive link verification only for suspicious links
+while treating confirmed stable links efficiently, with the
+maximum 6 RL iterations per link preventing unbounded
+computational growth. However, blockchain consensus la-
+tency may increase non-linearly with network density due
+to gossip protocol propagation delays and endorsement
+policy verification across distributed peers, potentially lim-
+iting practical deployments to metropolitan-area networks
+(MANs) rather than nationwide infrastructures. However,
+real time feasibility of the permissioned blockchain with
+respect to throughput under considered simulation set-
+tings is given in Appendix 7.1, which theoretically proves
+that the proposed system is feasible. The framework’s
+packet limiting mechanism (Equation 12) with signature-
+based duplicate detection provides O(1) flood attack mit-
+igation regardless of attacker population, demonstrating
+algorithmic scalability, though the blockchain storage re-
+quirements for reputation scores, location histories, and
+authentication credentials grow linearly with node count,
+necessitating periodic pruning strategies for long-term op-
+eration.
+5.3. Suitability of BQLLDA
+BQLLDA is particularly well-suited for zero-trust SDVN
+architectures where both control plane and data plane en-
+tities cannot be assumed trustworthy, addressing a crit-
+ical gap in existing link discovery security frameworks.
+The framework’s blockchain-based distributed consensus
+mechanism enables Byzantine fault tolerance without re-
+quiring centralized trust assumptions, making it ideal
+for consortium-based vehicular networks involving mul-
+tiple stakeholders (vehicle manufacturers, infrastructure
+providers, network operators) with competing interests.
+The mixed post-quantum and classical cryptography ap-
+proach future-proofs the system against emerging quan-
+tum computing threats while maintaining compatibility
+with existing infrastructure, addressing the long deploy-
+ment cycles typical in vehicular networks. However,
+BQLLDA’s computational requirements make it most suit-
+able for modern vehicular platforms with adequate pro-
+cessing capabilities (multi-core processors, dedicated secu-
+rity co-processors) rather than resource-constrained legacy
+systems. The framework’s permissioned blockchain archi-
+tecture with dynamic peer selection and optimized gos-
+sip protocol configuration (100ms batch timeout, 500ms
+pull interval) specifically addresses the low-latency require-
+ments of safety-critical vehicular applications, distinguish-
+ing it from general-purpose blockchain solutions unsuitable
+for real-time operation.
+5.5. Strengths of BQLLDA
+BQLLDA’s primary strength lies in its comprehen-
+sive defense-in-depth architecture that addresses attack
+vectors across control plane, data plane, and location
+tracking subsystems simultaneously through coordinated
+mechanisms rather than point solutions. The frame-
+work uniquely addresses controller-level attacks through
+the BCTES algorithm with automatic failover to trusted
+backup controllers, filling a critical security gap where ex-
+isting techniques assume controller trustworthiness and
+fail catastrophically when this assumption is violated.
+5.4. Scalability of BQLLDA
+BQLLDA’s scalability is influenced by several archi-
+tectural factors that create both opportunities and con-
+straints for large-scale deployment. The multi-controller
+architecture achieves sublinear scaling when network
+growth is accompanied by proportional controller addi-
+tion. For a network partitioned into K consortiums
+of N/K nodes each, per-consortium complexity becomes
+O((N/K)2 AJ), yielding total complexity O(N 2 AJ/K).
+31The blockchain-based weighted endorser trust mechanism
+with incentivized consensus provides distributed Byzan-
+tine fault tolerance while maintaining network function-
+ality even when significant portions of endorsers (up to
+33% based on BFT-SMaRt properties) exhibit malicious
+behavior. The dual-stage authentication combining ZKP-
+STARK proofs with time-limited session HMACs creates
+cryptographically strong binding between link discovery
+sessions and registered node identities, preventing replay
+attacks while minimizing authentication latency through
+cached proof reuse (reducing subsequent authentications
+by approximately 60% compared to full challenge-response
+cycles). The Q-learning-based adaptive link discovery
+demonstrates intelligent resource allocation by intensifying
+verification for suspicious links while minimizing overhead
+for stable legitimate links, achieving security-efficiency
+trade-offs impossible with static security policies.
+5.7. Implications of BQLLDA
+BQLLDA’s successful demonstration of zero-trust link
+discovery in SDVNs has significant implications for future
+vehicular network security architectures, suggesting that
+distributed consensus mechanisms and adaptive machine
+learning can achieve security guarantees previously consid-
+ered impractical for real-time systems. The framework’s
+blockchain-based reputation management paradigm ex-
+tends beyond link discovery to inform broader questions
+about decentralized trust establishment in vehicular net-
+works, potentially enabling new applications such as coop-
+erative perception data validation, distributed traffic man-
+agement, and peer-to-peer resource sharing without cen-
+tralized arbitration. The mixed post-quantum and clas-
+sical cryptography approach validates the feasibility of
+transitional security architectures that provide quantum
+resistance while maintaining backward compatibility, of-
+fering a deployment pathway for vehicular networks with
+10-15 year infrastructure lifecycles facing quantum com-
+puting emergence. From a standardization perspective,
+BQLLDA’s architecture suggests necessary extensions to
+existing ETSI ITS-G5 and C-V2X standards to incor-
+porate controller trust evaluation, distributed behavioral
+monitoring, and blockchain-based authentication mecha-
+nisms beyond current certificate-based approaches. The
+demonstrated trade-offs between security guarantees and
+computational costs (55-323 ms overhead) establish quan-
+titative benchmarks for evaluating future zero-trust ve-
+hicular protocols, suggesting that security-critical applica-
+tions justify these costs while delay-sensitive applications
+may require hybrid approaches combining BQLLDA’s
+comprehensive security for control plane with lightweight
+mechanisms for time-critical data plane forwarding.
+5.6. Weaknesses of BQLLDA
+BQLLDA’s computational complexity (46-323 ms) and
+latency (24-170 ms) represent significant operational costs
+compared to unsecured baselines, potentially limiting ap-
+plicability in ultra-low-latency applications requiring sub-
+10ms response times such as autonomous vehicle emer-
+gency braking coordination. At 80% attack, the computa-
+tional complexity breakdown is approximately C crypto =
+62%, C blockchain = 28%, C RL = 7%, C location = 3%
+(Refer to appendix 7.4), indicating cryptographic opera-
+tions dominate overheadThe blockchain infrastructure in-
+troduces architectural dependencies (Docker containers for
+subordinate CAs, gRPC communication channels, per-
+sistent storage for ledgers) that complicate deployment
+compared to lightweight centralized approaches, requir-
+ing careful capacity planning and maintenance procedures
+that may exceed capabilities of smaller vehicular network
+operators. The framework’s effectiveness against LLDP
+dropping attacks (Attack 5) degrades significantly when
+both sender and receiver of a link are malicious (MCC
+dropping to 0.31 at 100% attacks), as the reverse LLDP
+verification mechanism through port mirrors cannot over-
+come coordinated dropping by colluding endpoints. This
+motivates future work on physical-layer link verification
+orthogonal to protocol-layer defenses. The permissioned
+blockchain architecture, while providing performance ad-
+vantages over permissionless alternatives, introduces gov-
+ernance challenges regarding consortium membership, en-
+dorsement policy configuration, and certificate authority
+management that require ongoing coordination among po-
+tentially competing stakeholders. The Q-learning conver-
+gence to optimal policies requires multiple link discovery
+cycles (up to 6 RL iterations), introducing transient pe-
+riods where link state classifications may be suboptimal,
+though this weakness is partially mitigated by the con-
+servative suspicious state classifications that trigger addi-
+tional verification.
+6. Conclusion
+In this paper, we presented a blockchain and Q-
+learning-based cryptographically secure technique to mit-
+igate link discovery attacks in zero-trust SDVN by de-
+riving link states with the aid of Q-learning-based adap-
+tive link state determination, blockchain-based weighted
+endorser trust mechanism enabling Byzantine fault tol-
+erance, and controller trust evaluation with automatic
+switching, cycle-based digital signatures with encryption,
+time-based session-limited hash message authentication
+codes, packet limiting, and location verification. Unlike
+existing approaches assuming controller trustworthiness,
+BQLLDA provides comprehensive defense against five at-
+tack variants targeting control plane, data plane, and lo-
+cation tracking subsystems. The results proved that the
+proposed BQLLDA is highly effective in mitigating the
+5 link discovery attacks presented in this research indi-
+vidually and in combination compared to approaches pro-
+posed for SDN and VANET. An analysis of the obtained
+results proved that the proposed BQLLDA can prevent
+packet losses (97-98% PDR uto 80% attack), reduce eaves-
+dropping (0% PIR), reduce link discovery confusion (MCC
+32of 0.95-0.66 up to 80% attack) significantly outperform-
+ing all other techniques, while it achieves competitive la-
+tency (24-170 ms) and channel utilization (14%-37%) in
+SDVN despite being reported for higher computational
+complexity (46-323 ms) which can be traded off for all
+other gains. Performance degradation at 100% attack sat-
+uration (PDR: 27-50%, MCC: 0.31) when both endpoints
+are malicious reveals verification-based defense limitations,
+suggesting physical layer authentication necessity for ex-
+treme scenarios. BQLLDA’s demonstrated feasibility es-
+tablishes that distributed consensus and adaptive learning
+can achieve zero-trust security while meeting real-time ve-
+hicular requirements.
+Several limitations guide future work: (1) Scalabil-
+ity beyond 200 nodes: Current O(N AJ) complexity re-
+quires hierarchical Q-learning approximation or graph neu-
+ral networks for large-scale deployment, motivated by
+metropolitan SDVN scenarios with 500+ vehicles, (2) hy-
+brid architectures for ultra-low-latency applications (<
+10ms), (3) cross-layer physical-cryptographic authentica-
+tion addressing coordinated endpoint attacks integrating
+RF fingerprinting could identify compromised radios be-
+fore protocol-layer detection, as attack 5 shows 0.31 MCC
+at 100% saturation when both endpoints are malicious;
+(4) improving energy efficiency: Vehicles report 46-323ms
+computation overhead; so, real-world testbed validation
+with energy optimization for resource-constrained OBUs
+may be required, and (5) incorporating anomaly detection
+to detect malicious nodes. BQLLDA provides a founda-
+tion for secure next-generation intelligent transportation
+systems operating under zero-trust assumptions.
+7.2. Security analysis
+7.2.1. Fabrication resistance
+Lemma 1. Under the assumption that RSA-2048 is EUF-
+CMA secure, an attacker without skC cannot forge valid
+packet out signatures with probability > negl(λ).
+Proof. Fabrication requires producing σ = Sign(skC , m)
+for attacker-chosen message m. If attacker A succeeds
+with non-negligible probability ϵ(λ), we construct adver-
+sary B breaking RSA-2048’s EUF-CMA security: B re-
+ceives pkC from challenger, simulates BQLLDA by answer-
+ing A’s signing queries using its own oracle, and outputs
+A’s forgery (m∗ , σ ∗ ) as its own forgery. Since B succeeds
+whenever A does, B’s advantage is ϵ(λ), contradicting
+RSA-2048 security assumption that no polynomial-time
+adversary has non-negligible advantage.
+7.2.2. Replay Resistance
+Lemma 2. With HMAC lifetime τ < Tmax , probability
+of successful replay after expiration is bounded by collision
+probability of HMAC-SHA256: Preplay < 2−256 .
+Proof. For replay to succeed post-expiration, at-
+tacker must either: (1) predict future HMAC key
+(information-theoretically impossible given key derivation
+from KDHSC ), or (2) find HMAC collision. Under ran-
+dom oracle model, collision probability is bounded by
+birthday bound Pcollision ≤ q 2 /2257 where q is number
+of queries. For polynomial-time attacker with q < 264 ,
+Preplay < 2−129 , which is negligible.
+7.3. BQLLDA complexity analysis
+BQLLDA has time complexity O(N 2 × A × J × Tcrypto )
+where N = nodes, A = ports, J = RL iterations, Tcrypto =
+cryptographic operation time. Dominant costs: (1) signa-
+ture verification O(N 2 × J) for packet in, (2) blockchain
+queries O(N ) for reputation retrieval, (3) Q-value updates
+O(N 2 × A × J). Space complexity is O(N 2 × A) for Q-
+table storage. Compared to standard LLDP’s O(N 2 ), our
+overhead factor is O(A × J × Tcrypto /Tsimple ) ≈ 10-50×
+depending on J and cryptographic choices, where typical
+values are A = 4, J = 6, Tcrypto /Tsimple ≈ 0.4-2.0 (based
+on FALCON-1024 verification time 0.8 ms vs. simple for-
+warding 0.02 ms).
+7. Appendix
+7.1. Throughput analysis of blockchain
+With BFT-SMaRt ordering (3f + 1 replicas), batch size
+B = 30, and block time Tb = 100 ms, maximum through-
+put is B/Tb = 300 TPS. For N = 96 nodes with loca-
+tion update frequency floc = 1 s and reputation updates
+frep = 1 s:
+Blockchain transaction sources:
+• BWTRCB: Updates reputation, location, and loca-
+tion reputation per node. Triggered by location track-
+ing at floc = 1 Hz for all nodes = N × floc = 96 × 1
+= 96 TPS
+7.4. Computational complexity calculation
+• Controller trust evaluation (BCTES): Random subset
+(10% nodes) verification = 0.1 × N/THELLO = 0.1 ×
+96/1 s ≈ 9.6 TPS
+Computational complexity is decomposed into:
+(1) C crypto: aggregate time for signature genera-
+tion/verification, encryption/decryption, and HMAC
+computations across all packets; (2) C blockchain:
+smart contract invocation latency including endorse-
+ment and ordering; (3) C RL:
+Q-learning state
+updates and action selection; and (4) C location:
+location verification computations.
+Total complexity
+C total = C crypto + C blockchain + C RL + C location.
+• Registration data (RASC): Private data collection
+committed once per registration = N/60 s ≈ 1.6 TPS
+• Authentication timestamps (RASC): Private data col-
+lection committed once per authentication expiration
+= N × A/4 s ≈ 96 TPS
+Total steady-state load: 96 + 9.6 + 1.6 + 96 = 203.2 TPS
+(32.3% headroom), validating real-time feasibility.
+33Additional note: Initial registration incurs 250-400ms
+for ZKP-STARK generation (Cairo prover v0.11), amor-
+tized across node lifetime through blockchain caching.
+Subsequent authentications require only 10-15 ms verifi-
+cation. For vehicles with average network residence time
+→> 60s and re-authentication every 1 s, amortized per-
+session overhead becomes (400 + 15*60)/61 ≈ 21 ms, ac-
+ceptable for link discovery.
+detection in SDN control plane: a case study of topology discov-
+ery attacks. Wireless Communications and Mobile Computing,
+2020(1), p.8898949.
+[13] A. Nehra, M. Tripathi, M.S. Gaur, R.B. Battula, and C. Lal,
+” SLDP: A secure and lightweight link discovery protocol for
+software defined networking,” Computer Networks, 150, pp.102-
+116, 2019.
+[14] I. Al Salti, and N. Zhang, ”LINK-GUARD: An effective and
+scalable security framework for link discovery in SDN net-
+works,” IEEE Access, 10, pp.130233-130252, 2022.
+[15] Zhao, X., Yao, L. and Wu, G., 2018. ESLD: An efficient
+and secure link discovery scheme for software-defined network-
+ing. International Journal of Communication Systems, 31(10),
+p.e3552.
+[16] Spina, M.G., Tropea, M. and De Rango, F., 2023. Mitigation
+of LLDP Topological Poisoning Attack in SDN Environments
+Using Mininet Emulator. In SIMULTECH (pp. 318-325).
+[17] Wang, J., Tan, Y., Liu, J. and Zhang, Y., 2020. Topology poi-
+soning attack in SDN-enabled vehicular edge network. IEEE
+Internet of Things Journal, 7(10), pp.9563-9574.
+[18] Wijesekara, P.A.D.S.N. Intrusion Detection Using Blockchain
+in Software-Defined Networking: A Literature Review. Journal
+of Engineering Science and Technology Review 2025, 18(1).
+[19] Cardona, N.; Coronado, E.; Latré, S.; Riggio, R.; Marquez-
+Barja, J.M. Software-defined vehicular networking: Opportuni-
+ties and challenges. IEEE Access 2020, 8, 219971–219995.
+[20] Al-Hourani, A., Chandrasekharan, S., Baldini, G. and Kan-
+deepan, S., 2014, November. Propagation measurements in 5.8
+GHz and pathloss study for CEN-DSRC. In 2014 International
+Conference on Connected Vehicles and Expo (ICCVE) (pp.
+1086-1091). IEEE.
+[21] Aljeri, N. and Boukerche, A., 2020, November. A distributed
+topology discovery protocol for software-defined vehicular net-
+works. In Proceedings of the 17th ACM Symposium on Perfor-
+mance Evaluation of Wireless Ad Hoc, Sensor, & Ubiquitous
+Networks (pp. 17-24).
+[22] P.A.D.S.N. Wijesekara, K.L.K. Sudheera, G.G.N. Sandamali,
+and P.H.J. Chong, “An Optimization Framework for Data Col-
+lection in Software Defined Vehicular Networks,” Sensors, vol.
+23, no. 3, Art. no. 1600, Feb. 2023.
+[23] Das, T., Sridharan, V. and Gurusamy, M., 2019. A survey on
+controller placement in SDN. IEEE communications surveys &
+tutorials, 22(1), pp.472-503.
+[24] Kaur, R. and Kaur, A., 2012, September. Digital signature. In
+2012 International Conference on Computing Sciences (pp. 295-
+301). IEEE.
+[25] Michail, H.E., Kakarountas, A.P., Milidonis, A. and Goutis,
+C.E., 2004, December. Efficient implementation of the keyed-
+hash message authentication code (HMAC) using the SHA-1
+hash function. In Proceedings of the 2004 11th IEEE Interna-
+tional Conference on Electronics, Circuits and Systems, 2004.
+ICECS 2004. (pp. 567-570). IEEE.
+[26] B. Jang, M. Kim, G. Harerimana, and J.W. Kim, “Q-learning
+algorithms: A comprehensive classification and applications,”
+IEEE access, vol. 7, pp.133653-133667, Sep. 2019.
+[27] Grassi, L., Khovratovich, D., Rechberger, C., Roy, A. and
+Schofnegger, M., 2021. Poseidon: A new hash function for Zero-
+Knowledge proof systems. In 30th USENIX Security Sympo-
+sium (USENIX Security 21) (pp. 519-535).
+[28] National Institute of Standards and Technology, ”Recommenda-
+tion for Key Management: Part 1 – General (Revision 5), NIST
+Special Publication 800-57 Part 1 Rev. 5,” May 2020. [Online].
+Available: https://doi.org/10.6028/NIST.SP.800-57pt1r5
+7.5. MCC classes
+The true positive is obtained when a packet is delivered
+in a link predicted by LDS. True negative is LDA predicts
+as link not existing and packet is also not delivered. False
+positive is packet is not delivered, but the LDS specifies a
+link exists. False negative is packet is delivered, but LDS
+has predicted link does not exist.
+References
+[1] P.A.D.S.N. Wijesekara, and S. Gunawardena, “A Machine
+Learning-Aided Network Contention-Aware Link Lifetime- and
+Delay-Based Hybrid Routing Framework for Software-Defined
+Vehicular Networks,” Telecom, vol. 4, no. 3, pp. 393-458, Jul.
+2023.
+[2] Li, H. and Xu, Z., 2018. Routing Protocol in VANETs Equipped
+with Directional Antennas: Topology-Based Neighbor Discov-
+ery and Routing Analysis. Wireless Communications and Mo-
+bile Computing, 2018(1), p.7635143.
+[3] Deng, S., Zhang, X. and Gao, X., 2024. Poisoning Topology
+View in Software-Defined Vehicular Network: An Empirical
+Study. IEEE Transactions on Intelligent Transportation Sys-
+tems.
+[4] Abdelrahman, A.M., Rodrigues, J.J., Mahmoud, M.M., Saleem,
+K., Das, A.K., Korotaev, V. and Kozlov, S.A., 2021. Software-
+defined networking security for private data center networks
+and clouds: vulnerabilities, attacks, countermeasures, and solu-
+tions. International Journal of Communication Systems, 34(4),
+p.e4706.
+[5] Zhang, T., Bianco, A., Giaccone, P. and Nezhad, A.P., 2017,
+December. Dealing with misbehaving controllers in SDN net-
+works. In GLOBECOM 2017-2017 IEEE Global Communica-
+tions Conference (pp. 1-6). IEEE.
+[6] Badotra, S., Tanwar, S., Bharany, S., Rehman, A.U., Eldin,
+E.T., Ghamry, N.A. and Shafiq, M., 2022. A DDoS vulnerability
+analysis system against distributed SDN controllers in a cloud
+computing environment. Electronics, 11(19), p.3120.
+[7] Bhuiyan, Z.A., Islam, S., Islam, M.M., Ullah, A.A., Naz, F. and
+Rahman, M.S., 2023. On the (in) security of the control plane of
+sdn architecture: A survey. IEEE Access, 11, pp.91550-91582.
+[8] Wei, Z., Chen, Q., Yang, H., Wu, H., Feng, Z. and Ning, F.,
+2021. Neighbor discovery for VANET with gossip mechanism
+and multipacket reception. IEEE Internet of Things Journal,
+9(13), pp.10502-10515.
+[9] Nguyen, T.H. and Yoo, M., 2017, January. Analysis of link dis-
+covery service attacks in SDN controller. In 2017 International
+Conference on Information Networking (ICOIN) (pp. 259-261).
+IEEE.
+[10] Baidya, S.S., & Hewett, R.. 2020. Link discovery attacks in
+software-defined networks: Topology poisoning and impact
+analysis. Journal of Communications, 15(8), pp. 596-606.
+[11] Katsis C, Bertino E. ZT-SDN: an ML-powered zero-trust ar-
+chitecture for software-defined networks. ACM Transactions on
+Privacy and Security. 2025 Feb 22;28(2):1-35.
+[12] Chou, L.D., Liu, C.C., Lai, M.S., Chiu, K.C., Tu, H.H., Su, S.,
+Lai, C.L., Yen, C.K. and Tsai, W.H., 2020. Behavior anomaly
+34
