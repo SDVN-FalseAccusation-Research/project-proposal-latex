@@ -142,10 +142,10 @@
 \renewcommand{\thepage}{\roman{page}} % Start page numbering in roman
 
 \chapter*{Abstract}
-False accusation attacks pose a significant security challenge in Software-Defined Vehicular Networks (SDVN), where malicious entities deliberately accuse honest nodes of misbehavior to manipulate trust and reputation systems. Such attacks can severely disrupt routing decisions, degrade network performance, and undermine overall system stability. This study identifies four prominent variants of false accusation attacks: single-accuser opportunistic fabrication, Sybil-amplified consensus flooding, timing-based accusations during high-noise periods, and evidence spoofing through tampered or fabricated logs. \\ \\
-However, existing SDVN security solutions largely address false accusations in isolation, lack robust mechanisms for privacy-preserving verification, and fail to intelligently model complex accusation behaviors across diverse attack variants, resulting in limited resilience and scalability.\\ \\
-To address these threats, this research proposes a novel multi-layered defense framework that integrates blockchain technology, Zero-Knowledge Proofs (ZKPs), and Graph Neural Networks combined with Large Language Models (GNN-LLMs). Blockchain is employed to ensure immutable and decentralized logging of reputation and accusation records, while ZKPs enable privacy-preserving verification of accusation authenticity without revealing sensitive vehicular information. GNN-LLMs are leveraged to model SDVN topology and behavioral relationships, enabling the detection of anomalous accusation patterns and the intelligent interpretation of complex attack behaviors. \\\\
-The proposed framework is evaluated through comprehensive simulation across all identified attack variants, demonstrating its effectiveness in mitigating false accusation attacks while preserving network performance and privacy. To the best of our knowledge, this work represents the first integrated use of blockchain, ZKPs, and GNN-LLMs specifically designed to counter false accusation attacks in Software-Defined Vehicular Networks.
+False accusation attacks represent serious security threats against Software, Defined Vehicular Networks (SDVN), wherein malicious nodes maliciously level accusations against benign nodes in order to influence trust and reputation mechanisms. False accusations can dramatically influence routing decisions and significantly impede SDVN operations and stability. This research identifies four common false accusation attack variants: opportunistic innocuous Single, Accuser Fabrication, Sybil, Flooded Consensus, Timing Disruptions in Noise, rich periods, and Tampered, Logs, based Evidence Spoofing. \\ \\
+Existing SDVN countermeasures mostly treat false accusations independently, lack secure privacy, preserving verification protocols, and do not sufficiently model high, complexity false accusation behaviors across attack variants, limiting functionality.\\ \\
+This research proposes an innovative multi, layered solution architecture that synthesizes blockchain, Zero, Knowledge Proofs (ZKPs), and Graph Neural Networks enhanced with Large Language Models (GNN, LLMs). Blockchain facilitates replicable, distributed, and tamper, evident logging of reputation and false accusations records. ZKPs allow confidential verification of accusations. GNN, LLMs facilitate topology analysis, as well as inferences of unseen high, complexity false accusation attack variants by learning behavioral graph interactions. \\\\
+Our approach is evaluated and validated across all four false accusation variants in simulations, revealing its ability to significantly defend against false accusation attacks without compromising network operation and user privacy. To the best of our knowledge, this is the first use of blockchain, ZKPs, and GNNs, LLMs in tandem to deny false accusation attacks in SDVNs.
 \newpage
 
 % Table of Contents
@@ -178,11 +178,11 @@ To understand the security challenges in Software-Defined Vehicular Networks, it
 \subsection{Software-Defined Networking (SDN)}
 Software-Defined Networking (SDN) represents a revolutionary paradigm shift by fundamentally decoupling the control plane from the data plane \cite{godanj2016simple}. In traditional networks, both intelligence for routing decisions (control plane) and packet forwarding (data plane) reside together within network devices. SDN addresses these limitations through architectural separation where the control plane is extracted and centralized into software-based SDN controllers, while the data plane remains in simplified network devices focusing solely on packet forwarding \cite{godanj2016simple}.
 
-The SDN architecture consists of three distinct layers:
+The SDN architecture is composed of three layers:
 \begin{itemize}
-    \item \textbf{Application Plane:} Network applications defining desired behaviors and policies, communicating through the northbound API \cite{kreutz2014software}.
-    \item \textbf{Control Plane:} SDN controller maintaining global network view, making routing decisions, and translating policies into forwarding rules \cite{kreutz2014software}.
-    \item \textbf{Data Plane:} Physical and virtual network devices forwarding packets according to flow tables populated by the controller \cite{kreutz2014software}.
+	\item \textbf{Application plane:} the network applications that specify the desired network behavior and policies, interacting with the control plane through the northbound API \cite{kreutz2014software}.
+	\item \textbf{Control plane:} SDN controller that maintains a global view of the network state, makes routing decisions, and programs the forwarding devices through the southbound API \cite{kreutz2014software}.
+	\item \textbf{Data plane:} physical and virtual forwarding devices that forward packets according to flow tables installed by the network controller \cite{kreutz2014software}.
 \end{itemize}
 
 \begin{figure}[H]
@@ -192,33 +192,32 @@ The SDN architecture consists of three distinct layers:
     \label{fig:sdn}
 \end{figure}
 
-\subsection{Vehicular Ad-hoc Networks (VANET)}
-Vehicular Ad-hoc Networks (VANET) represent a specialized class of Mobile Ad-hoc Networks specifically designed for vehicle-to-vehicle (V2V) and vehicle-to-infrastructure (V2I) communication \cite{raja2010issues}. VANETs enable vehicles equipped with On-Board Units to communicate directly with each other and with Roadside Units deployed along roadways \cite{raja2010issues}.
+\subsection{Vehicular Ad,  hoc Networks (VANET)}
+A specialized form of a Mobile Ad, hoc Network, Vehicular Ad,  hoc Networks (VANET), offer vehicle,  to,  vehicle communication (V2V) and vehicle,  to,  infrastructure (V2I) communication \cite{raja2010issues}. VANETs provide a means of communication for vehicles equipped with On,  Board Units to communicate with fellow vehicles and infrastructure located around the road \cite{raja2010issues}.
 
-Distinctive characteristics of VANET:
+ Features of VANET:
 \begin{itemize}
-    \item \textbf{High Mobility:} Vehicles move at varying speeds creating highly dynamic topology with frequent link disruptions \cite{raja2010issues}.
-    \item \textbf{Dynamic Topology:} Network topology changes rapidly and unpredictably as vehicles enter, leave, or change lanes \cite{rehman2013vehicular}.
-    \item \textbf{Variable Network Density:} Node density varies dramatically based on location, time, and events \cite{lee2021vanet}.
-    \item \textbf{Distributed Decision Making:} Each vehicle makes local routing decisions without global network visibility \cite{raja2010issues}.
+ \item \textbf{Intensely dynamic topology:} As vehicles travel at various speed, link failure occurs frequently \cite{raja2010issues}.
+ \item \textbf{Frequent topology changes:} As vehicles join and leave roadways,  topology changes occur \cite{rehman2013vehicular}.
+ \item \textbf{Highly variable network density:} The number of vehicles varies widely by location, time of day and events \cite{lee2021vanet}.
+ \item \textbf{Distributed Decision Making:} Locally informed decisions are made by each vehicle without global network awareness \cite{raja2010issues}.
 \end{itemize}
 
 \begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{diagrams/2_VANET.png}
-    \caption{Architecture of Vehicular Ad-Hoc Networks (VANETs) \cite{rehman2013vehicular}}
-    \label{fig:vanet}
+ \centering
+ \includegraphics[width=0.85\textwidth]{diagrams/2_VANET.png}
+ \caption{Architecture of Vehicular Ad,  Hoc Networks (VANETs) \cite{rehman2013vehicular}}
+ \label{fig: vanet}
 \end{figure}
+\subsection{Software,  Defined Vehicular Networks (SDVN)}
+Software,  Defined Vehicular Networks (SDVN) hybridise SDN and VANET as a programmable, centrally controlled architecture with mobile communication ability \cite{correia2017architecture}. SDVN overcomes’ VANET‘s inherent limitations, , especially distributed routing within rapidly changing topologies,,  by centralising network intelligence whilst retaining vehicle,  to,  vehicle messaging \cite{li2016control}.
 
-\subsection{Software-Defined Vehicular Networks (SDVN)}
-Software-Defined Vehicular Networks (SDVN) emerge as a convergence architecture integrating the programmability and centralized control of SDN with the mobility and distributed communication of VANET \cite{correia2017architecture}. SDVN addresses fundamental VANET limitations—particularly distributed routing in highly dynamic topologies—by introducing centralized intelligence while maintaining vehicle-to-vehicle communication \cite{li2016control}.
-
-SDVN architectural components:
+SDVN architecture:
 \begin{itemize}
-    \item \textbf{SDN-Enabled Vehicles:} Vehicles as mobile SDN switches querying controllers for forwarding instructions \cite{li2016control}.
-    \item \textbf{SDN-Enabled RSUs:} Hybrid devices for packet forwarding and controller-to-vehicle communication aggregation \cite{li2016control}.
-    \item \textbf{Hierarchical Controllers:} Local controllers for region-specific routing with global controller coordination \cite{correia2017architecture}.
-    \item \textbf{Hybrid Control:} Time-critical safety messages via direct V2V; non-urgent traffic via centralized SDN \cite{dhawankar2017software}.
+	\item \textbf{SDN, PCV}:  Vehicles act as SDN switches with controllers providing forwarding guidance \cite{li2016control}
+	\item \textbf{SDN, enabled RSUs}: Packet forwarding and communication with controllers \cite{li2016control}
+	\item \textbf{Hierarchical Control}:  Local controllers with regional routing, globally networked \cite{correia2017architecture}
+	\item \textbf{Hybrid Control}: Urgent safety messages require direct V2V messaging;  other traffic travels via SDN \cite{dhawankar2017software}
 \end{itemize}
 
 \begin{figure}[H]
@@ -229,70 +228,65 @@ SDVN architectural components:
 \end{figure}
 
 \subsection{Security Challenges in SDVN}
-Software-Defined Vehicular Networks inherit security vulnerabilities from both Software-Defined Networking and Vehicular Ad-hoc Networks, while simultaneously introducing new attack surfaces due to their centralized control architecture and highly dynamic vehicular environment. Although SDVN improves network flexibility and routing efficiency, the tight coupling between mobile data-plane entities and centralized control logic increases the overall attack impact when security assumptions are violated \cite{arif2020sdn}.
+SDVNs inherit all security issues present in SDN and VANETs. In addition,  they can be targeted by new attack points due to centralized control plane and highly dynamic environment. SDVN networks offer flexible routing and enhanced network connectivity, however the mobile data,  plane entities and centralized logic in an SDVN system are tightly coupled and thus attack effects could be magnified if security assumptions are broken \cite{arif2020sdn}.
 
-One of the core security challenges in SDVN is maintaining reliable decision-making under highly dynamic conditions. Frequent topology changes, intermittent connectivity, and variable node density make it difficult to obtain accurate and consistent network state information \cite{arif2020sdn}. As a result, control-plane decisions may be based on incomplete, delayed, or noisy inputs, reducing the effectiveness of conventional security validation mechanisms \cite{arif2020sdn}.
+Achieving robust decision making under highly dynamic network environment remains a key security challenge in SDVN.  When the network topology changes rapidly,  links frequently go up and down, and the network density is unknown or variable,  it is challenging to accurately and reliably gather most up, to, date state information and report that to the control plan \cite{arif2020sdn}. Therefore, control,  plane decisions are rendered to potentially stale or inaccurate state information,  thereby diminishes traditional network security validation.
 
-The reliance on centralized or hierarchical controllers further complicates the security landscape \cite{hama2025security}. Controllers aggregate large volumes of network information and enforce global policies, making them attractive targets for compromise. Any disruption, manipulation, or failure at the control plane can propagate rapidly across the network, affecting routing stability, quality of service, and overall system reliability \cite{hama2025security}.
+Another security concern arises from using centralized or hierarchical controllers \cite{hama2025security}. Controllers collect varying network information, including the total system state information,  and carry out network,  wide enforcing rules, so that they can be targeted by an adversary. So,  any failure or attack against the control plane can quickly affect the rest of the network through routing, quality of service, and system stability degradation \cite{hama2025security}.
 
-Additionally, SDVN must balance security enforcement with privacy preservation. Vehicles continuously exchange sensitive operational and contextual information, yet excessive disclosure of such data violates privacy requirements and regulatory constraints. Existing security solutions often struggle to simultaneously ensure data integrity, system robustness, and privacy protection in large-scale vehicular environments \cite{hama2025security}. These unresolved challenges highlight the need for advanced security mechanisms capable of supporting trustworthy operation in SDVN, thereby motivating the problem addressed in the following section.
+Furthermore,  security in SDVN should be achieved without compromising privacy. Vehicles reveal a high rate of private and sensitive information on their state and environment to other traffic participants,  however revealing too much private information would breach privacy and legal policies. Existing security solutions have difficulties achieving data integrity, system resiliency and privacy in big vehicular networks, thus unresolved issues remain in securing SDVN operation in a trustworthy fashion,  as proposed in the sequel.
 
-\subsection{False Accusation Attacks in Software-Defined Vehicular Networks}
-False accusation attacks in Software-Defined Vehicular Networks (SDVNs) occur when malicious vehicles, RSUs, or compromised controllers deliberately submit fabricated or misleading reports against honest nodes to manipulate trust and reputation systems. Since SDVN relies on data-plane feedback for centralized control decisions, such attacks can unjustly penalize legitimate entities, disrupt routing and service allocation, and degrade overall network stability. The highly dynamic topology, high mobility, and time-sensitive control decisions in SDVN further amplify the impact of false accusations, making timely and reliable verification difficult and allowing coordinated or opportunistic attackers to exploit trust mechanisms effectively.
-
+\subsection{False accusation attacks in SDVN}
+False accusation attacks in SDVN refer to the malicious vehicles, RSUs or even compromised controller injecting false or misleading reports against legitimate nodes in order to influence trust and reputation system. The centralized control plane in SDVN broadcasts network, wide info based on feedback from data, plane, false accusation can work against the legitimate network entities to affect the viability of traffic routing and service allocation and consequently reduce the performance and network stability. The rapid network changing topology, ultra high mobility and demanding control decisions on timely manner can make it more vulnerable to false accusations in SDVN.
 
 \subsection{Limitations of Existing Works}
-Existing security and trust management solutions for SDVN suffer from several key limitations in addressing false accusation attacks. Most approaches assume simplified or isolated attack behaviors and fail to capture coordinated, adaptive, and multi-variant accusation strategies under realistic vehicular conditions \cite{lee2012efficient}. Additionally, many solutions require extensive disclosure of behavioral evidence, compromising privacy \cite{ullah2025decentralized}, while relying on centralized or mutable reputation storage that is vulnerable to tampering and single-point failures. Furthermore, traditional rule-based or statistical detection mechanisms lack the intelligence to model complex relational and temporal patterns of accusation behavior, resulting in limited robustness and scalability in dynamic SDVN environments \cite{cardona2020software}.
+Current security and trust management frameworks for SDVN have some common weaknesses in combating false accusing attacks. Most existing solutions consider only simplified, naive attack behaviors and ignore the advanced multi,  variant,  coordinated and dynamic aggression strategies in authentic SDVN scenarios \cite{lee2012efficient}.  Moreover,  heavily revealing behavioral evidence for validation not only breaches privacy \cite{ullah2025decentralized},  but also makes reputation store vulnerable to exploits and malicious modifications. Centralized or mutable reputation store also poses another practical barrier to real, world SDVN systems due to a single point of failure and tampering.  Besides,  the rigidity of traditional rule, statistic driven detection method is unable to build relational/temporal models of accusation dynamism and cooperation,  and leads to unscalable and unreliability in open SDVN environments \cite{cardona2020software}.
 
 \section{Problem Statement}
-Existing trust and reputation systems in Software-Defined Vehicular Networks cannot reliably mitigate false accusation attacks under realistic conditions involving high mobility, coordinated adversaries, and privacy constraints, resulting in unjust penalization of honest nodes and degraded network trust.
+Trust, security and reputation schemes in SDVN are ineffective against sophisticated false accusing attacks under realistic, open SDVN settings, due to high mobility,  self,  interests,  deception techniques and the striful privacy requirements.
 
 \section{Objectives and Scope}
 \subsection{Objectives}
-The primary objective of this research is to develop a robust defense framework for mitigating false accusation attacks in Software-Defined Vehicular Networks (SDVNs). 
+This research mainly aims to build up an effective and adaptive defense system to the false accusation attacks, especially in SDVNs.
 
 \singlespacing
 
-The specific objectives are:
+The subtler objectives are:
 \begin{enumerate}
-    \item \textbf{Analyze and model false accusation attacks in SDVNs } to understand their impact on trust and reputation systems under dynamic vehicular conditions, and to identify patterns of data-plane (vehicle/RSU) and control-plane (controller) attacks.
-    \item \textbf{Design and implement a secure, tamper-resistant reputation management framework } combining blockchain-based logging, Zero-Knowledge Proofs for privacy-preserving verification, and Graph Neural Network–based anomaly detection to identify malicious accusations and coordinated attacks.
-    \item \textbf{Evaluate the effectiveness of the proposed defense framework } through simulations in NS-3 integrated with a blockchain platform (e.g., Hyperledger Fabric), assessing attack detection accuracy, false positives, network performance, and overall Quality of Service.
+	\item study the effects of false accusation attacks on trust and reputation system under high mobility context in SDVNs, and describe the realistic scenario and characterize the attack flow pattern of data,  plane (vehicle or RSU) and control,  plane (controller) attacks;
+	\item develop a tamper resistant and private provenance reputation management system, including blockchain timestamped logging, Zero,  Knowledge Proofs for accusation authentication and Graph Neural Network,  based anomaly detector;
+	\item evaluate this fraud detection system using simulation experiment including NS, 3 and Hyperledger Fabric, with accuracy of attack detection, false identity attacks,  system performance and QoS.
 \end{enumerate}
 
 \subsection{Scope}
-The scope of this research is defined to ensure focused investigation and practical feasibility. The study concentrates on the following aspects:
+In order to keep the research clear and feasible, the investigation is focused on:
 \begin{itemize}
-    \item The research is limited to false accusation attacks targeting trust and reputation systems in Software-Defined Vehicular Networks.
-    \item Both data-plane adversaries (malicious vehicles and RSUs) and control-plane adversaries (compromised or malicious SDN controllers) are considered within the threat model.
-    \item The proposed framework focuses on the integration of blockchain, Zero-Knowledge Proofs, Graph Neural Networks, and Large Language Models as core defensive components.
-    \item Evaluation is conducted using simulation-based experiments rather than real-world vehicular deployments, with performance metrics including detection accuracy, reputation stability, routing efficiency, and QoS impact.
-    \item The scope excludes physical-layer attacks (e.g., jamming), traditional cryptographic key management protocols, and non-reputation-based network attacks that do not involve accusation manipulation.
+	\item false accusation attack to the trust and reputation system in SDVNs;
+	\item considering the both data,  plane adversaries like malicious vehicles/RSUs and compromised RSUs, as well as the control,  plane adversaries like malicious controllers or compromised controllers;
+	\item solution based on blockchain, Zero Knowledge Proof,  GNN and Large Language Model;
+	\item using simulation rather than real field test to evaluate the attack detection accuracy, reputation stability, routing efficiency, QoS performance, etc.;
+	\item excluding the physical,  layer attack,  traditional cryptography secure key management mechanism and non,  reputation attack which not manipulation the accusations.
 \end{itemize}
-
-This defined scope ensures that the research remains targeted toward developing a robust, privacy-preserving, and intelligent defense mechanism for false accusation attacks while maintaining relevance to real-world SDVN deployments.
+This scope set up the goal obviously to focus the research on building a resilient, privacy,  preserving,  sophisticated and intelligent defense approach against false accusing attack, and relevant to the real,  world deployments.
 
 \subsection{Methodological Contributions}
-The key methodological contributions of this research are as follows:
+The significant methodological contributions of this study include:
 \begin{itemize}
-    \item \textbf{Multi-Layered Defense Framework:} A framework for Software-Defined Vehicular Networks that jointly integrates blockchain, Zero-Knowledge Proofs (ZKPs), and AI-based learning models to mitigate false accusation attacks across both data plane and control plane entities.
-    \item \textbf{Decentralized Reputation Management:} A blockchain-based reputation mechanism with immutable logging and weighted endorser trust scoring, preventing unilateral or Sybil-amplified false accusations from influencing blacklist decisions.
-    \item \textbf{Privacy-Preserving Accusation Verification:} A Zero-Knowledge Proof (ZKP) approach that allows vehicles and RSUs to prove accusation legitimacy without revealing sensitive identity or contextual information.
-    \item \textbf{Graph-Based Anomaly Detection:} A Graph Neural Network (GNN) model to capture spatio-temporal and relational patterns of coordinated accusation behaviors in highly dynamic SDVN topologies.
-    \item \textbf{LLM-Assisted Semantic Reasoning:} A semantic reasoning layer that analyzes unstructured controller logs and network events to interpret complex attack scenarios, generate explainable incident reports, and support administrator decision-making.
-    \item \textbf{Smart Contract-Based Controller Trust Evaluation:} A controller trust mechanism implemented via smart contracts to detect compromised SDN controllers and automatically trigger failover, ensuring resilience against insider and control-plane attacks.
-\end{itemize} 
+	\item \textbf{Multi,  Layered Defense Scheme:} A SDVN defense framework with combination of blockchain, ZKPs and AI,  based learning models to prevent false accusation attacks on both data plane and control plane entities.
+	\item \textbf{Decentralized Reputation Management:} Blockchain,  based reputation scheme with all, recorded immutable logs and a weighted endorser trust score,  which prevents single authorities or Sybil, time amplification from manipulating the blacklist decision.
+	\item \textbf{Privacy, Preservation of Accusation Proving:} ZKP scheme that the vehicle and RSUs only prove accusations’ validity without revealing sensitive information such as identities or external conditions.
+	\item \textbf{Graph Neural Network,  Based Anomaly Detection:} GNN models to leverage the spatio,  temporal and relational coherence of coordinated attack behaviors in highly dynamic SDVN topologies.
+	\item \textbf{LLM, Enabled Inferencing of Attacking Intents:} LLM, enabled semantic reasoning layer on the unstructured controller logs and network events to synthesize finer, grained interpretation of attack incidents and provide explainable incident reports to LMs. \item \textbf{Automated Controller Trust Evaluation:} Smart contract, based controller trust that automatically makes failover decision when SDN controllers are compromised.
+\end{itemize}
 
-\subsection{Implications of the Research}
-The proposed framework has significant implications for the design of secure and trustworthy SDVN infrastructures. By ensuring robust mitigation of false accusation attacks while preserving privacy and network performance, the framework enhances the reliability of trust-based routing and decision-making in vehicular environments. The integration of explainable AI components further supports operational transparency and administrative control, making the solution practical for real-world deployment. Beyond SDVN, the proposed methodology can be adapted to other cyber-physical and software-defined systems that rely on distributed trust, such as smart transportation, industrial IoT, and intelligent edge networks.
+\subsection{Implication of the research}
+The work offers important implications for designing secure and trusted SDVN infrastructures.  It guarantees effective false, accusations mitigation while maintaining privacy and network performance by using SP within trust,  based routing, usage, based policy management, white, list marking, and convoy formation. Built on the explainable AI elements and platformed on SDVN infrastructure,  the framework supplies high operability transparency and administrative control for practical deployment. For other cyber,  physical and software,  defined systems based on distributed trust,  the proposed approach also applies,  such as in smart transportation, industrial internet of things, and intelligent edge net.
 
 \subsection{Novelty of the Proposed Work}
-The novelty of this research lies in its problem formulation and attack modeling rather than in the individual techniques applied. It formulates false accusation attacks in Software-Defined Vehicular Networks as a multi-variant, cross-layer trust manipulation problem affecting both the data plane and control plane under realistic constraints such as high mobility and privacy preservation. Unlike existing approaches that treat false accusations as isolated events, the proposed model captures their temporal, relational, and behavioral dependencies, including coordinated and timing-based attack strategies.
-Based on this formulation, the research proposes a unified defense framework where accusation validation and trust evolution are jointly guided by cryptographic consistency, historical trust behavior, and network-wide relationships. Blockchain, Zero-Knowledge Proofs, and GNN–LLM components are employed as enabling mechanisms aligned with the problem model, rather than as a novelty in themselves, distinguishing the work from fragmented or assumption-driven defenses in existing literature.
-
+The novelty of this work is in the problem modeling and attack modeling,  rather than in the individual techniques used.  This work formulates false accusation attacks in SDVNs as a multi,  variant, cross,  layer trust attack with both data plane and control plane perspectives in realistic scenarios such high mobility and privacy, preserving.  Instead of the stereotypical setting where false accusations are independent events, the proposed model accounts for their temporal, relational, and behavioraldependencies such as coordinated attack and timing,  based attack strategies. Based on the formulation,  this work then proposes a comprehensive defense framework where the accusation validation and trust evolution are simultaneously regulated by cryptographic consistency, historical trust behavior, and network,  wide views. Blockchain, Zero,  Knowledge Proof, and GNN,  LLM are only used as means to the end, i. e.,  the real problem modeled here, rather than as another piece of fragmented or assumptive defenses in the literature.
 
 \subsection{Organization of the Paper}
-The remainder of this paper is organized as follows. Chapter 2 presents a comprehensive review of related work on trust management and false accusation attacks in Software-Defined Vehicular Networks, highlighting existing limitations. Chapter 3 describes the system model, threat model, and the proposed multi-layered defense framework in detail. Chapter 4 outlines the project timeline and resources required for implementation and evaluation. Chapter 5 concludes the paper by summarizing the key contributions and discussing the significance of the proposed approach for secure and trustworthy SDVN deployment.
+The rest of the paper is structured as follows.  In Chapter 2,  a wide coverage of work related to trust management and false accusation attacks in SDVNs is presented,  showing gap areas.  In Chapter 3,  the system model, threat model, and the multi,  layered defense framework are described in detail.  The project timetable and requirements for implementation and evaluation are provided in Chapter 4. Finally, findings are summarized in Chapter 5 and the potential impact of this approach on trustworthy deployment of SDVNs is discussed.
 
 \chapter{Literature Review}
 \section{Previous Works}
