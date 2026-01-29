@@ -412,19 +412,15 @@ LLM-assisted contextual analysis of logs with blockchain-trusted state and ZKP v
 	\label{fig:arch}
 \end{figure}
 
-Figure \ref{fig:arch} illustrates the integrated high-level architecture of the proposed SDVN framework.
-As shown in Figure \ref{fig:arch}, the AI analysis layer sits at the top and acts as the intelligence and reporting component.
-It consumes two main categories of inputs: (i) the current network state (e.g., node status and trust values)
-and (ii) continuous logs and events generated from RSUs and controllers (e.g., warnings, repeated anomalies,
-and observed misbehavior). A graph-based model processes the network as connected entities (vehicles, RSUs,
-and controllers) to identify suspicious patterns from relationships and traffic behavior. Its output is then
-passed to a language-based reasoning component that produces a concise, human-understandable explanation of
-what is happening, why it is suspicious, and what response is recommended. The final output of this layer is
-an attack detection decision plus a response report that is forwarded to the enforcement path.
+Figure \ref{fig:arch} depicts the integrated high-level architecture of the proposed SDVN framework.
+As shown in Figure \ref{fig:arch}, the topmost layer in the system is the AI analysis layer, which serves as the intelligence and reporting component.
+It takes in two general types of information as input: (i) the current network state (e.g., node status and trust level) and (ii) time series and event streams that are continually reported by the RSUs and the controllers (e.g., warning messages, repeated anomalies, and observed misbehavior).
+The network is represented as a graph-based model consisting of connected entities (vehicles, RSUs, and controllers) to uncover suspicious relationships and traffic behavior.
+This leads to a narrative explanation from a language-based reasoning component about what is happening, why it is suspicious, and what kind of response should be taken.
+Once this is derived, the top AI analysis layer produces an attack detection decision and a report of the response, which is then sent to the enforcement path.
 
-The blockchain layer is implemented using \textbf{Hyperledger Fabric} to maintain a shared, tamper-resistant
-record of security-relevant updates across multiple controllers. This layer contains three smart contract
-modules (SC1--SC3) that coordinate different types of trust decisions:
+The blockchain layer is implemented on \textbf{Hyperledger Fabric} to keep a common, immutable record of security-sensitive updates across multiple controllers.
+There are three smart contract modules (SC1--SC3) on this layer that coordinate different types of trust decisions:
 \begin{itemize}
     \item \textbf{SC1: Registration and Authentication} -- manages joining/participation status of nodes and
     stores whether a node is allowed to operate in the network.
@@ -468,38 +464,38 @@ a node’s access through network rules or prioritization).
 The adversary model adopts a Zero-Trust Architecture where any network component may potentially be compromised. The threat model defines attacker capabilities, attack scenarios, and security assumptions \cite{adnan2021towards}.
 
 \subsection{Attacker Capabilities}
-\textbf{C1 - Data Plane Compromise:} Attackers can compromise up to n-f vehicular nodes and RSUs where n is the total number of nodes. Compromised nodes can participate in routing and reputation voting while executing malicious behaviors such as false accusations or packet manipulation.
+\textbf{C1 - Data Plane Compromise:} Attackers are capable of compromising $n_f$ vehicular nodes and RSUs, where $n$ is the total number of nodes in the network. Compromised nodes are able to perform routing and reputation voting in addition to malicious operations like sending false accusations or modifying packets.
 
-\textbf{C2 - Control Plane Compromise:} Adversaries may compromise up to nc-1 SDN controllers out of nc total controllers (e.g., 3 out of 4). The blockchain ordering service tolerates up to $\lfloor(n_o-1)/3\rfloor$ Byzantine faults through BFT-SMaRt consensus, with additional resilience provided by the Controller Trust Evaluation Smart Contract \cite{yahiatene2018blockchain}.
+\textbf{C2 - Control Plane Attack:} Attackers can compromise at most $n_c-1$ of the whole set of $n_c$ SDN controllers (e.g., 3 of 4). The blockchain ordering service tolerates up to $\lfloor(n_o-1)/3\rfloor$ Byzantine failures with BFT-SMaRt consensus, with further buy-in from the Controller Trust Evaluation Smart Contract \cite{yahiatene2018blockchain}.
 
-\textbf{C3 - Wireless Communication Attacks:} Attackers can intercept, modify, replay, or flood V2V and V2I wireless transmissions over IEEE 802.11p DSRC channels.
+\textbf{C3 - Wireless Security:} Wireless V2V and V2I communication can be eavesdropped on, altered, and replayed, or flooded (denial of service) over IEEE 802.11p DSRC channels.
 
-\textbf{C4 - Computational Bounds:} Adversaries are computationally powerful but bounded by classical computing. Post-quantum cryptography (FALCON-1024, Kyber-1024) protects against future quantum threats, while frequent key rotation mitigates classical cryptanalysis \cite{bensasson2018scalable}.
+\textbf{C4 - Limits on Computing Resources:} Attackers can be arbitrarily strong within classical limits. Post-quantum public-key schemes (FALCON-1024 and Kyber-1024) are used to mitigate brute-force risks, including future quantum threats. Keys are refreshed and replaced regularly to make classical cryptanalysis infeasible \cite{bensasson2018scalable}.
 
 \subsection{Attack Scenarios}
-\textbf{Scenario 1 - Single-Accuser Fabrication:} A privileged malicious node with high reputation fabricates false evidence against honest vehicles, leveraging trusted status to cause blacklisting.
+\textbf{Scenario 1 - Single-Accuser Fabrication:} A trusted malicious node with high reputation creates false evidence against vehicles.
 
-\textbf{Scenario 2 - Sybil-Amplified Flooding:} Multiple fake identities coordinate to flood the reputation system with false accusations, creating artificial consensus.
+\textbf{Scenario 2 - Sybil-Amplified Flooding:} Several fabricated identities work together to overwhelm the reputation system with false reports to generate consensus artificially.
 
-\textbf{Scenario 3 - Timing-Based Accusations:} Attackers exploit legitimate network stress events (congestion, handovers) to mask malicious accusations as genuine failures.
+\textbf{Scenario 3 - Timing-Based Accusations:} Attackers take advantage of real network stress events (congestion, handovers) to cover malicious accusations as real failures.
 
-\textbf{Scenario 4 - Evidence-Spoofing:} Adversaries fabricate tampered packet logs, forged routing traces, or manipulated sensor data to frame honest nodes.
+\textbf{Scenario 4 - Evidence-Spoofing:} Malicious nodes generate fake corrupted packet logs, false routing traces, or manipulated sensor readings in order to accuse innocent nodes.
 
 \section{System Assumptions}
-The framework operates under the following security and infrastructure assumptions:
+The system assumes the following security and infrastructure assumptions:
 \begin{itemize}
-    \item \textbf{A1 - Cryptographic Security:} All cryptographic primitives (FALCON-1024, Kyber-1024, RSA-2048, ECDH-256, AES-256, HMAC-SHA-256) are secure against known attacks when correctly implemented \cite{bensasson2018scalable}.
-    \item \textbf{A2 - Byzantine Fault Tolerance:} BFT-SMaRt consensus tolerates up to $\lfloor(n_o-1)/3\rfloor$ Byzantine faults among orderers, maintaining safety and liveness \cite{castro1999practical}.
-    \item \textbf{A3 - Bootstrap Trust:} At least one trusted controller exists during initial deployment for credential distribution and blockchain initialization.
-    \item \textbf{A4 - Physical Layer Availability:} Underlying communication infrastructure (IEEE 802.11p, cellular backhaul) provides sufficient availability for safety-critical applications.
-    \item \textbf{A5 - Time Synchronization:} All entities maintain loosely synchronized clocks ($\pm$1 second) via GPS or NTP for timestamp-based replay detection.
-    \item \textbf{A6 - Computational Resources:} Vehicles and RSUs possess sufficient processing power (multi-core CPUs, HSMs) for cryptographic operations and ML inference.
-    \item \textbf{A7 - Registration Authority:} A trusted registration authority (manufacturer, operator, or government agency) issues initial credentials tied to physical vehicle identities.
-    \item \textbf{A8 - Honest Majority:} The majority of network participants are honest, with high-trust endorsers predominantly following protocol specifications.
+    \item \textbf{A1 - Cryptography:} Cryptographic primitives (FALCON-1024, Kyber-1024, RSA-2048, ECDH-256, AES-256, HMAC-SHA-256) are computationally unbreakable with proper implementation \cite{bensasson2018scalable}.
+    \item \textbf{A2 - BFT:} BFT-SMaRt consensus can endure up to $\lfloor(n_o-1)/3\rfloor$ Byzantine orderers and guarantees safety and liveness \cite{castro1999practical}.
+    \item \textbf{A3 - Bootstrap:} In the early stages of deployment, when a group of trusted controllers are present, credentials are distributed, and the blockchain is initialized.
+    \item \textbf{A4 - Network:} Availability of underlying physical communication infrastructure (IEEE 802.11p, cellular backhaul) is adequate for safety-critical services.
+    \item \textbf{A5 - Timestamps:} Each entity's clocks are loosely synchronized ($\pm$1 second) using GPS or NTP for detection of replay.
+    \item \textbf{A6 - Hardware:} Sufficient computational resources (multi-core CPUs, HSMs) are present in vehicles or RSUs to perform cryptographic and ML operations.
+    \item \textbf{A7 - Validation:} A trusted registration authority (vehicle manufacturer, station operator, or government agency) provides initial credentials that identify the physical vehicle.
+    \item \textbf{A8 - Honest Majority:} Most participants are honest with high-trust endorsers who adhere strictly to protocol.
 \end{itemize}
 
 
-\section{Overview of the False Accusation Attack}
+\section{Overview of False Accusation Attacks}
 \subsection{Single-Accuser Opportunistic Fabrication (Malicious Vehicle/RSU)}
 \begin{figure}[H]
     \centering
@@ -508,11 +504,11 @@ The framework operates under the following security and infrastructure assumptio
     \label{fig:overview_single_accuser_dv}
 \end{figure}
 
-Figure~\ref{fig:overview_single_accuser_dv} tells the data-plane story step by step. First, in
-\textbf{(step 1) Position of the Attacker}, a malicious vehicle/RSU positions itself near the honest node.
-Next, in \textbf{(step 2) Fabrication of the Accusation}, it forges a false accusation packet. The attacker then
-uploads this claim in \textbf{(step 3) Reporting to Brain (The Upload)} via the RSU to the controller. In
-\textbf{(step 4) The Decision (Processing)}, the controller processes the report and updates the trust decision.
+Figure~\ref{fig:overview_single_accuser_dv} illustrates the data-plane case by outlining the process.
+First, in \textbf{(step 1) Position of the Attacker}, a malicious vehicle/RSU positions itself close to an honest node.
+Then, in \textbf{(step 2) Fabrication of the Accusation}, it constructs a fake accusation packet. The attacker uploads this claim in
+\textbf{(step 3) Reporting to Brain (The Upload)} via the RSU to the controller. In
+\textbf{(step 4) The Decision (Processing)}, the controller handles the report and revises the trust decision.
 Finally, \textbf{(step 5) The Execution of the Consequence (The Block)} is issued, and the honest node is
 blacklisted and isolated.
 
@@ -525,11 +521,11 @@ blacklisted and isolated.
 \end{figure}
 
 Figure~\ref{fig:overview_single_accuser_cv} narrates the control-plane case where the controller is malicious.
-In \textbf{(step 1) Target Identification}, the controller selects an honest vehicle as the victim. It then performs
-\textbf{(step 2) Internal Reputation Fabrication} by creating false evidence against that node. Without external checks,
-the controller issues \textbf{(step 3) Blacklist Command}. Through \textbf{(step 4) Network-Wide Propagation}, the blacklist is
-sent across RSUs and neighboring nodes. The sequence ends in \textbf{(step 5) Complete Isolation}, where the victim is
-fully cut off from the network.
+In \textbf{(step 1) Target Identification}, the controller picks a non-hostile vehicle as its target. It then executes
+\textbf{(step 2) Internal Reputation Fabrication} by establishing false evidence for the node. Without external checks,
+the controller issues \textbf{(step 3) Blacklist Command}. In \textbf{(step 4) Network-Wide Propagation}, the blacklist is
+distributed to RSUs and neighboring nodes. The sequence ends in \textbf{(step 5) Complete Isolation}, where the target is
+completely isolated from the network.
 
 \subsection{Sybil-Amplified Consensus Flooding (Malicious Vehicle)}
 \begin{figure}[H]
@@ -539,12 +535,11 @@ fully cut off from the network.
     \label{fig:overview_sybil_dv}
 \end{figure}
 
-Figure~\ref{fig:overview_sybil_dv} shows a data-plane Sybil attack as a staged narrative. In
-\textbf{(step 1) Sybil Generation}, the attacker creates multiple fake identities. Those Sybils then begin
-\textbf{(step 2) The Flooding (The Attack)} by sending coordinated false accusation packets toward the RSU.
-These accusations are forwarded in \textbf{(step 3) Reporting to Brain (The Upload)} to the controller, which
-perceives them as coming from many distinct nodes. The controller performs \textbf{(step 4) The Decision (Processing)},
-interpreting the volume as consensus. The story ends at \textbf{(step 5) The Consequence (The Block)}, where the
+Figure~\ref{fig:overview_sybil_dv} depicts a data-plane Sybil attack in a narrative format. In
+\textbf{(step 1) Sybil Generation}, the attacker fabricates multiple false identities. The Sybils launch
+\textbf{(step 2) The Flooding (The Attack)} by sending synchronized false accusation packets to the RSU. These accusations are passed along in
+\textbf{(step 3) Reporting to Brain (The Upload)} to the controller, which sees them as originating from separate nodes. The controller carries out \textbf{(step 4) The Decision (Processing)},
+viewing the number as consensus. The narrative concludes at \textbf{(step 5) The Consequence (The Block)}, where the
 victim is blacklisted via revocation commands.
 
 \subsection{Sybil-Amplified Consensus Flooding (Malicious Controller)}
@@ -555,12 +550,11 @@ victim is blacklisted via revocation commands.
     \label{fig:overview_sybil_cv}
 \end{figure}
 
-Figure~\ref{fig:overview_sybil_cv} presents the control-plane Sybil story where the controller itself
-manufactures consensus. In \textbf{(step 1) Create Phantom Sybil IDs}, the controller generates fictitious identities
-(S1*, S2*, S3*). It follows with \textbf{(step 2) Insert Fabricated Reports}, injecting false accusations tied to those IDs.
-To legitimize the appearance of agreement, the controller performs \textbf{(step 3) Data Retrieval for Trust Evaluation},
-then applies \textbf{(step 4) Trust Evaluation (Sybil-amplified consensus)} to justify a downgrade. The sequence ends with
-\textbf{(step 5) The Consequence (The Block)} as the victim is blacklisted through controller-issued revocation commands.
+Figure~\ref{fig:overview_sybil_cv} offers the control-plane Sybil explanation where the controller fabricates consensus.
+First, the controller invents fictitious identities (S1*, S2*, S3*). It then employs \textbf{(step 2) Insert Fabricated Reports} by injecting false accusations.
+To make the consensus look real, the controller performs \textbf{(step 3) Data Retrieval for Trust Evaluation}, then applies
+\textbf{(step 4) Trust Evaluation (Sybil-amplified consensus)} to justify a downgrade. The narrative concludes with
+\textbf{(step 5) The Consequence (The Block)}, blacklisting the victim with controller orders.
 
 \subsection{Timing-Based Accusations During High-Noise Periods (Malicious Controller)}
 \begin{figure}[H]
