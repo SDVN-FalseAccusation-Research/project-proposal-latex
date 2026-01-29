@@ -653,28 +653,26 @@ while the \textit{Location Verification and Behavioral Monitoring} component con
 activity and produces \textit{logs and events}. These logs are forwarded to the \textit{Trust Update Core},
 which processes security-relevant evidence and updates three trust functions: \textit{participation status}
 (SC1), \textit{reputation updates} (SC2), and \textit{controller trust} (SC3). The validated outputs are
-recorded in the \textit{shared trusted state/ledger}, which represents the latest trusted network state.
-
-In parallel, the \textit{AI Analysis and Report} block reads both the logs/events and the trusted state
-from the ledger to detect abnormal behavior and generate a recommended response. Finally, the
-\textit{Mitigation and Enforcement} block applies the response actions through the control/monitoring path,
-and the outcomes are fed back into the trust update process to keep future decisions consistent with the
-recorded history.
+stored at the \textit{shared trusted state/ledger}, which is the most recent recorded trusted network state.
+Meanwhile, the \textit{AI Analysis and Report} block reads in the logs/events and the trusted state from the
+ledger to highlight the abnormal network state and produce the suggested response. This is followed by the
+\textit{Mitigation and Enforcement} block which enforces the response actions through the control/monitoring path,
+and feedbacks the results to the trust update process.
 
 
 \subsubsection{Blockchain-Based Decentralized Trust Management}
 \label{subsec:blockchain-trust}
 
 
-The core of our approach utilizes blockchain technology to eliminate single points of failure
-inherent in centralized SDN architectures \cite{sharma2017distblocknet}. A permissioned blockchain serves as
-a distributed ledger that records authentication events, routing-related security decisions,
-and reputation changes immutably. This prevents attackers from erasing evidence of malicious
-behavior or manipulating historical records. The blockchain operates across multiple SDN
-controllers, forming a consortium where critical decisions require consensus among trusted
-nodes \cite{yahiatene2018blockchain}. Figure~\ref{fig:functional_diagram} summarizes how these blockchain
-capabilities are used during node admission (registration and authentication) and how trust
-decisions are enforced.
+To fundamental our approach, the use of blockchain technology is a way to remove single point of failures in
+the centralized SDN architectures \cite{sharma2017distblocknet}. A permissioned blockchain is used as a
+distributed database to record authentication requests, decisions related to the security of routing and
+reputation updates, in an unaltered way. This ensures that an attacker cannot remove evidence related to
+illegal activity or coerce the historical state of the system. The blockchain runs over multiple SDN
+controllers, creating a consortium where essential decisions are made by consensus of trusted members
+\cite{yahiatene2018blockchain}. Figure \ref{fig: functional_diagram} shows how these blockchain‘s features are
+utilized for node admission, registration and authentication, and the way that trust decisions are
+implemented.
 
 Three specialized smart contracts govern different security aspects. First, the Registration
 and Authentication Smart Contract manages node identity verification using Zero-Knowledge
@@ -691,36 +689,35 @@ record from the blockchain (``Blockchain: Retrieve Node Record'') as illustrated
 Figure~\ref{fig:functional_diagram}. The ZKP validity decision (``ZKP Valid?'') ensures that only
 registered entities can proceed without exposing private identity information \cite{bensasson2018scalable}.
 
-Second, the Reputation Management Smart Contract implements weighted endorser trust
-scoring to prevent false accusations from influencing blacklist decisions \cite{alshaibani2023blockchain}. In the
-workflow of Figure~\ref{fig:functional_diagram}, this corresponds to the trust decision stage
-(``Trust Score Sufficient?'') after ZKP verification. Rather than trusting a single report, reputation
-updates and punitive actions require endorsement from multiple parties, where each endorser’s
-vote is weighted by historical accuracy. New nodes and previously malicious nodes carry minimal
-weight, preventing Sybil attackers from immediately impacting reputation scores. Reputation
-changes require consensus from multiple high-trust endorsers, typically requiring agreement
-from at least two-thirds of weighted trust scores \cite{bessani2014state}. If trust is insufficient, the system
-follows the ``Blacklisted?'' decision path: blacklisted nodes are rejected, while borderline cases
-trigger enhanced verification (e.g., additional evidence checks) before any access is granted, as
-captured in Figure~\ref{fig:functional_diagram}. This design ensures that a node cannot progress
-from authentication into active participation unless both cryptographic proof and trust policy
-conditions are satisfied.
+Second, the Reputation Management Smart Contract uses a weighted endorser trust scoring scheme to
+minimize the impact of false accusations on the blacklisting decision \cite{alshaibani2023blockchain}. In
+the flowchart of Figure~\ref{fig: functional_diagram}, this maps into the trust decision step (``Trust Score
+Sufficient?’’) following ZKP validation. Instead of relying on one report, reputation updates and
+punishment actions are endorsed by multiple endorsers, each of whom‘s vote is weighted according to
+past reputation accuracy. New nodes and previously malicious nodes have little impact on endorser trust
+voting, obstructing Sybil attackers from quickly undermining reputation scores. Changes require
+consensus from multiple high, trust endorsers, often requiring at least 2/3 of total trust vote to sanction
+or admit a node \cite{bessani2014state}. If there is not enough trust, the path takes the branch
+(``Blacklisted?’’), where blacklisted nodes are rejected and borderline nodes require additional proof
+checks before receiving access, as summarized in Figure~\ref{fig: functional_diagram}. This prevents a
+node from transitioning from authenticating to active participation without satisfying both crypto
+verification and trust policy.
 
-Third, the Controller Trust Evaluation Smart Contract addresses the critical threat of controller
-compromise through continuous behavioral monitoring \cite{khan2017topology}. In Figure~\ref{fig:functional_diagram},
-the controller is responsible for validating incoming authentication attempts (``Controller Validates'')
-and initiating blockchain lookups and policy checks. To prevent a malicious/compromised controller
-from abusing this role, random subsets of nodes validate whether the controller’s reported network
-topology matches actual packet flows. Discrepancies trigger trust score reductions, and if controller
-trust falls below a threshold, the system automatically switches to a pre-designated backup controller,
-ensuring network continuity even under insider attacks \cite{raja2020energy}.
+Third, the Controller Trust Evaluation Smart Contract maintains vigilance against controller compromise
+by constantly auditing the controller \cite{khan2017topology}. In Figure~\ref{fig: functional_diagram}, the
+controller is responsible for authenticating each new login (``Controller Validates’’) and reporting this
+to the blockchain to trigger subsequent policy checks. To circumvent a malicious/compromised
+controller, a randomized fraction of nodes comment on whether the controller‘s fed topology images
+actual packet flows. If inconsistencies are observed, trust score is reduced, and if controller trust drops
+below a set minimum, a backup node is automatically designated to preserve the network‘s health
+\cite{raja2020energy}.
 
-Finally, upon successful verification and trust approval in Figure~\ref{fig:functional_diagram}, the system
-issues session keys (``Issue Session Keys Encrypt with Kyber-1024'') and commits an immutable record
-update (``Blockchain: Update Authentication Timestamp''). These events provide an auditable trail of
-who joined, when they joined, and under what trust conditions. The same authenticated admission
-event is also forwarded to the learning layer (``GNN: Add Node to Network Graph''), ensuring that the
-AI components operate on blockchain-consistent, verified participation states.
+Finally, Figure~\ref{fig: functional_diagram} shows that once a node has been validated and trusts VOTE,
+the system distributes session keys (``Issue Session Keys Encrypt with Kyber, 1024’’) and immutably logs
+this event (``Blockchain: Update Authentication Timestamp’’). These serve as a verifiable record of the
+join event so any audit trail records who was added, when, and with what trust status. This same
+authenticated join event is communicated to the AI learning layer (``GNN: Add Node to Network Graph’),
+ensuring deep learning uses only verified blockchain elements.
 
 
 \begin{figure}[H]
@@ -731,25 +728,33 @@ AI components operate on blockchain-consistent, verified participation states.
 \end{figure}
 
 \subsubsection{AI-Driven Anomaly Detection}
-While blockchain provides immutability and consensus, artificial intelligence adds intelligent pattern recognition to detect coordinated attacks that might evade rule-based systems. The vehicular network is modeled as a temporal graph where vehicles and roadside units form nodes, and communication links form edges \cite{zhou2020automating}. Graph Neural Networks (GNN) analyze this dynamic topology to identify anomalous patterns indicative of coordinated attacks.
+While the immutable public record ensures no party can alter its records and the consensus mechanism ensures no party can decide which records get added, artificial intelligence adds intelligent pattern recognition which is able to call out coordinated attacks that rule, based systems may miss. The vehicular network is considered a temporal graph in which vehicular nodes and roadside units are vertices connected by communication edges \cite{zhou2020automating}. Graph Neural Networks (GNN) reason over this time, varying topology to detect unusual patterns characteristic of a coordinated attack.
 
-Specifically, the GNN detects Sybil attack clusters by identifying groups of nodes with suspiciously similar behavioral patterns, identical registration timestamps, or star-topology accusation patterns where multiple accusers simultaneously target a single victim \cite{balaram2023highly}. Temporal attention mechanisms track how reputation scores change over time, flagging sudden drops that correlate with accusation floods. Recent research demonstrates that heterogeneous graph attention networks achieve over 99\% accuracy in identifying Sybil nodes in vehicular networks \cite{chen2025sybil}.
+In particular, the GNN detects Sybil attack clusters by finding groups of nodes with suspiciously similar human behavioral patterns, identical registration time stamps, or star, topology accusation domains where multiple accusers target a single victim \cite{balaram2023highly}. Temporal attention methods monitor the trajectories of reputation values, calling out abnormal drops associated with allegation floods. State of the art research finds that heterogeneous graph attention networks deliver over 99\% accuracy at identifying Sybil nodes within vehicular networks \cite{chen2025sybil}.
 
-Large Language Models (LLM) complement the GNN by processing unstructured data sources such as controller logs, error messages, and system alerts \cite{zhang2024large}. The LLM performs semantic reasoning to understand causal relationships between events, for example, recognizing that a controller failover occurring minutes before a reputation spike suggests a timing-based attack. The LLM generates human-readable incident reports that explain detected attacks, identify suspected malicious nodes, assess confidence levels, and recommend mitigation actions. This interpretability is crucial for network administrators who must make final decisions on high-stakes actions like controller failover.
+The large language model (LLM) supplements the GNN by analyzing unstructured data sources from the controller for evidence of attack such as log files, error messages, or system alerts \cite{zhang2024large}. The LLM performs semantic analysis for causal reasoning, such as reading a controller failover about a minute before a reputation spike as indicative of a timing attack. After understanding the who, what, when, and how of an attack, the LLM writes an incident report explaining what was detected, which nodes did it, what confidence levels the model has, and what actions should be taken to counterattack. The report of the integrated system allows network administrator to decide whether to perform a controller failover.
 
 \subsubsection{Cryptographic Defense Mechanisms}
-Cryptographic protocols form the foundation of attack prevention. Digital signatures ensure that every packet and accusation can be attributed to a specific authenticated node, preventing evidence fabrication \cite{pournaghi2020necppa}. Post-quantum cryptography algorithms protect against future quantum computing threats, particularly important for long-term infrastructure like vehicular networks. Time-stamped authentication tokens with limited validity windows prevent replay attacks where adversaries re-transmit old legitimate packets to disrupt routing \cite{benjaballah2021security}.
+Cryptography protocols are the basis of attack prevention. Digital signatures guarantee that we get reliable evidence,
+and nobody could file accusations or packets without being identified throughout any packet or packet attack
+\cite{pournaghi2020necppa}. Future quantum computers attacks will use post, quantum cryptography algorithms; they
+can prevent such threats by working in long term infrastructures, like vehicular networks. Further attack prevention
+are time, stamped authentication tokens, valid only within a time window, so the adversary can‘t replay legitimate
+packets to confuse routing procedures \cite{benjaballah2021security}.
 
-Location verification smart contracts validate that nodes claiming specific geographic positions are present there, preventing wormhole attacks where distant colluding nodes pretend to be neighbors \cite{quevedo2020intelligent}. Cross-validation with multiple roadside units ensures location claims are accurate, and kinematic constraints (maximum velocity and acceleration limits) detect physically impossible location changes that indicate GPS spoofing.
+Location verification smart contracts check that nodes claiming particular geographic locations are located there,
+so that wormhole attacks where malicious nodes far away collude to appear as neighbors are thwarted. Cross checking
+with several roadside units validates a location claim, while kinematic constraints (max velocity and acceleration)
+detect impossible location changes that reveal GPS spoofing.
 
 \subsubsection{Integrated Defense Workflow}
-As illustrated in Figure~\ref{fig:simple_block}, the complete system operates as a continuous closed-loop
-cycle across monitoring, validation, analysis, and response. Vehicles periodically authenticate in the
-\textit{Registration and Authentication Module}, where legitimacy is verified without exposing sensitive
-identity information. During each cycle, nodes exchange routing and status information through RSUs and
-controllers, and any suspicious behavior observed in the field is captured by the
-\textit{Location Verification and Behavioral Monitoring} component, producing the \textit{Logs and Events}
-stream shown in the diagram.
+The entire system, as shown in Figure~\ref{fig: simple_block}, flows in the form of a continous closed,
+loop cycle in monitoring, validation, analysis and response. Vehicles authenticate to the
+\textit{Registration and Authentication Module} on a regular basis, where legitimacy is checked without
+revealing private identity data. In every cycle, nodes pass routing and status information to the RSUs
+and controllers and detected malicious activity in the field is recorded by the
+\textit{Location Verification and Behavioral Monitoring} block, producing the \textit{Logs and Events} flow
+that can be seen in the diagram.
 
 When an accusation is generated, it is submitted through the controller path to the trust update process.
 As indicated by the \textit{Trust Update Core} and the Fabric blocks in Figure~\ref{fig:simple_block}, each
@@ -765,59 +770,107 @@ analysis component evaluates the evolving network graph to identify suspicious s
 When anomalies are detected, the language-based reasoning component combines these findings with system logs to
 produce threat assessments and recommended actions.
 
-If the AI assessment and the decentralized validation outcome support the presence of an attack, the response
-is applied through the \textit{Mitigation and Feedback} block (Figure~\ref{fig:simple_block}). The controllers
-enforce the selected actions back to the field (e.g., restricting or isolating malicious nodes), while the final
-decision and outcomes are recorded back into Fabric so that subsequent cycles build on verified history. In the
-same loop, SC3 continuously tracks controller reliability to detect insider threats and support safe controller
-switching when required.
+If both the AI evaluation and the decentralized validation result reach conclusions that indicate the existence of
+an attack, then the response is issued from the \textit{Mitigation and Feedback} block (Figure~\ref{fig:
+simple_block}). The controllers execute the chosen response back in the field (e. g., isolating or limiting any
+malicious hosts), while the final decision and results are stored back into Fabric so future cycles can incorporate
+verified history. In parallel, SC3 monotonically observes controller trustworthiness to prevent insider attacks and
+facilitate safe controller switching if needed.
 
-This integrated design forces an adversary to overcome multiple independent protections---evidence-based validation,
-decentralized agreement, trust scoring, and AI-driven anomaly detection---thereby making reputation manipulation and
-coordinated attacks significantly harder to succeed while preserving operational requirements \cite{huo2023trustgnn}.
-
-
-\subsection{Attack-Specific Mitigation Strategies}
-The proposed methodology addresses each false accusation attack variant through targeted defense mechanisms:
-
-\subsection{Single-Accuser Opportunistic Fabrication}
-
-This attack occurs when a single privileged malicious node fabricates convincing evidence against legitimate vehicles. The weighted endorser trust mechanism in the Reputation Management Smart Contract prevents this by requiring accusations to be validated by multiple high-trust endorsers \cite{alshaibani2023blockchain}. A single accuser, regardless of how convincing their evidence appears, contributes only their weighted trust score to the reputation change calculation. Since blacklisting requires $\geq$2/3 weighted consensus, a lone attacker cannot unilaterally blacklist a victim unless multiple independent high-trust nodes corroborate the accusation.
-
-Additionally, cryptographic evidence validation ensures that accusations lacking proper digital signatures, valid timestamps, or verifiable location proofs are automatically rejected. The blockchain's immutable audit logs all accusations with timestamps, allowing forensic analysis to identify nodes that frequently make false accusations, gradually reducing their trust weights to near-zero \cite{bessani2014state}.
-
-\subsection{Sybil-Amplified Consensus Flooding}
-
-Sybil attacks create multiple fake identities to flood the network with coordinated accusations, attempting to achieve artificial consensus. The methodology employs three defensive layers. First, the Registration Smart Contract with Zero-Knowledge Proofs ensures that each node possesses unique cryptographic credentials tied to physical vehicle identities \cite{bensasson2018scalable}. Creating Sybil identities requires either stealing legitimate credentials or registering through out-of-band channels, both of which are computationally expensive and detectable.
-
-Second, new nodes start with minimal trust weights. Even if an attacker successfully registers multiple Sybil identities, they initially carry near-zero influence in reputation decisions. Trust accumulates gradually only through consistent honest behavior over extended periods, making instant consensus flooding ineffective \cite{balaram2023highly}.
-
-Third, the Graph Neural Network detects coordinated attack patterns by analyzing the network topology \cite{chen2025sybil}. When multiple low-trust nodes simultaneously target a single victim, the GNN identifies this star-topology accusation pattern as anomalous. Features such as identical registration timestamps, similar behavioral patterns, and temporal clustering of accusations trigger high-confidence Sybil detection, prompting immediate investigation and potential preemptive blacklisting of the attacker cluster.
-
-\subsection{Timing-Based Accusations During High-Noise Periods}
+This holistic design requires an adversary to defeat all four individual layers of protection, evidence, based
+consensus, decentralized validation, trust ranking, and AI, based anomaly detection, thereby significantly raising
+the difficulty of successful reputation manipulation and coordinated assault without compromising functionality
+\cite{huo2023trustgnn}.
 
 
-Sophisticated attackers exploit periods of legitimate network stress—congestion, controller handovers, or channel degradation—to mask malicious accusations as genuine failures. The temporal attention mechanism in the GNN specifically addresses this by analyzing accusation timing relative to network conditions \cite{zhou2020automating}. The system maintains historical baselines of legitimate packet loss rates during various network states (normal operation, moderate congestion, severe congestion, handover periods).
+\subsection{Attack, Specific Mitigation Strategies}
+Our approach specifically counteracts each of the false accusation attack variants as follows:
 
-When accusations occur during high-noise periods, the LLM performs semantic reasoning to distinguish between expected failures and coordinated attacks \cite{zhang2024large}. For instance, if multiple vehicles near a congestion zone report packet loss, this correlates with legitimate network stress. However, if accusations target only specific nodes while other nearby vehicles report normal performance, this discrepancy flags a timing-based attack.
+\subsection{Single, Accuser Opportunistic Fabrication}
+A single malicious node attempts to fabricate convincing evidence against the victimized vehicle. The weighted endorser trust scheme in the Reputation Management Smart Contract can prevent this, by requiring multiple high, trust endorsers to sign off on an accusation \cite{alshaibani2023blockchain}. An individual malicious node can only influence the magnitude of change in the victim‘s reputation, but not induce a blacklist, since the accused victim is only upheld if $\geq$2/3 of overall weighted endorsers agree to the blacklisting. An accused malicious node is counted as an endorser of its own false accusation, although their sigature contributes to the conviction but does not alter the few agents’ initial trust weights.
 
-Furthermore, the weighted endorser mechanism inherently provides resilience: during genuine high-noise periods, multiple independent high-trust endorsers will naturally corroborate packet loss reports. Malicious timing-based accusations lack this broad corroboration pattern, revealing them as outliers despite the noisy environment.
+Furthermore, the accusation validation cryptography prevents accusations without valid signatures, timestamps, or location proofs from being accepted. In addition, the blockchain maintains a traceable recorded log of all accusations with timestamps, so the system can audit nodes that have repeatedly made unfounded accusations and begin to diminish their reputation weights to mean, zero \cite{bessani2014state}.
 
-\subsection{Evidence-Spoofing with Tampered Logs and Collusion}
+\subsection{Sybil, Amplified Consensus Flooding}
+Sybil attacks are defined by the creation of multiple fictitious identities, used by the attacker to designate a
+flood of simultaneous accusations, thus seeking a pseudo, consensus. The Sybil shield they devise consists of 3
+levels of security. The first one is identified by the Registration Smart Contract utilizing Zero, Knowledge Proofs
+to verify the possession by each node of distinct cryptographic keys related to a physical vehicle
+\cite{bensasson2018scalable}. Both implementation approaches of such Sybil schemes are hard in terms of time and
+cost; they consist either of stealing valid cryptographic tokens or of registration by an out, of, band (OOB)
+communication, both are easily identified.
 
+Secondly, the newcomer nodes initially have very weak trust weights. Even if an attacker is successful in
+registration of several Sybil IDs, they carry almost zero influence in reputation decision at the beginning, and it
+takes long time for their trust to build up through long, term honest beaconing, preventing quick flooding of
+consensus \cite{balaram2023highly}.
 
-The most sophisticated attack involves fabricating cryptographically convincing but falsified evidence—tampered packet logs, forged signatures, or collusion among multiple compromised nodes. The methodology employs multi-layer cryptographic validation as the primary defense \cite{pournaghi2020necppa}. Every accusation must include: (1) valid digital signatures from authenticated nodes, (2) unfalsifiable timestamps within acceptable time windows, (3) Zero-Knowledge Proofs demonstrating the accuser's legitimate network presence, and (4) location proofs validated by multiple independent roadside units \cite{quevedo2020intelligent}.
+Third, the GNN characterizes the accusation topology \cite{chen2025sybil} by detecting the attack pattern of
+partially coordinated attack. By watching the attack dynamics via the network topology, the multiple low, trust
+nodes simultaneously shoot at one victim, the attack paper pattern of a star topology for accusation is classed as
+anomaly. Having one or several lines which share some features such as same registration time, similar behavior
+dynamics, and accusation time cluster, Sybil has a high confidence to announce the attack after detection, thereby
+entering active investigation and blacklist the attacker group in advance.
 
-The blockchain's immutable chain-of-custody provides additional protection. Evidence must include traceable hashes of original packets stored on the blockchain at capture time. Retrospective evidence fabrication is impossible because the blockchain timestamp proves when data was recorded. Attackers cannot backdate evidence to match historical events \cite{sharma2017distblocknet}.
+ \subsection{Timing, Based Accusations During Elevated Noise Periods}
 
-When facing collusion among multiple compromised nodes, the Controller Trust Evaluation Smart Contract becomes critical \cite{raja2020energy}. If multiple nodes collude to provide fabricated corroborating evidence, but their reports conflict with the controller's observed packet flows, the cross-endorsement validation mechanism detects this discrepancy. The system then treats the entire colluding group as suspect. Moreover, post-quantum cryptography ensures that even computationally powerful adversaries cannot forge signatures or break encryption to manufacture fake evidence \cite{bensasson2018scalable}.
+Advanced attackers take advantage of normal levels of network stress,, congestion, controller handover, channel
+deterioration,, to surreptitiously sneak accusations into the system as normal failures. The proposed temporal
+attention mechanism neural network is designed to handle this situation by considering timing of accusations during
+varying network conditions \cite{zhou2020automating}. This neural network will gather long, term records of normal
+packet loss rates across various network conditions (idle, moderate congestion, heavy congestion, handover
+periods).
 
-In scenarios where the SDN controller itself is compromised and colluding with malicious nodes, the Controller Trust Evaluation Smart Contract continuously monitors controller behavior through random cross-endorsement validation \cite{khan2017topology}. If the controller manipulates reputation scores or routing tables to favor colluding attackers, its trust score decreases. Once trust falls below threshold, the blockchain automatically triggers failover to a pre-designated backup controller from a different administrative domain, neutralizing the insider threat.
+When accusations are encountered during elevated noise periods, the LLM can use semantic reasoning to differentiate
+normal failures vs coordinated attack \cite{zhang2024large}. For example, if multiple vehicles near the congestion
+area simultaneously report packet loss, then this can be reasoned to also be a result of network congestion.
+However, if the first few nodes to send accusations are located within the congestion area but other vehicles in no
+congestion subnetworks send normal reports, then this is a timing, based attack.
 
-\section{Experiments/Results. }
-The proposed framework will be validated through simulation-based evaluation where all five false accusation attack variants are implemented at varying intensities from 0\% to 100\% network penetration. Performance will be measured using standard vehicular network metrics: Packet Delivery Ratio (percentage of packets successfully delivered), Packet Interception Ratio (percentage compromised by attackers), and Matthews Correlation Coefficient for attack detection accuracy \cite{nayak2021tbddosa}.
+In addition, the weighted endorser will perform inherently well by design: in the case of true elevated noise
+periods, the probability that multiple, independent highly trusted endorsers send reports confirming packet loss is
+high. Thus, timing, based accusations will turn out to be outliers and head other attacks in a noisy environment.
 
-Comparative analysis against existing approaches, including traditional trust-based systems, pure cryptographic methods, and basic blockchain implementations—will demonstrate the framework's superiority in maintaining network performance under attack while correctly identifying and isolating malicious nodes. Statistical significance will be assessed through repeated trials with different network topologies and mobility patterns, ensuring results are not artifacts of specific scenarios \cite{adnan2021towards}.
+ \subsection{Evidence, Spoofing with Tampered Logs and Collusion}
+
+The most advanced attack is to produce falsified, cryptographically, sound evidence this include manipulated packet
+logs, forged signatures, or even collution by multiple intruded nodes. The technique relies on multi, layer
+cryptographic validation as the main line of defense \cite{pournaghi2020necppa}. To deceive the verifiers, the
+evidence must contain: (1) authentic digital signatures filed by known nodes, (2) unforgeable timestamps that do
+not deviate from the expected latency window, (3) Zero, Knowledge Proofs signed by the accused node showing
+legitimate presence in the network, and (4) verifiable location proofs signed by several roadside units
+\cite{quevedo2020intelligent}.
+
+Blockchain chain, of, custody also enhances protection. Evidence must cite traceable hashes of the original packets
+recorded on the blockchain at capture time. Retrospective fraud of evidence is infeasible since the blockchain
+timestamp reveals the time of storage. Malicious actors cannot manipulate blockchain entries to retrospectively
+align evidence with time series data \cite{sharma2017distblocknet}.
+
+To address multiple, colluded compromised nodes, the Controller Trust Evaluation Smart Contract plays a pivotal
+role \cite{raja2020energy}. If colluding attackers provide shared falsified evidence, but the verified traffic flow
+contradicts controller logics, the cross, endorsement validation uncovers inconsistencies. This identifies the
+attacker, coalition. Other than that, cryptography, based protections such as post, quantum secure zero, knowledge
+proofs prevent collusions even in the presense of near, omnipotent adversaries \cite{bensasson2018scalable}.
+
+In the event of a smashing compromise of the SDN controller with colluding colluders, the Controller Trust
+Evaluation Smart Contract assesses the trust score of the controller by similar random cross, endorsement tests
+\cite{khan2017topology}. If the controller attempts to change routing tables and reputation values in order to
+favor attacker nodes, the trust score plummets. If it falls below a preset threshold, a new backup controller is
+automatically deployed from a different site, eliminating end, line attack.
+
+\section{Experiments/Results.}
+The proposed framework will be tested using simulation, based evaluation in which all five variants of false
+accusation attack will be simulated at different levels of attack intensity (in other words, different levels of
+network penetration,) 0\%, 20\%, 40\%, 60\%, 80\%, 100\%. Performance and effectiveness will be evaluated with
+standard vehicular network metrics: Packet Delivery Ratio (ratio of packets successfully delivered), Packet
+Interception Ratio (ratio of packets caught), and successful attack detection measures (Matthews Correlation
+Coefficient) \cite{nayak2021tbddosa}.
+
+Comparison with other current approaches, including trust, based, cryptographic, and simple blockchain based
+approaches, will prove that the approach to be implemented is the most successful in remaining unaffected,
+accurately detecting, and excluding malicious nodes from the network. Results will be analyzed for statistical
+significance by conducting multiple trials on different network topologies and mobility patterns
+\cite{adnan2021towards}.
 
 \chapter{Timeline and Resource Required}
 
@@ -846,13 +899,24 @@ For the implementation of the proposed blockchain, ZKP, and GNN-LLM-based defens
 These tools will be employed for the design, implementation, simulation, and evaluation of the proposed defense framework against false accusation attacks in Software-Defined Vehicular Networks.
 
 \chapter{Conclusion}
-False accusation attacks represent a critical security threat in Software-Defined Vehicular Networks, where malicious entities exploit reputation-based trust management systems to falsely accuse legitimate nodes, leading to route elimination, network instability, and degraded Quality of Service. This research addresses sophisticated attack variants including single-accuser fabrication, Sybil-amplified flooding, timing-based accusations, and evidence-spoofing through a novel multi-layered defense framework.
+False accusation attacks pose a severe threat in SDVNs, allowing malicious nodes to directly attack the trust
+management system by submitting fabricated accusations. In turn, false accusations result in route depletion,
+transient functionality loss, and overall lowered QoS. This research fundamentally pushes the state of the art
+forward in defending against false accusations through the first multi, layer framework aimed at combating single,
+accuser fabrication, Sybil, amplified flooding, double blaming, and false verdict evidence falsification attacks.
 
-The proposed solution uniquely integrates blockchain technology for tamper-proof decentralized reputation logging, Zero-Knowledge Proofs for privacy-preserving verification without revealing sensitive vehicular information, and Graph Neural Networks combined with Large Language Models for intelligent anomaly detection through network topology analysis and contextual threat interpretation. The framework operates under a Zero-Trust Architecture with specialized smart contracts for registration authentication, weighted endorser trust scoring, and continuous controller trust evaluation.
+The novel framework proposes a hybridized framework incorporating the decentralized blockchain protocol and token
+incentivized registration smart contract, the negation proof enhanced Zero, Knowledge Proof scheme, and the
+intelligent GNN, LLM agents, tasked with aversion handling and contextual understanding. Our framework uniquely
+combines these state, of, the, art technologies within a Zero, Trust Architecture equipped with specialized smart
+contracts that establish the registration and other trust protocols across the multi, user system.
 
-Comprehensive simulation-based validation using NS-3 will evaluate the framework across varying attack intensities, measuring Packet Delivery Ratio, Packet Interception Ratio, and Matthews Correlation Coefficient. Comparative analysis will demonstrate superiority over traditional trust-based systems and basic blockchain implementations.
-
-This research represents the first integrated application of blockchain, ZKP, and GNN-LLM technologies specifically designed to counter false accusation attacks in SDVN, enhancing the reliability and trustworthiness of intelligent transportation systems essential for future autonomous driving and smart city applications.
+Simulation will then validate using NS, 3 the long, term aggregation and interpretation of these three advanced
+technologies in a complex multi, user system across different attack levels. Performance metrics will include
+Packet Delivery Ratio, Packet Interception Ratio, and Matthews Correlation Coefficient with results compared to
+other trust, based defense methods and simple blockchain, based solutions. To the best of our knowledge, this is
+the first paper to establish an integrated framework that leverages all three emerging applied advanced
+technological fields towards safeguarding vehicles in SDVNs from false accusation attacks.
 
 % References
 \renewcommand{\bibname}{References}
